@@ -8,14 +8,18 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">DG Rimbun</div>
-        <div class="nav-links">
-            <a href="index.jsp">Home</a>
-            <a href="homestays.jsp">View Units</a>
-            <a href="contact.jsp" class="active-link">Contact</a>
-            <a href="login.jsp" class="btn-outline">Login</a>
-        </div>
-    </nav>
+    <div class="nav-brand">Cuti Murah Melaka</div>
+    <div class="nav-links">
+        <a href="index.jsp">Home</a>
+        <a href="homestays.jsp">View Units</a>
+        <a href="contact.jsp" class="active-link">Contact</a>
+        <a href="login.jsp" class="btn-outline">Login</a>
+    </div>
+</nav>
+...
+<footer class="site-footer">
+    <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
+</footer>
 
     <div class="page-banner">
         <div class="container">

@@ -15,7 +15,7 @@
             </div>
             
             <!-- Login Form -->
-            <form action="LoginServlet" method="POST">
+            <form action="${pageContext.request.contextPath}/LoginServlet" method="POST">
                 <div class="form-group">
                     <label>Email Address</label>
                     <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
