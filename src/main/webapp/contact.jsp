@@ -16,10 +16,6 @@
         <a href="login.jsp" class="btn-outline">Login</a>
     </div>
 </nav>
-...
-<footer class="site-footer">
-    <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
-</footer>
 
     <div class="page-banner">
         <div class="container">
@@ -48,8 +44,9 @@
         </div>
     </main>
 
-    <footer class="site-footer">
-        <p>&copy; 2026 DG Rimbun Chalet Management. All rights reserved.</p>
-    </footer>
+
+<footer class="site-footer">
+    <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
+</footer>
 </body>
 </html>

@@ -9,19 +9,19 @@
 }
 
 :root {
-    --primary-color: #16a34a; /* Green theme */
-    --primary-light: #dcfce7;
-    --border-color: #e5e7eb;
-    --text-main: #1f2937;
-    --text-muted: #6b7280;
-    --bg-light: #f3f4f6;
+    --primary-color: #800020; /* Melaka Maroon theme */
+    --primary-light: #FAF3EC; /* Warm Nude highlight */
+    --border-color: #E6DFD5;  /* Soft sand divider lines */
+    --text-main: #2C2523;     /* Deep charcoal for maximum contrast */
+    --text-muted: #706461;    /* Accessible mid-tone text */
+    --bg-light: #FAF7F2;      /* Soft cream base (prevents eye strain) */
     --bg-white: #ffffff;
     --danger: #dc2626;
     --danger-hover: #b91c1c;
 }
 
 .admin-body {
-    background-color: #f8fafc;
+    background-color: var(--bg-light);
     color: var(--text-main);
 }
 
@@ -34,7 +34,7 @@
 }
 
 .container {
-    max-w-width: 1200px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -90,12 +90,13 @@
 }
 
 .nav-link:hover {
-    background-color: var(--bg-light);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
 }
 
 .nav-link.active {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: var(--bg-white);
 }
 
 .nav-link .icon {
@@ -171,10 +172,12 @@
     border-radius: 6px;
     font-size: 1rem;
     outline: none;
+    background-color: var(--bg-white);
 }
 
+/* Added explicit focus-glow accessibility states */
 .search-input:focus {
-    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.3);
+    box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.2);
 }
 
 .btn-primary {
@@ -187,7 +190,7 @@
     cursor: pointer;
 }
 
-.btn-primary:hover { background-color: #15803d; }
+.btn-primary:hover { background-color: #5c0016; }
 
 .btn-clear {
     background-color: white;
@@ -199,7 +202,7 @@
     font-weight: bold;
 }
 
-.btn-clear:hover { background-color: var(--bg-light); }
+.btn-clear:hover { background-color: var(--primary-light); }
 
 /* =========================================
    Tables & Badges
@@ -213,7 +216,7 @@
 }
 
 .table-header {
-    background-color: #f8fff9;
+    background-color: #FDFBF9; /* Soft cream header */
     border-bottom: 1px solid var(--border-color);
     padding: 1.5rem;
 }
@@ -234,14 +237,14 @@
 }
 
 .data-table th {
-    background-color: var(--bg-light);
-    color: var(--text-muted);
-    font-weight: 500;
+    background-color: var(--primary-light);
+    color: var(--text-main);
+    font-weight: 600;
     font-size: 0.875rem;
 }
 
 .data-table tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--bg-light);
 }
 
 .font-medium { font-weight: 500; }
@@ -256,10 +259,10 @@
     border: 1px solid transparent;
 }
 
-.badge-guest { background-color: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+.badge-guest { background-color: var(--bg-light); color: var(--text-main); border-color: var(--border-color); }
 .badge-owner { background-color: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
 .badge-active { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
-.badge-none { background-color: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; }
+.badge-none { background-color: var(--bg-light); color: var(--text-muted); border-color: var(--border-color); }
 
 .inline-form { margin: 0; }
 
@@ -287,6 +290,7 @@
     padding: 1.25rem 5%;
     background-color: var(--bg-white);
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .nav-brand { 
@@ -326,7 +330,7 @@
 }
 
 .site-footer {
-    background-color: #1f2937;
+    background-color: #2C2523; /* Coordinated charcoal dark tone */
     color: white;
     text-align: center;
     padding: 2rem;
@@ -385,6 +389,7 @@
     border-radius: 12px;
     padding: 2.5rem;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
 }
 
 .auth-header {
@@ -418,11 +423,14 @@
     border-radius: 6px;
     font-size: 1rem;
     transition: border-color 0.2s;
+    background-color: var(--bg-white);
+    color: var(--text-main);
 }
 
 .form-control:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.15);
 }
 
 .btn-block { 
@@ -503,6 +511,7 @@
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
+    color: var(--text-muted);
 }
 
 .chalet-details {
@@ -587,6 +596,7 @@ textarea.form-control {
     display: flex;
     justify-content: center;
     align-items: center;
+    color: var(--text-muted);
 }
 
 .details-info h1 {
@@ -678,6 +688,8 @@ textarea.form-control {
     justify-content: center;
     align-items: center;
     font-size: 1.5rem;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
 }
 
 .stat-info h3 {
