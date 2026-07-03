@@ -9,11 +9,12 @@ public class Booking {
     private String bookingStatus;
     private int staffID;
     private int guestID;
+    private int accommodationID;
     
     public Booking() {}
     
     public Booking(int bookingID, String checkInDate, String checkOutDate, int numberOfPax, 
-    		double totalPrice, String bookingStatus, int staffID, int guestID) {
+    		double totalPrice, String bookingStatus, int staffID, int guestID, int accommodationID) {
     	this.bookingID = bookingID;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
@@ -22,6 +23,7 @@ public class Booking {
         this.bookingStatus = bookingStatus;
         this.staffID = staffID;
         this.guestID = guestID;
+        this.accommodationID = accommodationID;
     }
 
     public int getBookingID() { return bookingID; }
@@ -47,4 +49,7 @@ public class Booking {
 
     public int getGuestID() { return guestID; }
     public void setGuestID(int guestID) { this.guestID = guestID; }
+
+    public int getAccommodationID() { return accommodationID; }
+    public void setAccommodationID(int accommodationID) { this.accommodationID = accommodationID; }
 }

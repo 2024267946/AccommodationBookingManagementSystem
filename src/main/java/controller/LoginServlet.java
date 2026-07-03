@@ -28,7 +28,7 @@ public class LoginServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String path =
+        String path = 
                 request.getServletPath();
 
         switch(path) {
@@ -81,7 +81,7 @@ public class LoginServlet extends HttpServlet {
         if(success) {
 
             response.sendRedirect(
-                    "login.jsp");
+                "login.jsp");
 
         } else {
 

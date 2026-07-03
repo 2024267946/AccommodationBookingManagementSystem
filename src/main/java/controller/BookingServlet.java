@@ -4,10 +4,12 @@ package controller;
 import model.Booking;
 import model.Guest;
 import model.Staff;
+
+import dao.BookingDAO;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,41 +17,65 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/BookingServlet")
+@WebServlet(urlPatterns = {
+    "/booking/create-booking",
+    "/booking/cancel-booking",
+    "/booking/my-booking",  
+    "/staff/booking/verify",
+    "/staff/booking/view-bookings"
+})
 public class BookingServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession();
-        User currentUser = (User) session.getAttribute("currentUser");
+        String path = request.getServletPath();
 
-        // Security check: Only logged-in guests can book
-        if (currentUser == null || !currentUser.getRole().equals("guest")) {
-            response.sendRedirect("login.jsp");
-            return;
+        switch(path){
+            case "/booking/create-booking":
+                createBooking(request, response);
+                break;
+            case "/booking/cancel-booking":
+
+                break;
+            case "/booking/my-booking":
+
+                break;
+            case "/staff/booking/verify":
+
+                break;
+            case "/staff/booking/view-bookings":
+
+                break;
+        }
+    }
+
+    private void createBooking(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        
+        // CHECKING IF THERE'S ANY MISSING FIELD ON THE REQUEST
+        if(request.getParameter("checkInDate") == null || request.getParameter("checkOutDate") == null || request.getParameter("accomodationID") == null){
+            response.sendRedirect("homestayDetails.jsp?create-booking=failed&reason=invalid");
         }
 
-        // 1. Get form parameters
-        String checkIn = request.getParameter("checkIn");
-        String checkOut = request.getParameter("checkOut");
-        int guests = Integer.parseInt(request.getParameter("guests"));
-        
-        // 2. Calculate Total Price (Assuming RM 150/night for Chalet 1)
-        LocalDate startDate = LocalDate.parse(checkIn);
-        LocalDate endDate = LocalDate.parse(checkOut);
-        long nights = ChronoUnit.DAYS.between(startDate, endDate);
-        double totalAmount = nights * 150.0;
+        // CREATE BOOKING MODEL
+        Booking booking = new Booking();
+        booking.setCheckInDate(request.getParameter("checkInDate"));
+        booking.setCheckOutDate(request.getParameter("checkOutDate"));
+        booking.setNumberOfPax(Integer.parseInt(request.getParameter("numberOfPax")));
+        booking.setTotalPrice(Double.parseDouble(request.getParameter("totalPrice")));
+        booking.setBookingStatus(request.getParameter("bookingStatus"));
+        booking.setStaffID(Integer.parseInt(request.getParameter("staffID")));
+        booking.setGuestID(Integer.parseInt(request.getParameter("guestID")));
+        booking.setAccommodationID(Integer.parseInt(request.getParameter("accommodationID")));
 
-        // 3. Create new Booking
-        String bookingId = "BK-" + System.currentTimeMillis();
-        Booking newBooking = new Booking(bookingId, currentUser.getName(), checkIn, checkOut, guests, totalAmount, "Pending");
-        
-        // 4. Save to our mock database
-        Booking.bookingDatabase.add(newBooking);
+        // CALL DAO TO SAVE TO DATABASE
+        boolean isSuccess = BookingDAO.createBooking(booking);
 
-        // 5. Redirect to the bookings page
-        response.sendRedirect("booking.jsp");
+        if(isSuccess == true){
+            response.sendRedirect("booking.jsp");
+        }else{
+            response.sendRedirect("homestayDetails.jsp?status=failed&which=create-booking&reason=dao");
+        }
     }
 }
