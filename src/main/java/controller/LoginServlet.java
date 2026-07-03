@@ -56,10 +56,9 @@ public class LoginServlet extends HttpServlet {
             logout(request,response);
         }
     }
-    private void register(
-            HttpServletRequest request,
+    private void register(HttpServletRequest request,
             HttpServletResponse response)
-            throws IOException {
+            throws ServletException, IOException{
 
         Guest guest = new Guest();
 
@@ -72,28 +71,34 @@ public class LoginServlet extends HttpServlet {
         guest.setGuestPhoneNumber(
                 request.getParameter("phone"));
 
-        guest.setGuestPassword(
-                request.getParameter("password"));
+        
+        
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
 
-        boolean success =
-                userDAO.registerGuest(guest);
+        if (!password.equals(confirmPassword)) {
+            request.setAttribute("error", "Password and Confirm Password do not match.");
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
+            return;
+        }
 
-        if(success) {
+        guest.setGuestPassword(password);
+        
 
-            response.sendRedirect(
-                    "login.jsp");
+        boolean success = userDAO.registerGuest(guest);
 
+        System.out.println("Register Success = " + success);
+
+        if (success) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
         } else {
-
-            response.sendRedirect(
-                    "register.jsp?error=1");
+            response.sendRedirect(request.getContextPath() + "/register.jsp?error=1");
         }
     }
     private void login(
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws IOException {
-
+        HttpServletRequest request,
+        HttpServletResponse response)
+        throws ServletException, IOException {
         String email =
                 request.getParameter("email");
 
@@ -116,27 +121,25 @@ public class LoginServlet extends HttpServlet {
 
                 case "OWNER":
 
-                    response.sendRedirect(
-                            "ownerDashboard.jsp");
+                	response.sendRedirect(request.getContextPath() + "/ownerDashboard.jsp");
                     break;
 
                 case "STAFF":
 
-                    response.sendRedirect(
-                            "staffDashboard.jsp");
+                	response.sendRedirect(request.getContextPath() + "/staffDashboard.jsp");
                     break;
 
                 case "GUEST":
 
-                    response.sendRedirect(
-                            "guestDashboard.jsp");
+                	response.sendRedirect(request.getContextPath() + "/homestays.jsp");
+
                     break;
             }
 
         } else {
 
-            response.sendRedirect(
-                    "login.jsp?error=1");
+        	request.setAttribute("error", "Invalid email or password.");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }
     private void logout(
@@ -152,7 +155,6 @@ public class LoginServlet extends HttpServlet {
             session.invalidate();
         }
 
-        response.sendRedirect(
-                "index.jsp");
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
     }
 }

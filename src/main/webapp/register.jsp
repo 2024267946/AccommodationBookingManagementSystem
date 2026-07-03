@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Register - DG Rimbun</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body class="auth-body">
     <div class="auth-container">
@@ -16,6 +16,13 @@
             
             <!-- Registration Form -->
            <form action="${pageContext.request.contextPath}/auth/register" method="POST">
+
+    <!-- Error Message -->
+    <% if(request.getAttribute("error") != null){ %>
+        <div class="error-message">
+            <%= request.getAttribute("error") %>
+        </div>
+    <% } %>
 
     <div class="form-group">
         <label>Full Name</label>
@@ -34,7 +41,20 @@
 
     <div class="form-group">
         <label>Password</label>
-        <input type="password" name="password" class="form-control" required>
+        <input type="password"
+               name="password"
+               class="form-control"
+               minlength="6"
+               required>
+    </div>
+
+    <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password"
+               name="confirmPassword"
+               class="form-control"
+               minlength="6"
+               required>
     </div>
 
     <button type="submit" class="btn-primary btn-block">

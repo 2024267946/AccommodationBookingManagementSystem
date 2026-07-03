@@ -56,6 +56,13 @@ import java.io.IOException;
 	        return guestPassword;
 	    }
 
+	    public void setGuestConfirmPassword(String guestPassword) {
+	        this.guestPassword = guestPassword;
+	    }
+	    public String getGuestConfirmPassword() {
+	        return guestPassword;
+	    }
+
 	    public void setGuestPassword(String guestPassword) {
 	        this.guestPassword = guestPassword;
 	    }

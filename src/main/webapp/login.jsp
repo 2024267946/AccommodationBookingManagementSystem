@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - DG Rimbun</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body class="auth-body">
     <div class="auth-container">
@@ -14,8 +14,14 @@
                 <p>Login to manage your bookings</p>
             </div>
             
+            <% if(request.getAttribute("error") != null){ %>
+    		<div class="error-message">
+        		<%= request.getAttribute("error") %>
+   		 	</div>
+			<% } %>
+            
             <!-- Login Form -->
-            <form action="LoginServlet" method="POST">
+            <form action="${pageContext.request.contextPath}/auth/login" method="POST">
                 <div class="form-group">
                     <label>Email Address</label>
                     <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
