@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - DG Rimbun</title>
+    <title>Admin Dashboard - Cuti Murah Melaka</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -55,7 +55,7 @@
               </div>
               <div class="stat-info">
                 <h3>Total Guests</h3>
-                <p class="stat-number">124</p> 
+                <p class="stat-number">${totalGuests}</p> 
               </div>
             </div>
 
@@ -65,7 +65,7 @@
               </div>
               <div class="stat-info">
                 <h3>Active Bookings</h3>
-                <p class="stat-number">18</p>
+                <p class="stat-number">${activeBookings}</p>
               </div>
             </div>
 
@@ -75,7 +75,7 @@
               </div>
               <div class="stat-info">
                 <h3>Total Units</h3>
-                <p class="stat-number">100</p>
+                <p class="stat-number">${totalUnits}</p>
               </div>
             </div>
           </div>

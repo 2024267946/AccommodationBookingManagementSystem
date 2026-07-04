@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class Staff {
 
-    private int staffId;
+    private String staffId;
     private String staffName;
     private String staffPassword;
     private String staffEmail;
@@ -21,11 +21,11 @@ public class Staff {
     public Staff() {
     }
 
-    public int getStaffId() {
+    public String getStaffId() {
         return staffId;
     }
 
-    public void setStaffId(int staffId) {
+    public void setStaffId(String staffId) {
         this.staffId = staffId;
     }
 
