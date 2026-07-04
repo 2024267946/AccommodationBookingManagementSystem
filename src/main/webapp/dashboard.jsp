@@ -13,7 +13,7 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <span class="brand-text">DG Rimbun Admin</span>
+          <span class="brand-text">Cuti Murah Melaka Admin</span>
         </div>
         <nav class="sidebar-nav">
           <a href="dashboard.jsp" class="nav-link active">

@@ -3,14 +3,14 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Chalet Units - DG Rimbun</title>
+    <title>Chalet Units - Cuti Murah Melaka</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
-        <div class="nav-brand">DG Rimbun</div>
+        <div class="nav-brand">Cuti Murah Melaka</div>
         <div class="nav-links">
             <a href="index.jsp">Home</a>
             <a href="homestays.jsp" class="active-link">View Units</a>

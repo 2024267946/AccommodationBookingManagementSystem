@@ -21,7 +21,11 @@
 			<% } %>
             
             <!-- Login Form -->
+<<<<<<< HEAD
             <form action="${pageContext.request.contextPath}/auth/login" method="POST">
+=======
+            <form action="${pageContext.request.contextPath}/LoginServlet" method="POST">
+>>>>>>> branch 'main' of https://github.com/2024267946/HomestayBookingManagementSystem.git
                 <div class="form-group">
                     <label>Email Address</label>
                     <input type="email" name="email" class="form-control" placeholder="Enter your email" required>

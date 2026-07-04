@@ -1,0 +1,10 @@
+model/Staff.class
+model/Guest.class
+dao/UserDAO.class
+controller/LoginServlet.class
+controller/RegisterServlet.class
+controller/BookingServlet.class
+DBConnection/DBConnection.class
+dao/BookingDAO.class
+controller/LogoutServlet.class
+model/Booking.class
