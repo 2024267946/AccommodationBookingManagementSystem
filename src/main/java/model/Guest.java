@@ -11,7 +11,7 @@ import java.io.IOException;
 
 	public class Guest {
 
-	    private int guestId;
+	    private String guestId;
 	    private String guestName;
 	    private String guestEmail;
 	    private String guestPhoneNumber;
@@ -20,11 +20,11 @@ import java.io.IOException;
 	    public Guest() {
 	    }
 
-	    public int getGuestId() {
+	    public String getGuestId() {
 	        return guestId;
 	    }
 
-	    public void setGuestId(int guestId) {
+	    public void setGuestId(String guestId) {
 	        this.guestId = guestId;
 	    }
 
