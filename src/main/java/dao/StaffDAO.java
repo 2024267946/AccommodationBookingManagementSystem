@@ -147,7 +147,7 @@ public class StaffDAO {
         return staff;
     }
 
-    public void updateStaff(Staff staff) {
+    public boolean updateStaff(Staff staff) {
 
         String sql =
                 "UPDATE STAFF SET " +
@@ -175,6 +175,7 @@ public class StaffDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+		return false;
     }
 
     public boolean archiveStaff(String staffID) {
