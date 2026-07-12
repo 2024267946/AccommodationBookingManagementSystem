@@ -214,7 +214,7 @@ session.removeAttribute("errorMessage");
     <div class="logo">Homestay Murah Melaka</div>
     <div class="topnav">
         <a href="<%=request.getContextPath()%>/owner/dashboard">Dashboard</a>
-        <a href="<%=request.getContextPath()%>/auth/logout">Logout</a>
+        <a href="<%=request.getContextPath()%>/auth/LogoutServlet">Logout</a>
     </div>
 </div>
 
@@ -231,7 +231,7 @@ session.removeAttribute("errorMessage");
 
     <a href="#">Profile</a>
 
-    <a href="<%=request.getContextPath()%>/auth/logout">
+    <a href="<%=request.getContextPath()%>/auth/LogoutServlet">
         Logout
     </a>
 </div>

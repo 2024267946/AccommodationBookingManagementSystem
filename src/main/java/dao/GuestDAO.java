@@ -1,32 +1,37 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Guest;
 import DBConnection.DBConnection;
+import model.Guest;
 
 public class GuestDAO {
 
     private String generateGuestID() {
+
         String newID = "G001";
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql =
+                "SELECT GUESTID FROM GUEST " +
+                "ORDER BY GUESTID DESC FETCH FIRST 1 ROWS ONLY";
 
-            String sql = "SELECT GUESTID FROM GUEST ORDER BY GUESTID DESC FETCH FIRST 1 ROWS ONLY";
+        try (
+            Connection con = DBConnection.getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery()
+        ) {
 
             if (rs.next()) {
+
                 String lastID = rs.getString("GUESTID");
-                int number = Integer.parseInt(lastID.substring(1));
-                number++;
+                int number = Integer.parseInt(lastID.substring(1)) + 1;
+
                 newID = String.format("G%03d", number);
             }
-
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,15 +40,19 @@ public class GuestDAO {
         return newID;
     }
 
+    // Add a new guest as ACTIVE.
     public void addGuest(Guest guest) {
-        try {
+
+        String sql =
+                "INSERT INTO GUEST " +
+                "(GUESTID, GUESTNAME, GUESTEMAIL, " +
+                "GUESTPHONENUMBER, GUESTPASSWORD, STATUS) " +
+                "VALUES (?, ?, ?, ?, ?, 'ACTIVE')";
+
+        try (
             Connection con = DBConnection.getConnection();
-
-            String sql = "INSERT INTO GUEST "
-                    + "(GUESTID, GUESTNAME, GUESTEMAIL, GUESTPHONENUMBER, GUESTPASSWORD) "
-                    + "VALUES (?, ?, ?, ?, ?)";
-
-            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setString(1, generateGuestID());
             ps.setString(2, guest.getGuestName());
@@ -52,36 +61,62 @@ public class GuestDAO {
             ps.setString(5, guest.getGuestPassword());
 
             ps.executeUpdate();
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    // Return active guests only.
     public List<Guest> getAllGuest() {
+
         List<Guest> guestList = new ArrayList<>();
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql =
+                "SELECT * FROM GUEST " +
+                "WHERE STATUS = 'ACTIVE' " +
+                "ORDER BY GUESTID";
 
-            String sql = "SELECT * FROM GUEST ORDER BY GUESTID";
+        try (
+            Connection con = DBConnection.getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery()
+        ) {
 
             while (rs.next()) {
-                Guest guest = new Guest();
 
-                guest.setGuestId(rs.getString("GUESTID"));
-                guest.setGuestName(rs.getString("GUESTNAME"));
-                guest.setGuestEmail(rs.getString("GUESTEMAIL"));
-                guest.setGuestPhoneNumber(rs.getString("GUESTPHONENUMBER"));
-                guest.setGuestPassword(rs.getString("GUESTPASSWORD"));
-
+                Guest guest = mapGuest(rs);
                 guestList.add(guest);
             }
 
-            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return guestList;
+    }
+
+    // Return archived/inactive guests only.
+    public List<Guest> getArchivedGuests() {
+
+        List<Guest> guestList = new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM GUEST " +
+                "WHERE STATUS = 'INACTIVE' " +
+                "ORDER BY GUESTID";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                Guest guest = mapGuest(rs);
+                guestList.add(guest);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -91,28 +126,25 @@ public class GuestDAO {
     }
 
     public Guest getGuestByID(String guestID) {
+
         Guest guest = null;
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql =
+                "SELECT * FROM GUEST WHERE GUESTID = ?";
 
-            String sql = "SELECT * FROM GUEST WHERE GUESTID = ?";
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+
             ps.setString(1, guestID);
 
-            ResultSet rs = ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
 
-            if (rs.next()) {
-                guest = new Guest();
-
-                guest.setGuestId(rs.getString("GUESTID"));
-                guest.setGuestName(rs.getString("GUESTNAME"));
-                guest.setGuestEmail(rs.getString("GUESTEMAIL"));
-                guest.setGuestPhoneNumber(rs.getString("GUESTPHONENUMBER"));
-                guest.setGuestPassword(rs.getString("GUESTPASSWORD"));
+                if (rs.next()) {
+                    guest = mapGuest(rs);
+                }
             }
-
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,51 +153,101 @@ public class GuestDAO {
         return guest;
     }
 
-    public boolean deleteGuest(String guestID) {
-        boolean success = false;
+    // Soft archive guest.
+    public boolean archiveGuest(String guestID) {
 
-        try {
+        String sql =
+                "UPDATE GUEST " +
+                "SET STATUS = 'INACTIVE' " +
+                "WHERE GUESTID = ?";
+
+        try (
             Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
-            String sql = "DELETE FROM GUEST WHERE GUESTID = ?";
-            PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, guestID);
 
-            int row = ps.executeUpdate();
-            success = row > 0;
+            return ps.executeUpdate() > 0;
 
-            con.close();
-
-        } catch (SQLIntegrityConstraintViolationException e) {
-            success = false;
         } catch (Exception e) {
             e.printStackTrace();
-            success = false;
+            return false;
         }
-
-        return success;
     }
-    public int getTotalGuest(){
+
+    // Restore archived guest.
+    public boolean restoreGuest(String guestID) {
+
+        String sql =
+                "UPDATE GUEST " +
+                "SET STATUS = 'ACTIVE' " +
+                "WHERE GUESTID = ?";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, guestID);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Count active guests.
+    public int getTotalGuest() {
+
+        String sql =
+                "SELECT COUNT(*) FROM GUEST " +
+                "WHERE STATUS = 'ACTIVE'";
+
+        return getCount(sql);
+    }
+
+    // Count archived guests.
+    public int getArchivedGuestCount() {
+
+        String sql =
+                "SELECT COUNT(*) FROM GUEST " +
+                "WHERE STATUS = 'INACTIVE'";
+
+        return getCount(sql);
+    }
+
+    private Guest mapGuest(ResultSet rs) throws Exception {
+
+        Guest guest = new Guest();
+
+        guest.setGuestId(rs.getString("GUESTID"));
+        guest.setGuestName(rs.getString("GUESTNAME"));
+        guest.setGuestEmail(rs.getString("GUESTEMAIL"));
+        guest.setGuestPhoneNumber(rs.getString("GUESTPHONENUMBER"));
+        guest.setGuestPassword(rs.getString("GUESTPASSWORD"));
+        guest.setStatus(rs.getString("STATUS"));
+
+        return guest;
+    }
+
+    private int getCount(String sql) {
 
         int total = 0;
 
-        try{
-
+        try (
             Connection con = DBConnection.getConnection();
-
-            String sql = "SELECT COUNT(*) FROM GUEST";
-
             PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
 
-            ResultSet rs = ps.executeQuery();
-
-            if(rs.next()){
+            if (rs.next()) {
                 total = rs.getInt(1);
             }
 
-            con.close();
-
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

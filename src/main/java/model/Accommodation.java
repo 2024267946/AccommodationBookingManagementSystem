@@ -12,6 +12,14 @@ public class Accommodation {
     public String getAccommodationId() {
         return accommodationId;
     }
+    
+    public String getAccommodationName() {
+        return accommodationName;
+    }
+
+    public void setAccommodationName(String accommodationName) {
+        this.accommodationName = accommodationName;
+    }
 
     public void setAccommodationId(String accommodationId) {
         this.accommodationId = accommodationId;

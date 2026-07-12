@@ -16,6 +16,7 @@ import java.io.IOException;
 	    private String guestEmail;
 	    private String guestPhoneNumber;
 	    private String guestPassword;
+	    private String status;
 
 	    public Guest() {
 	    }
@@ -65,6 +66,14 @@ import java.io.IOException;
 
 	    public void setGuestPassword(String guestPassword) {
 	        this.guestPassword = guestPassword;
+	    }
+	    
+	    public String getStatus() {
+	        return status;
+	    }
+
+	    public void setStatus(String status) {
+	        this.status = status;
 	    }
 	}
 

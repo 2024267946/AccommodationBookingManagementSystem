@@ -66,7 +66,7 @@ function searchGuest() {
     <div class="logo">Homestay Murah Melaka</div>
     <div class="topnav">
         <a href="<%=request.getContextPath()%>/owner/dashboard">Dashboard</a>
-        <a href="<%=request.getContextPath()%>/auth/logout">Logout</a>
+        <a href="<%=request.getContextPath()%>/auth/LogoutServlet">Logout</a>
     </div>
 </div>
 
@@ -83,7 +83,7 @@ function searchGuest() {
 
     <a href="#">Profile</a>
 
-    <a href="<%=request.getContextPath()%>/auth/logout">
+    <a href="<%=request.getContextPath()%>/auth/LogoutServlet">
         Logout
     </a>
 </div>

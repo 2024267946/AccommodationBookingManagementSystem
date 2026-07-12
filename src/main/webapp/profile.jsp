@@ -5,23 +5,11 @@
 <head>
     <meta charset="UTF-8">
     <title>My Profile - Cuti Murah Melaka</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css?v=3">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <jsp:include page="header.jsp" />
+    <jsp:include page="navbar.jsp" />
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand"><i class="fas fa-umbrella-beach"></i> Cuti Murah Melaka</div>
-        <div class="nav-links">
-            <a href="index.jsp">Home</a>
-            <a href="homestays.jsp">View Units</a>
-            <a href="contact.jsp">Contact</a>
-            <a href="profile.jsp" class="active-link">My Profile</a>
-            
-            <form action="${pageContext.request.contextPath}/LogoutServlet" method="POST" style="display:inline; margin: 0;">
-                <button type="submit" class="btn-outline" style="border:none; cursor:pointer; background:none;">Logout</button>
-            </form>
-        </div>
-    </nav>
+    
 
     <main class="container" style="padding: 3rem 5%; min-height: 75vh;">
         <div class="page-header">

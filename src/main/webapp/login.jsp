@@ -3,10 +3,14 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Login - DG Rimbun</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <title>Login - Cuti Murah Melaka</title>
+    <jsp:include page="header.jsp" />
+   
 </head>
 <body class="auth-body">
+  
+        <jsp:include page="navbar.jsp" />
+        
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -21,20 +25,23 @@
 			<% } %>
             
             <!-- Login Form -->
-<<<<<<< HEAD
+
             <form action="${pageContext.request.contextPath}/auth/login" method="POST">
-=======
-            <form action="${pageContext.request.contextPath}/LoginServlet" method="POST">
->>>>>>> branch 'main' of https://github.com/2024267946/HomestayBookingManagementSystem.git
+
                 <div class="form-group">
                     <label>Email Address</label>
                     <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
                 </div>
-                <button type="submit" class="btn-primary btn-block">Login</button>
+                
+                <button type="submit" class="btn-primary btn-block">
+                Login
+                </button>
+   
             </form>
             
             <div class="auth-footer">

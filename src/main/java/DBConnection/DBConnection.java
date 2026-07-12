@@ -14,7 +14,7 @@ public class DBConnection {
 	//oracle
 	private static final String DB_DRIVER = "oracle.jdbc.driver.OracleDriver";
 	private static final String DB_CONNECTION = "jdbc:oracle:thin:@//localhost:1521/freepdb1";
-	private static final String DB_USER = "sinerrores"; 	
+	private static final String DB_USER = "SINERRORES"; 	
 	public static final String DB_PASSWORD = "oracle";	
 	
 	public static Connection getConnection() {

@@ -1,98 +1,161 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-import model.Guest;
 import DBConnection.DBConnection;
+import model.Guest;
+import model.Staff;
 
 public class UserDAO {
-	public boolean registerGuest(Guest guest) {
 
-	    boolean success = false;
+    public boolean registerGuest(Guest guest) {
 
-	    try {
+        String sql =
+                "INSERT INTO GUEST " +
+                "(GUESTID, GUESTNAME, GUESTEMAIL, " +
+                "GUESTPHONENUMBER, GUESTPASSWORD) " +
+                "VALUES (GUEST_SEQ.NEXTVAL, ?, ?, ?, ?)";
 
-	        Connection conn =
-	                DBConnection.getConnection();
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
 
-	        String sql =
-	        "INSERT INTO GUEST(GUESTID,GUESTNAME,GUESTEMAIL,GUESTPHONENUMBER,GUESTPASSWORD) VALUES(GUEST_SEQ.NEXTVAL,?,?,?,?)";
+            ps.setString(1, guest.getGuestName());
+            ps.setString(2, guest.getGuestEmail());
+            ps.setString(3, guest.getGuestPhoneNumber());
+            ps.setString(4, guest.getGuestPassword());
 
-	        PreparedStatement ps =
-	                conn.prepareStatement(sql);
+            return ps.executeUpdate() > 0;
 
-	        ps.setString(1, guest.getGuestName());
-	        ps.setString(2, guest.getGuestEmail());
-	        ps.setString(3, guest.getGuestPhoneNumber());
-	        ps.setString(4, guest.getGuestPassword());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	        success = ps.executeUpdate() > 0;
+    // Authenticate guest and return the full Guest object.
+    public Guest loginGuest(String email, String password) {
 
-	        conn.close();
+        String sql =
+                "SELECT GUESTID, GUESTNAME, GUESTEMAIL, " +
+                "GUESTPHONENUMBER, GUESTPASSWORD " +
+                "FROM GUEST " +
+                "WHERE GUESTEMAIL = ? " +
+                "AND GUESTPASSWORD = ?";
 
-	    } catch(Exception e) {
-	        e.printStackTrace();
-	    }
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
 
-	    return success;
-	}
-	public String login(String email, String password) {
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-	    try {
+            try (ResultSet rs = ps.executeQuery()) {
 
-	        Connection conn =
-	                DBConnection.getConnection();
+                if (rs.next()) {
 
-	        // Check Guest
+                    Guest guest = new Guest();
 
-	        String guestSql =
-	        "SELECT * FROM GUEST WHERE GUESTEMAIL=? AND GUESTPASSWORD=?";
+                    guest.setGuestId(
+                            rs.getString("GUESTID"));
 
-	        PreparedStatement guestPs =
-	        conn.prepareStatement(guestSql);
+                    guest.setGuestName(
+                            rs.getString("GUESTNAME"));
 
-	        guestPs.setString(1, email);
-	        guestPs.setString(2, password);
+                    guest.setGuestEmail(
+                            rs.getString("GUESTEMAIL"));
 
-	        ResultSet guestRs =
-	        guestPs.executeQuery();
+                    guest.setGuestPhoneNumber(
+                            rs.getString("GUESTPHONENUMBER"));
 
-	        if(guestRs.next()) {
+                    guest.setGuestPassword(
+                            rs.getString("GUESTPASSWORD"));
 
-	            conn.close();
-	            return "GUEST";
-	        }
+                    return guest;
+                }
+            }
 
-	        // Check Staff
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-	        String staffSql =
-	        "SELECT STAFFROLES FROM STAFF WHERE STAFFEMAIL=? AND STAFFPASSWORD=?";
+        return null;
+    }
 
-	        PreparedStatement staffPs =
-	        conn.prepareStatement(staffSql);
+    // Authenticate owner or staff and return the full Staff object.
+    public Staff loginStaff(String email, String password) {
 
-	        staffPs.setString(1, email);
-	        staffPs.setString(2, password);
+        String sql =
+                "SELECT STAFFID, STAFFNAME, STAFFEMAIL, " +
+                "STAFFPHONENUMBER, STAFFPASSWORD, STAFFROLES " +
+                "FROM STAFF " +
+                "WHERE STAFFEMAIL = ? " +
+                "AND STAFFPASSWORD = ?";
 
-	        ResultSet staffRs =
-	        staffPs.executeQuery();
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
 
-	        if(staffRs.next()) {
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-	            String role =
-	            staffRs.getString("STAFFROLES");
+            try (ResultSet rs = ps.executeQuery()) {
 
-	            conn.close();
+                if (rs.next()) {
 
-	            return role;
-	        }
+                    Staff staff = new Staff();
 
-	        conn.close();
+                    staff.setStaffId(
+                            rs.getString("STAFFID"));
 
-	    } catch(Exception e) {
-	        e.printStackTrace();
-	    }
+                    staff.setStaffName(
+                            rs.getString("STAFFNAME"));
 
-	    return null;
-	}
+                    staff.setStaffEmail(
+                            rs.getString("STAFFEMAIL"));
+
+                    staff.setStaffPhoneNumber(
+                            rs.getString("STAFFPHONENUMBER"));
+
+                    staff.setStaffPassword(
+                            rs.getString("STAFFPASSWORD"));
+
+                    staff.setStaffRoles(
+                            rs.getString("STAFFROLES"));
+
+                    return staff;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /*
+     * Kept for compatibility with any older code that still calls login().
+     */
+    public String login(String email, String password) {
+
+        Guest guest = loginGuest(email, password);
+
+        if (guest != null) {
+            return "GUEST";
+        }
+
+        Staff staff = loginStaff(email, password);
+
+        if (staff != null) {
+            return staff.getStaffRoles();
+        }
+
+        return null;
+    }
 }

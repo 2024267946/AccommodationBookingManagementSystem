@@ -4,21 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Chalet Units - Cuti Murah Melaka</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   	<jsp:include page="guestHeader.jsp" />
+    <jsp:include page="guestNavbar.jsp" />
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-brand">Cuti Murah Melaka</div>
-        <div class="nav-links">
-            <a href="index.jsp">Home</a>
-            <a href="homestays.jsp" class="active-link">View Units</a>
-            <a href="contact.jsp">Contact</a>
-            <a href="login.jsp" class="btn-outline">Login</a>
-        </div>
-    </nav>
-
+    
     <!-- Page Header -->
     <div class="page-banner">
         <div class="container">
@@ -31,7 +21,7 @@
     <main class="container grid-section">
         <div class="chalet-grid">
             
-            <!-- Example of ONE Chalet Card (You will loop this with JSTL later) -->
+            <!-- Example of ONE Chalet Card -->
             <div class="chalet-card">
                 <div class="chalet-img-placeholder">
                     <i class="fas fa-image fa-3x text-muted"></i>
@@ -71,11 +61,31 @@
                 </div>
             </div>
 
+            <!-- Example Card 3 (ADDED) -->
+            <div class="chalet-card">
+                <div class="chalet-img-placeholder">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+                <div class="chalet-details">
+                    <h3>Luxury Nature Villa C1</h3>
+                    <p class="chalet-desc">Luxurious villa with breathtaking views of the surrounding forest scenery.</p>
+                    <div class="chalet-features">
+                        <span><i class="fas fa-bed"></i> 4 Beds</span>
+                        <span><i class="fas fa-bath"></i> 3 Baths</span>
+                        <span><i class="fas fa-snowflake"></i> AirCon</span>
+                    </div>
+                    <div class="chalet-footer">
+                        <span class="price">RM 350 <small>/ night</small></span>
+                        <a href="homestayDetails.jsp?id=3" class="btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <footer class="site-footer">
-        <p>&copy; 2026 DG Rimbun Chalet Management. All rights reserved.</p>
+        <p class="mb-0">&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
     </footer>
 </body>
 </html>

@@ -4,7 +4,8 @@ public class Amenity {
     private int amenityId;
     private String amenityName;
     private String status; // "ACTIVE" or "ARCHIVED"
-
+    private String accommodationId;
+    
     public Amenity() {}
 
     public Amenity(int amenityId, String amenityName, String status) {
@@ -22,4 +23,12 @@ public class Amenity {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getAccommodationId() {
+        return accommodationId;}
+    
+
+    public void setAccommodationId(String accommodationId) {
+        this.accommodationId = accommodationId;
+    }
 }

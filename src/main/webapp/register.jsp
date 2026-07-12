@@ -3,10 +3,12 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Register - DG Rimbun</title>
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
+    <title>Register</title>
+    <jsp:include page="header.jsp" />
+    
 </head>
 <body class="auth-body">
+<jsp:include page="navbar.jsp" />
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -26,35 +28,23 @@
 
     <div class="form-group">
         <label>Full Name</label>
-        <input type="text" name="name" class="form-control" required>
+        <input type="text" name="name" class="form-control" placeholder="Enter your full name" required>
     </div>
-
     <div class="form-group">
         <label>Phone Number</label>
-        <input type="tel" name="phone" class="form-control" required>
+        <input type="tel" name="phone" class="form-control" placeholder="Enter your phone number" required>
     </div>
-
     <div class="form-group">
         <label>Email Address</label>
-        <input type="email" name="email" class="form-control" required>
+        <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
     </div>
-
     <div class="form-group">
         <label>Password</label>
-        <input type="password"
-               name="password"
-               class="form-control"
-               minlength="6"
-               required>
+        <input type="password" name="password" class="form-control" minlength="6" placeholder="Enter your password" required>
     </div>
-
     <div class="form-group">
         <label>Confirm Password</label>
-        <input type="password"
-               name="confirmPassword"
-               class="form-control"
-               minlength="6"
-               required>
+        <input type="password" name="confirmPassword" class="form-control" minlength="6" placeholder="Re-enter your password" required>
     </div>
 
     <button type="submit" class="btn-primary btn-block">

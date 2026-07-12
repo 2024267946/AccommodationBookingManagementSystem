@@ -4,152 +4,326 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
 import model.Booking;
 import DBConnection.DBConnection;
 
 public class BookingDAO {
 
     private static final Logger logger = Logger.getLogger(BookingDAO.class.getName());
-    
+
     // 1. /booking/create-booking
-    public static boolean createBooking(Booking booking) {
-        try {
+    // Creates a booking and returns its generated ID, for example B005.
+    public static String createBooking(Booking booking) {
+
+        String bookingID = generateNewBookingId();
+
+        if (bookingID == null) {
+            return null;
+        }
+
+        String sql =
+            "INSERT INTO BOOKING " +
+            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, " +
+            "CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
+            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
+            "TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
+
+        try (
             Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
 
-            // insert into booking table
-            String sql1 = "INSERT INTO BOOKING (BOOKINGID, GUESTID, STAFFID, CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) VALUES (SEQ_BOOKING.NEXTVAL, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
-            PreparedStatement ps1 = conn.prepareStatement(sql1);
-            ps1.setInt(1, booking.getGuestID());
-            ps1.setInt(2, booking.getStaffID());
-            ps1.setString(3, booking.getCheckInDate());
-            ps1.setString(4, booking.getCheckOutDate());
-            ps1.setInt(5, booking.getNumberOfPax());
-            ps1.setDouble(6, booking.getTotalPrice());
-            ps1.setString(7, booking.getBookingStatus());
-            
-            int result1 = ps1.executeUpdate();
+            ps.setString(1, bookingID);
+            ps.setString(2, booking.getGuestID());
 
-            // insert into bookingdetail table
-            String sql2 = "INSERT INTO BOOKINGDETAIL (BOOKINGID, ACCOMMODATIONID) VALUES (SEQ_BOOKING.CURRVAL, ?)";
-            PreparedStatement ps2 = conn.prepareStatement(sql2);
-            ps2.setInt(1, booking.getAccommodationID()); // Pulls from your model object
-            
-            int result2 = ps2.executeUpdate();
-
-            // check
-            if (result1 > 0 && result2 > 0) {
-                return true;
+            if (booking.getStaffID() == null
+                    || booking.getStaffID().trim().isEmpty()) {
+                ps.setNull(3, Types.VARCHAR);
             } else {
-                return false;
+                ps.setString(3, booking.getStaffID());
+            }
+
+            ps.setString(4, booking.getAccommodationID());
+            ps.setString(5, booking.getCheckInDate());
+            ps.setString(6, booking.getCheckOutDate());
+            ps.setInt(7, booking.getNumberOfPax());
+            ps.setDouble(8, booking.getTotalPrice());
+            ps.setString(9, booking.getBookingStatus());
+
+            if (ps.executeUpdate() > 0) {
+                return bookingID;
             }
 
         } catch (Exception e) {
             logger.info(e.getMessage());
-            return false;
+            e.printStackTrace();
         }
+
+        return null;
     }
-    
+
+    // Generates IDs in the format B001, B002, B003 and so on.
+    private static String generateNewBookingId() {
+
+        String sql =
+            "SELECT 'B' || LPAD(" +
+            "NVL(MAX(TO_NUMBER(SUBSTR(BOOKINGID, 2))), 0) + 1, " +
+            "3, '0') AS NEWID " +
+            "FROM BOOKING " +
+            "WHERE REGEXP_LIKE(BOOKINGID, '^B[0-9]+$')";
+
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            if (rs.next()) {
+                return rs.getString("NEWID");
+            }
+
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     // 2. /booking/cancel-booking
     public boolean cancelBooking(Booking booking) {
-        try {
+
+        String sql =
+            "UPDATE BOOKING SET BOOKINGSTATUS = 'Cancelled' WHERE BOOKINGID = ?";
+
+        try (
             Connection conn = DBConnection.getConnection();
-            String sql = "UPDATE BOOKING SET BOOKINGSTATUS = 'Cancelled' WHERE BOOKINGID = ?";
-            
-            PreparedStatement preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setInt(1, booking.getBookingID());
-            
-            int result = preparedStatement.executeUpdate();
-          
-            if (result > 0) {
-                return true;
-            } else {
-                return false;
-            }
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, booking.getBookingID());
+
+            return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             logger.info(e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
-    
+
     // 3. /staff/booking/verify
     public boolean verifyBooking(Booking booking) {
-        try {
+
+        String sql =
+            "UPDATE BOOKING SET BOOKINGSTATUS = 'Verified', STAFFID = ? WHERE BOOKINGID = ?";
+
+        try (
             Connection conn = DBConnection.getConnection();
-            String sql = "UPDATE BOOKING SET BOOKINGSTATUS = 'Verified', STAFFID = ? WHERE BOOKINGID = ?";
-            
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, booking.getStaffID());
-            ps.setInt(2, booking.getBookingID());
-            
-            int result = ps.executeUpdate();
-            
-            if (result > 0) {
-                return true;
-            } else {
-                return false;
-            }
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, booking.getStaffID());
+            ps.setString(2, booking.getBookingID());
+
+            return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             logger.info(e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
-    
+
     // 4. /booking/my-bookings
-    public List<Booking> getBookingsByGuest(int guestID) {
+    public List<Booking> getBookingsByGuest(String guestId) {
+
         List<Booking> list = new ArrayList<>();
-        try {
+
+        String sql =
+            "SELECT BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS, " +
+            "TO_CHAR(CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
+            "TO_CHAR(CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
+            "FROM BOOKING " +
+            "WHERE GUESTID = ? " +
+            "ORDER BY BOOKINGID DESC";
+
+        try (
             Connection conn = DBConnection.getConnection();
-            String sql = "SELECT BOOKINGID, GUESTID, STAFFID, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS, TO_CHAR(CHECKINDATE, 'YYYY-MM-DD') AS checkInStr, TO_CHAR(CHECKOUTDATE, 'YYYY-MM-DD') AS checkOutStr FROM BOOKING WHERE GUESTID = ? ORDER BY BOOKINGID DESC";
-            
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, guestID);
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, guestId);
+
             ResultSet rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Booking b = new Booking();
-                b.setBookingID(rs.getInt("BOOKINGID"));
-                b.setCheckInDate(rs.getString("checkInStr"));
-                b.setCheckOutDate(rs.getString("checkOutStr"));
+
+                b.setBookingID(rs.getString("BOOKINGID"));
+                b.setGuestID(rs.getString("GUESTID"));
+                b.setStaffID(rs.getString("STAFFID"));
+                b.setAccommodationID(rs.getString("ACCOMMODATIONID"));
+                b.setCheckInDate(rs.getString("CHECKINSTR"));
+                b.setCheckOutDate(rs.getString("CHECKOUTSTR"));
                 b.setNumberOfPax(rs.getInt("NUMBEROFPAX"));
                 b.setTotalPrice(rs.getDouble("TOTALPRICE"));
                 b.setBookingStatus(rs.getString("BOOKINGSTATUS"));
-                b.setStaffID(rs.getInt("STAFFID"));
-                b.setGuestID(rs.getInt("GUESTID"));
-                
+
                 list.add(b);
             }
+
         } catch (Exception e) {
             logger.info(e.getMessage());
+            e.printStackTrace();
         }
+
         return list;
     }
-    
+
     // 5. /staff/view-bookings
     public List<Booking> getAllBookings() {
+
         List<Booking> list = new ArrayList<>();
-        try {
+
+        String sql =
+            "SELECT BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS, " +
+            "TO_CHAR(CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
+            "TO_CHAR(CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
+            "FROM BOOKING " +
+            "ORDER BY BOOKINGID DESC";
+
+        try (
             Connection conn = DBConnection.getConnection();
-            String sql = "SELECT BOOKINGID, GUESTID, STAFFID, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS, TO_CHAR(CHECKINDATE, 'YYYY-MM-DD') AS checkInStr, TO_CHAR(CHECKOUTDATE, 'YYYY-MM-DD') AS checkOutStr FROM BOOKING ORDER BY BOOKINGID DESC";
-            
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            
+            ResultSet rs = stmt.executeQuery(sql)
+        ) {
+
             while (rs.next()) {
                 Booking b = new Booking();
-                b.setBookingID(rs.getInt("BOOKINGID"));
-                b.setCheckInDate(rs.getString("checkInStr"));
-                b.setCheckOutDate(rs.getString("checkOutStr"));
+
+                b.setBookingID(rs.getString("BOOKINGID"));
+                b.setGuestID(rs.getString("GUESTID"));
+                b.setStaffID(rs.getString("STAFFID"));
+                b.setAccommodationID(rs.getString("ACCOMMODATIONID"));
+                b.setCheckInDate(rs.getString("CHECKINSTR"));
+                b.setCheckOutDate(rs.getString("CHECKOUTSTR"));
                 b.setNumberOfPax(rs.getInt("NUMBEROFPAX"));
                 b.setTotalPrice(rs.getDouble("TOTALPRICE"));
                 b.setBookingStatus(rs.getString("BOOKINGSTATUS"));
-                b.setStaffID(rs.getInt("STAFFID"));
-                b.setGuestID(rs.getInt("GUESTID"));
-                
+
                 list.add(b);
             }
+
         } catch (Exception e) {
             logger.info(e.getMessage());
+            e.printStackTrace();
         }
+
         return list;
+    }
+
+    // 6. Staff update accommodation availability
+    public boolean updateAvailability(String accommodationID, String staffID,
+                                      String checkIn, String checkOut, String status) {
+
+        if ("Unavailable".equalsIgnoreCase(status)) {
+            return blockAvailability(accommodationID, staffID, checkIn, checkOut);
+        } else if ("Available".equalsIgnoreCase(status)) {
+            return reopenAvailability(accommodationID, checkIn, checkOut);
+        }
+
+        return false;
+    }
+
+    // Staff blocks accommodation date
+    private boolean blockAvailability(String accommodationID, String staffID,
+                                      String checkIn, String checkOut) {
+
+        String bookingId = generateBookingId();
+
+        String sql =
+            "INSERT INTO BOOKING " +
+            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
+            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
+
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, bookingId);
+            ps.setString(2, null);
+            ps.setString(3, staffID);
+            ps.setString(4, accommodationID);
+            ps.setString(5, checkIn);
+            ps.setString(6, checkOut);
+            ps.setInt(7, 0);
+            ps.setDouble(8, 0.00);
+            ps.setString(9, "Unavailable");
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Staff reopens blocked accommodation date
+    private boolean reopenAvailability(String accommodationID, String checkIn, String checkOut) {
+
+        String sql =
+            "UPDATE BOOKING SET BOOKINGSTATUS = 'Cancelled' " +
+            "WHERE ACCOMMODATIONID = ? " +
+            "AND UPPER(BOOKINGSTATUS) = 'UNAVAILABLE' " +
+            "AND TO_DATE(?, 'YYYY-MM-DD') < CHECKOUTDATE " +
+            "AND TO_DATE(?, 'YYYY-MM-DD') > CHECKINDATE";
+
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, accommodationID);
+            ps.setString(2, checkIn);
+            ps.setString(3, checkOut);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Generate Booking ID like B001, B002, B003
+    private String generateBookingId() {
+
+        String bookingId = "B001";
+
+        String sql =
+            "SELECT 'B' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(BOOKINGID, 2))), 0) + 1, 3, '0') AS NEWID " +
+            "FROM BOOKING WHERE REGEXP_LIKE(BOOKINGID, '^B[0-9]+$')";
+
+        try (
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            if (rs.next()) {
+                bookingId = rs.getString("NEWID");
+            }
+
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            e.printStackTrace();
+        }
+
+        return bookingId;
     }
 }

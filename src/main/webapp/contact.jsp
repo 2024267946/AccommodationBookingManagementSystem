@@ -3,19 +3,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Contact Us - DG Rimbun</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <title>Contact Us - Cuti Murah Melaka</title>
+    <jsp:include page="header.jsp"></jsp:include>
 </head>
 <body>
-    <nav class="navbar">
-    <div class="nav-brand">Cuti Murah Melaka</div>
-    <div class="nav-links">
-        <a href="index.jsp">Home</a>
-        <a href="homestays.jsp">View Units</a>
-        <a href="contact.jsp" class="active-link">Contact</a>
-        <a href="login.jsp" class="btn-outline">Login</a>
-    </div>
-</nav>
+    <jsp:include page="navbar.jsp" />
 
     <div class="page-banner">
         <div class="container">

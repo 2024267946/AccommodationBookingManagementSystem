@@ -1,44 +1,61 @@
 package dao;
 
 import java.sql.Connection;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import DBConnection.DBConnection;
 import model.Payment;
 
 public class PaymentDAO {
 
+    private String generatePaymentId(Connection conn) {
+
+        String paymentId = "PAY001";
+
+        String sql =
+            "SELECT 'PAY' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(PAYMENTID,4))),0)+1,3,'0') AS NEWID " +
+            "FROM PAYMENT " +
+            "WHERE REGEXP_LIKE(PAYMENTID,'^PAY[0-9]+$')";
+
+        try (
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+            if (rs.next()) {
+                paymentId = rs.getString("NEWID");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return paymentId;
+    }
+
     public boolean makePayment(Payment payment) {
 
         boolean success = false;
 
-        try {
+        String sql =
+            "INSERT INTO PAYMENT " +
+            "(PAYMENTID, BOOKINGID, PAYMENTDATE, TOTALAMOUNT, PAYMENTMETHOD, PAYMENTSTATUS) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
 
+        try (
             Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+            String paymentId = generatePaymentId(conn);
 
-            String sql =
-            	    "INSERT INTO PAYMENT "
-            	  + "(PAYMENTID, BOOKINGID, PAYMENTDATE, TOTALAMOUNT, "
-            	  + "PAYMENTMETHOD, PAYMENTSTATUS, SECURITYDEPOSIT, PAYMENTINVOICE) "
-            	  + "VALUES "
-            	  + "(PAYMENT_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
-            
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setString(1, payment.getBookingID());           
-            ps.setDate(2, new java.sql.Date(System.currentTimeMillis()));            
-            ps.setDouble(3, payment.getTotalAmount());
-            ps.setString(4, payment.getPaymentMethod());
-            ps.setString(5, payment.getPaymentStatus());
-            ps.setDouble(6, payment.getSecurityDeposit());
-            ps.setString(7, payment.getPaymentInvoice());
+            ps.setString(1, paymentId);
+            ps.setString(2, payment.getBookingID());
+            ps.setDate(3, java.sql.Date.valueOf(payment.getPaymentDate()));
+            ps.setDouble(4, payment.getTotalAmount());
+            ps.setString(5, payment.getPaymentMethod());
+            ps.setString(6, payment.getPaymentStatus());
 
             success = ps.executeUpdate() > 0;
-
-            ps.close();
-            conn.close();
 
         } catch (Exception e) {
             e.printStackTrace();

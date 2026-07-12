@@ -3,12 +3,12 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Invoice - DG Rimbun</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body style="background-color: var(--bg-light); padding: 2rem;">
+    <title>Invoice</title>
+    <jsp:include page="header.jsp" />
     
+</head>
+<body class="invoice-page-body">
+    <jsp:include page="navbar.jsp" />
     <div class="container" style="max-width: 800px; margin: 0 auto;">
         
         <!-- Action bar (Hidden when printing) -->
@@ -21,7 +21,7 @@
         <div class="invoice-card">
             <div class="invoice-header">
                 <div>
-                    <h2 style="color: var(--primary-color);">DG Rimbun Chalet</h2>
+                    <h2 style="color: var(--primary-color);">Cuti Murah Melaka</h2>
                     <p class="text-muted">Melaka, Malaysia</p>
                 </div>
                 <div style="text-align: right;">
@@ -69,7 +69,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 4rem; color: var(--text-muted);">
-                    <p>Thank you for choosing DG Rimbun!</p>
+                    <p>Thank you for choosing Cuti Murah Melaka!</p>
                 </div>
             </div>
         </div>

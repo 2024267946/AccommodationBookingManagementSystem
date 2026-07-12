@@ -5,9 +5,12 @@ import java.io.IOException;
 import dao.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.Guest;
+import model.Staff;
 
 @WebServlet(urlPatterns = {
         "/auth/login",
@@ -16,46 +19,56 @@ import model.Guest;
 })
 public class LoginServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
+
     private UserDAO userDAO;
 
+    @Override
     public void init() {
-
         userDAO = new UserDAO();
     }
+
     @Override
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String path = 
-                request.getServletPath();
+        String path = request.getServletPath();
 
-        switch(path) {
+        switch (path) {
 
             case "/auth/login":
-                login(request,response);
+                login(request, response);
                 break;
 
             case "/auth/register":
-                register(request,response);
+                register(request, response);
+                break;
+
+            default:
+                response.sendRedirect(
+                        request.getContextPath() + "/index.jsp");
                 break;
         }
     }
+
     @Override
     protected void doGet(
             HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String path =
-                request.getServletPath();
+        String path = request.getServletPath();
 
-        if(path.equals("/auth/logout")) {
-
-            logout(request,response);
+        if ("/auth/logout".equals(path)) {
+            logout(request, response);
+        } else {
+            response.sendRedirect(
+                    request.getContextPath() + "/index.jsp");
         }
     }
+
     private void register(
             HttpServletRequest request,
             HttpServletResponse response)
@@ -78,17 +91,20 @@ public class LoginServlet extends HttpServlet {
         boolean success =
                 userDAO.registerGuest(guest);
 
-        if(success) {
+        if (success) {
 
             response.sendRedirect(
-                "login.jsp");
+                    request.getContextPath()
+                    + "/login.jsp?register=success");
 
         } else {
 
             response.sendRedirect(
-                    "register.jsp?error=1");
+                    request.getContextPath()
+                    + "/register.jsp?error=1");
         }
     }
+
     private void login(
             HttpServletRequest request,
             HttpServletResponse response)
@@ -100,45 +116,113 @@ public class LoginServlet extends HttpServlet {
         String password =
                 request.getParameter("password");
 
-        String role =
-                userDAO.login(email,password);
+        if (email == null
+                || email.trim().isEmpty()
+                || password == null
+                || password.trim().isEmpty()) {
 
-        if(role != null) {
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/login.jsp?error=missing");
+            return;
+        }
+
+        /*
+         * Check guest first.
+         */
+        Guest guest =
+                userDAO.loginGuest(
+                        email.trim(),
+                        password);
+
+        if (guest != null) {
 
             HttpSession session =
-                    request.getSession();
+                    request.getSession(true);
+
+            session.setAttribute(
+                    "role",
+                    "GUEST");
+
+            session.setAttribute(
+                    "loggedGuest",
+                    guest);
+
+            session.setAttribute(
+                    "guestID",
+                    guest.getGuestId());
+
+            session.setAttribute(
+                    "guestName",
+                    guest.getGuestName());
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/homepage.jsp");
+            return;
+        }
+
+        /*
+         * If not guest, check owner/staff.
+         */
+        Staff staff =
+                userDAO.loginStaff(
+                        email.trim(),
+                        password);
+
+        if (staff != null) {
+
+            String role =
+                    staff.getStaffRoles();
+
+            HttpSession session =
+                    request.getSession(true);
 
             session.setAttribute(
                     "role",
                     role);
 
-            switch(role) {
+            session.setAttribute(
+                    "loggedStaff",
+                    staff);
 
-                case "OWNER":
+            session.setAttribute(
+                    "staffID",
+                    staff.getStaffId());
 
-                    response.sendRedirect(
-                            "ownerDashboard.jsp");
-                    break;
+            session.setAttribute(
+                    "staffName",
+                    staff.getStaffName());
 
-                case "STAFF":
+            if ("OWNER".equalsIgnoreCase(role)) {
 
-                    response.sendRedirect(
-                            "staffDashboard.jsp");
-                    break;
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/owner/dashboard");
 
-                case "GUEST":
+            } else if ("STAFF".equalsIgnoreCase(role)) {
 
-                    response.sendRedirect(
-                            "guestDashboard.jsp");
-                    break;
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/staff/dashboard");
+
+            } else {
+
+                session.invalidate();
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/login.jsp?error=invalidRole");
             }
 
-        } else {
-
-            response.sendRedirect(
-                    "login.jsp?error=1");
+            return;
         }
+
+        response.sendRedirect(
+                request.getContextPath()
+                + "/login.jsp?error=1");
     }
+
     private void logout(
             HttpServletRequest request,
             HttpServletResponse response)
@@ -147,12 +231,12 @@ public class LoginServlet extends HttpServlet {
         HttpSession session =
                 request.getSession(false);
 
-        if(session != null) {
-
+        if (session != null) {
             session.invalidate();
         }
 
         response.sendRedirect(
-                "index.jsp");
+                request.getContextPath()
+                + "/index.jsp");
     }
 }

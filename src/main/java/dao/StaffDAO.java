@@ -1,32 +1,37 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Staff;
 import DBConnection.DBConnection;
+import model.Staff;
 
 public class StaffDAO {
 
     private String generateStaffID() {
+
         String newID = "S001";
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql =
+                "SELECT STAFFID FROM STAFF " +
+                "ORDER BY STAFFID DESC FETCH FIRST 1 ROWS ONLY";
 
-            String sql = "SELECT STAFFID FROM STAFF ORDER BY STAFFID DESC FETCH FIRST 1 ROWS ONLY";
+        try (
+            Connection con = DBConnection.getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery()
+        ) {
 
             if (rs.next()) {
-                String lastID = rs.getString("STAFFID"); // S001
-                int number = Integer.parseInt(lastID.substring(1)); // 001
-                number++;
+                String lastID = rs.getString("STAFFID");
+                int number =
+                        Integer.parseInt(lastID.substring(1)) + 1;
+
                 newID = String.format("S%03d", number);
             }
-
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,14 +41,17 @@ public class StaffDAO {
     }
 
     public void addStaff(Staff staff) {
-        try {
+
+        String sql =
+                "INSERT INTO STAFF " +
+                "(STAFFID, STAFFNAME, STAFFPASSWORD, STAFFEMAIL, " +
+                "STAFFPHONENUMBER, STAFFROLES, STATUS) " +
+                "VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')";
+
+        try (
             Connection con = DBConnection.getConnection();
-
-            String sql = "INSERT INTO STAFF "
-                    + "(STAFFID, STAFFNAME, STAFFPASSWORD, STAFFEMAIL, STAFFPHONENUMBER, STAFFROLES) "
-                    + "VALUES (?, ?, ?, ?, ?, ?)";
-
-            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setString(1, generateStaffID());
             ps.setString(2, staff.getStaffName());
@@ -53,7 +61,6 @@ public class StaffDAO {
             ps.setString(6, staff.getStaffRoles());
 
             ps.executeUpdate();
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,29 +68,50 @@ public class StaffDAO {
     }
 
     public List<Staff> getAllStaff() {
+
         List<Staff> staffList = new ArrayList<>();
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql =
+                "SELECT * FROM STAFF " +
+                "WHERE UPPER(STATUS) = 'ACTIVE' " +
+                "ORDER BY STAFFID";
 
-            String sql = "SELECT * FROM STAFF ORDER BY STAFFID";
+        try (
+            Connection con = DBConnection.getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery()
+        ) {
 
             while (rs.next()) {
-                Staff staff = new Staff();
-
-                staff.setStaffId(rs.getString("STAFFID"));
-                staff.setStaffName(rs.getString("STAFFNAME"));
-                staff.setStaffPassword(rs.getString("STAFFPASSWORD"));
-                staff.setStaffEmail(rs.getString("STAFFEMAIL"));
-                staff.setStaffPhoneNumber(rs.getString("STAFFPHONENUMBER"));
-                staff.setStaffRoles(rs.getString("STAFFROLES"));
-
-                staffList.add(staff);
+                staffList.add(mapStaff(rs));
             }
 
-            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return staffList;
+    }
+
+    public List<Staff> getArchivedStaff() {
+
+        List<Staff> staffList = new ArrayList<>();
+
+        String sql =
+                "SELECT * FROM STAFF " +
+                "WHERE UPPER(STATUS) = 'INACTIVE' " +
+                "AND UPPER(STAFFROLES) = 'STAFF' " +
+                "ORDER BY STAFFID";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+                staffList.add(mapStaff(rs));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,29 +121,24 @@ public class StaffDAO {
     }
 
     public Staff getStaffByID(String staffID) {
+
         Staff staff = null;
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql =
+                "SELECT * FROM STAFF WHERE STAFFID = ?";
 
-            String sql = "SELECT * FROM STAFF WHERE STAFFID = ?";
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+
             ps.setString(1, staffID);
 
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                staff = new Staff();
-
-                staff.setStaffId(rs.getString("STAFFID"));
-                staff.setStaffName(rs.getString("STAFFNAME"));
-                staff.setStaffPassword(rs.getString("STAFFPASSWORD"));
-                staff.setStaffEmail(rs.getString("STAFFEMAIL"));
-                staff.setStaffPhoneNumber(rs.getString("STAFFPHONENUMBER"));
-                staff.setStaffRoles(rs.getString("STAFFROLES"));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    staff = mapStaff(rs);
+                }
             }
-
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,18 +148,20 @@ public class StaffDAO {
     }
 
     public void updateStaff(Staff staff) {
-        try {
+
+        String sql =
+                "UPDATE STAFF SET " +
+                "STAFFNAME = ?, " +
+                "STAFFPASSWORD = ?, " +
+                "STAFFEMAIL = ?, " +
+                "STAFFPHONENUMBER = ?, " +
+                "STAFFROLES = ? " +
+                "WHERE STAFFID = ?";
+
+        try (
             Connection con = DBConnection.getConnection();
-
-            String sql = "UPDATE STAFF SET "
-                    + "STAFFNAME = ?, "
-                    + "STAFFPASSWORD = ?, "
-                    + "STAFFEMAIL = ?, "
-                    + "STAFFPHONENUMBER = ?, "
-                    + "STAFFROLES = ? "
-                    + "WHERE STAFFID = ?";
-
-            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setString(1, staff.getStaffName());
             ps.setString(2, staff.getStaffPassword());
@@ -146,86 +171,127 @@ public class StaffDAO {
             ps.setString(6, staff.getStaffId());
 
             ps.executeUpdate();
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public boolean deleteStaff(String staffID) {
-        boolean success = false;
+    public boolean archiveStaff(String staffID) {
 
-        try {
+        if (staffID == null || staffID.trim().isEmpty()) {
+            return false;
+        }
+
+        String sql =
+                "UPDATE STAFF " +
+                "SET STATUS = 'INACTIVE' " +
+                "WHERE STAFFID = ? " +
+                "AND UPPER(STAFFROLES) = 'STAFF'";
+
+        try (
             Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
-            String sql = "DELETE FROM STAFF WHERE STAFFID = ?";
-            PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, staffID);
 
-            int row = ps.executeUpdate();
-            success = row > 0;
+            return ps.executeUpdate() > 0;
 
-            con.close();
-
-        } catch (SQLIntegrityConstraintViolationException e) {
-            success = false;
         } catch (Exception e) {
             e.printStackTrace();
-            success = false;
+            return false;
+        }
+    }
+
+    public boolean restoreStaff(String staffID) {
+
+        if (staffID == null || staffID.trim().isEmpty()) {
+            return false;
         }
 
-        return success;
+        String sql =
+                "UPDATE STAFF " +
+                "SET STATUS = 'ACTIVE' " +
+                "WHERE STAFFID = ? " +
+                "AND UPPER(STAFFROLES) = 'STAFF'";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, staffID);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-    
+
     public int getTotalStaff() {
 
-        int total = 0;
+        String sql =
+                "SELECT COUNT(*) FROM STAFF " +
+                "WHERE UPPER(STAFFROLES) = 'STAFF' " +
+                "AND UPPER(STATUS) = 'ACTIVE'";
 
-        try {
-
-            Connection con = DBConnection.getConnection();
-
-            String sql = "SELECT COUNT(*) FROM STAFF WHERE STAFFROLES='STAFF'";
-
-            PreparedStatement ps = con.prepareStatement(sql);
-
-            ResultSet rs = ps.executeQuery();
-
-            if(rs.next()){
-                total = rs.getInt(1);
-            }
-
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return total;
+        return getCount(sql);
     }
-    
+
     public int getTotalOwner() {
 
+        String sql =
+                "SELECT COUNT(*) FROM STAFF " +
+                "WHERE UPPER(STAFFROLES) = 'OWNER' " +
+                "AND UPPER(STATUS) = 'ACTIVE'";
+
+        return getCount(sql);
+    }
+
+    public int getArchivedStaffCount() {
+
+        String sql =
+                "SELECT COUNT(*) FROM STAFF " +
+                "WHERE UPPER(STAFFROLES) = 'STAFF' " +
+                "AND UPPER(STATUS) = 'INACTIVE'";
+
+        return getCount(sql);
+    }
+
+    private Staff mapStaff(ResultSet rs) throws Exception {
+
+        Staff staff = new Staff();
+
+        staff.setStaffId(rs.getString("STAFFID"));
+        staff.setStaffName(rs.getString("STAFFNAME"));
+        staff.setStaffPassword(rs.getString("STAFFPASSWORD"));
+        staff.setStaffEmail(rs.getString("STAFFEMAIL"));
+        staff.setStaffPhoneNumber(
+                rs.getString("STAFFPHONENUMBER"));
+        staff.setStaffRoles(rs.getString("STAFFROLES"));
+        staff.setStatus(rs.getString("STATUS"));
+
+        return staff;
+    }
+
+    private int getCount(String sql) {
+
         int total = 0;
 
-        try {
-
+        try (
             Connection con = DBConnection.getConnection();
-
-            String sql = "SELECT COUNT(*) FROM STAFF WHERE STAFFROLES='OWNER'";
-
             PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
 
-            ResultSet rs = ps.executeQuery();
-
-            if(rs.next()){
+            if (rs.next()) {
                 total = rs.getInt(1);
             }
 
-            con.close();
-
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

@@ -2,19 +2,18 @@ package model;
 
 public class Payment {
 
-    private int paymentID;
-    private String bookingID;
-    private String paymentDate;
-    private double totalAmount;
-    private String paymentMethod;
-    private String paymentStatus;
-    private double securityDeposit;
-    private String paymentInvoice;
+  private String paymentID;
+  private String bookingID;
+  private String paymentDate;
+  private double totalAmount;
+  private String paymentMethod;
+  private String paymentStatus;
+  private String paymentInvoice;
 
     public Payment() {}
 
-    public int getPaymentID() { return paymentID; }
-    public void setPaymentID(int paymentID) { this.paymentID = paymentID; }
+    public String getPaymentID() { return paymentID; }
+    public void setPaymentID(String paymentID) { this.paymentID = paymentID; }
 
     public String getBookingID() { return bookingID; }
     public void setBookingID(String bookingID) { this.bookingID = bookingID; }
@@ -30,9 +29,6 @@ public class Payment {
 
     public String getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
-
-    public double getSecurityDeposit() { return securityDeposit; }
-    public void setSecurityDeposit(double securityDeposit) { this.securityDeposit = securityDeposit; }
 
     public String getPaymentInvoice() { return paymentInvoice; }
     public void setPaymentInvoice(String paymentInvoice) { this.paymentInvoice = paymentInvoice; }

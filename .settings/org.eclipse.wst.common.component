@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-        
-    <wb-module deploy-name="cmm">
-        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-                
+    <wb-module deploy-name="HomestayBookingManagementSystemNEWWWWWW">
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
-                
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-                
-        <property name="java-output-path" value="/HomestayBookingManagementSystem/build/classes"/>
-        <property name="context-root" value="cmm"/>
-            
+        <property name="context-root" value="HomestayBookingManagementSystemNEWWWWWW"/>
+        <property name="java-output-path" value="/HomestayBookingManagementSystemNEWWWWWW/build/classes"/>
     </wb-module>
-    
 </project-modules>

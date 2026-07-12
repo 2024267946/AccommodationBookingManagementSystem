@@ -17,6 +17,7 @@ public class Staff {
     private String staffEmail;
     private String staffPhoneNumber;
     private String staffRoles;
+    private String status;
 
     public Staff() {
     }
@@ -67,5 +68,12 @@ public class Staff {
 
     public void setStaffRoles(String staffRoles) {
         this.staffRoles = staffRoles;
+    }
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
