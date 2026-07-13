@@ -6,10 +6,9 @@
     <meta charset="UTF-8">
     <title>My Profile - Cuti Murah Melaka</title>
     <jsp:include page="header.jsp" />
-    <jsp:include page="navbar.jsp" />
 </head>
 <body>
-    
+    <jsp:include page="navbar.jsp" />
 
     <main class="container" style="padding: 3rem 5%; min-height: 75vh;">
         <div class="page-header">

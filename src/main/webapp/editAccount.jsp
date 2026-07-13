@@ -5,12 +5,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Account - Cuti Murah Melaka</title>
+    <jsp:include page="guestHeader.jsp" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/theme.css">
 
 </head>
-<body class="auth-body">
+<body class="auth-body profile-edit-page">
+<style>
+    body.profile-edit-page { padding-top: 0 !important; }
+    body.profile-edit-page .guest-user-nav { position: relative !important; top: auto !important; }
+    body.profile-edit-page .auth-container { margin: 42px auto 70px; }
+</style>
 <jsp:include page="navbar.jsp" />
     <div class="auth-container" style="max-width: 500px;">
         <div class="auth-card">

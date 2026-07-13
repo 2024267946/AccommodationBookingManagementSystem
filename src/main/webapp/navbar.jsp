@@ -4,10 +4,13 @@ String navbarRole = session.getAttribute("role") == null
         ? null
         : session.getAttribute("role").toString();
 
-if ("OWNER".equalsIgnoreCase(navbarRole)
-        || "STAFF".equalsIgnoreCase(navbarRole)) {
+if ("OWNER".equalsIgnoreCase(navbarRole)) {
 %>
     <jsp:include page="Owner/ownerNavbar.jsp" />
+<%
+} else if ("STAFF".equalsIgnoreCase(navbarRole)) {
+%>
+    <jsp:include page="Staff/StaffNavbar.jsp" />
 <%
 } else if ("GUEST".equalsIgnoreCase(navbarRole)
         && session.getAttribute("loggedGuest") != null) {
