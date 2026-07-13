@@ -9,7 +9,7 @@ List<Booking> masterBookingsList =
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Booking Verification Pipeline - Cuti Murah Melaka</title>
+    <title>Booking Management - Cuti Murah Melaka</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/theme.css">
@@ -27,7 +27,7 @@ List<Booking> masterBookingsList =
           
           <div class="page-header">
             <h1>Booking Management</h1>
-            <p class="text-muted">Review, track, and verify upcoming homestay reservations.</p>
+            <p class="text-muted">Review and track homestay reservations.</p>
           </div>
 
           <div class="table-card">
@@ -46,13 +46,11 @@ List<Booking> masterBookingsList =
                     <th>Check-Out</th>
                     <th>Amount</th>
                     <th>Status</th>
-                    <th class="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                 <% if (masterBookingsList != null && !masterBookingsList.isEmpty()) {
                     for (Booking booking : masterBookingsList) {
-                        boolean pending = "PENDING".equalsIgnoreCase(booking.getBookingStatus());
                 %>
                   <tr>
                     <td class="font-medium"><%= booking.getBookingID() %></td>
@@ -62,23 +60,11 @@ List<Booking> masterBookingsList =
                     <td><%= booking.getCheckOutDate() %></td>
                     <td class="font-medium" style="color: var(--primary-color);">RM <%= String.format("%.2f", booking.getTotalPrice()) %></td>
                     <td><span class="badge-status-pending" style="font-weight:600; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;"><%= booking.getBookingStatus() %></span></td>
-                    <td class="text-center">
-                      <% if (pending) { %>
-                      <form action="${pageContext.request.contextPath}/owner/booking/verify" method="POST"  style="margin:0;">
-                        <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
-                        <button type="submit" class="btn-primary" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 8px !important;">
-                            Verify
-                        </button>
-                      </form>
-                      <% } else { %>
-                        <span class="text-muted">—</span>
-                      <% } %>
-                    </td>
                   </tr>
                 <%  }
                    } else { %>
                   <tr>
-                    <td colspan="8" class="text-center text-muted">No bookings available.</td>
+                    <td colspan="7" class="text-center text-muted">No bookings available.</td>
                   </tr>
                 <% } %>
                 </tbody>

@@ -29,6 +29,10 @@
                     <h1>Account Settings</h1>
                 </div>
 
+                <% if (request.getParameter("error") != null) { %>
+                    <div class="message message-error">Unable to update your profile. Please check the information and try again.</div>
+                <% } %>
+
                 <!-- Sub-navigation tabs inside Account -->
                 <div class="sub-nav-tabs">
                     <a href="${pageContext.request.contextPath}/Owner/myProfile" class="active">My Profile</a>
@@ -100,7 +104,7 @@
 
         function toggleEditMode() {
             const form = document.getElementById('profileForm');
-            const inputs = form.querySelectorAll('input');
+            const inputs = form.querySelectorAll('#ownerName, #ownerPhone');
             const actionBtn = document.getElementById('actionBtn');
             const btnText = document.getElementById('btnText');
             const containers = form.querySelectorAll('.input-container');

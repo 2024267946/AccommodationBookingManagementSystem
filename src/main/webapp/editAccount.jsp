@@ -5,8 +5,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Account - Cuti Murah Melaka</title>
-    <!-- Appended ?v=3 to match your updated style rules -->
-    <link rel="stylesheet" type="text/css" href="css/style.css?v=3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/theme.css">
@@ -20,14 +18,13 @@
                 <h2>Edit Account</h2>
                 <p>Update your personal information for Cuti Murah Melaka</p>
             </div>
+
+            <% if (request.getParameter("error") != null) { %>
+                <div class="message message-error">Unable to update your profile. Please check the information and try again.</div>
+            <% } %>
             
             <!-- Points to your single-servlet path mapping matching Member 3 specs -->
             <form action="${pageContext.request.contextPath}/profile/update-profile" method="POST">
-                <input type="hidden" name="userId" value="${profile.id}">
-                
-                <!-- Hidden email identifier for the ProfileDAO database update query -->
-                <input type="hidden" name="email" value="${profile.email}">
-                
                 <div class="form-group">
                     <label><i class="fas fa-id-card text-muted" style="margin-right: 5px;"></i> Full Name</label>
                     <input type="text" name="fullName" class="form-control" value="${profile.name != null ? profile.name : ''}" required>
@@ -40,8 +37,7 @@
                 
                 <div class="form-group">
                     <label><i class="fas fa-envelope text-muted" style="margin-right: 5px;"></i> Email Address</label>
-                    <!-- Disabled email input to preserve it as the primary database key block -->
-                    <input type="email" class="form-control" value="${profile.email != null ? profile.email : ''}" required>
+                    <input type="email" class="form-control" value="${profile.email != null ? profile.email : ''}" readonly>
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock text-muted" style="margin-right: 5px;"></i> New Password (Optional)</label>

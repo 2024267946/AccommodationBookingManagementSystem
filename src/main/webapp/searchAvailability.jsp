@@ -30,7 +30,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Search Availability | Cuti Murah Melaka</title>
+    <title>Check Availability | Cuti Murah Melaka</title>
 
     <jsp:include page="guestHeader.jsp" />
 
@@ -386,7 +386,7 @@
 
     <section class="page-intro">
         <span class="page-eyebrow">Find Your Stay</span>
-        <h1>Search Availability</h1>
+        <h1>Check Availability</h1>
         <p>
             Select your travel dates and number of guests to view
             homestays that are available for your stay.

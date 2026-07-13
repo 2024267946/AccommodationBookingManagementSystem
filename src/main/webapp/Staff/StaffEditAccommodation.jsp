@@ -185,6 +185,8 @@
                                 </select>
                             </div>
 
+                            <%@ include file="../accommodationSubtypeFields.jsp" %>
+
                             <div class="form-group">
                                 <label class="form-label">Location</label>
 

@@ -42,12 +42,13 @@ public class PaymentDAO {
             "(PAYMENTID, BOOKINGID, PAYMENTDATE, TOTALAMOUNT, PAYMENTMETHOD, PAYMENTSTATUS) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
             String paymentId = generatePaymentId(conn);
 
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, paymentId);
             ps.setString(2, payment.getBookingID());
             ps.setDate(3, java.sql.Date.valueOf(payment.getPaymentDate()));
@@ -55,10 +56,22 @@ public class PaymentDAO {
             ps.setString(5, payment.getPaymentMethod());
             ps.setString(6, payment.getPaymentStatus());
 
-            success = ps.executeUpdate() > 0;
+                if (ps.executeUpdate() == 0) { conn.rollback(); return false; }
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE BOOKING SET BOOKINGSTATUS='CONFIRMED' WHERE BOOKINGID=?")) {
+                ps.setString(1, payment.getBookingID());
+                if (ps.executeUpdate() == 0) { conn.rollback(); return false; }
+            }
+            conn.commit();
+            success = true;
 
         } catch (Exception e) {
             e.printStackTrace();
+            if (conn != null) try { conn.rollback(); } catch (Exception ignored) { }
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (Exception ignored) { }
         }
 
         return success;

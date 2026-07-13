@@ -111,41 +111,20 @@ public class BookingDAO {
     }
 
     // 2. /booking/cancel-booking
-    public boolean cancelBooking(Booking booking) {
+    public boolean cancelBooking(String bookingId, String guestId) {
 
         String sql =
-            "UPDATE BOOKING SET BOOKINGSTATUS = 'Cancelled' WHERE BOOKINGID = ?";
+            "UPDATE BOOKING SET BOOKINGSTATUS = 'CANCELLED' " +
+            "WHERE BOOKINGID = ? AND GUESTID = ? " +
+            "AND UPPER(BOOKINGSTATUS) NOT IN ('CANCELLED', 'COMPLETED')";
 
         try (
             Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)
         ) {
 
-            ps.setString(1, booking.getBookingID());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            logger.info(e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // 3. /staff/booking/verify
-    public boolean verifyBooking(Booking booking) {
-
-        String sql =
-            "UPDATE BOOKING SET BOOKINGSTATUS = 'CONFIRMED', STAFFID = ? " +
-            "WHERE BOOKINGID = ? AND BOOKINGSTATUS = 'PENDING'";
-
-        try (
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, booking.getStaffID());
-            ps.setString(2, booking.getBookingID());
+            ps.setString(1, bookingId);
+            ps.setString(2, guestId);
 
             return ps.executeUpdate() > 0;
 

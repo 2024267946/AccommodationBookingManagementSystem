@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import DBConnection.DBConnection;
 import model.Accommodation;
@@ -394,6 +396,35 @@ public class AccommodationDAO {
  // Update an existing accommodation record.
         public boolean updateAccommodation(Accommodation acc) {
 
+            return updateAccommodation(acc, null, null, null, null, null);
+        }
+
+        public Map<String, String> getAccommodationSubtype(String accommodationId, String type) {
+            Map<String, String> details = new HashMap<>();
+            String sql = "HOMESTAY".equalsIgnoreCase(type)
+                    ? "SELECT NUMBEROFROOM, HASLIVINGHALL FROM HOMESTAY WHERE ACCOMMODATIONID=?"
+                    : "SELECT ROOMNUMBER, FLOORLEVEL, CHALETCATEGORY FROM CHALET WHERE ACCOMMODATIONID=?";
+            try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, accommodationId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        if ("HOMESTAY".equalsIgnoreCase(type)) {
+                            details.put("numberOfRooms", rs.getString("NUMBEROFROOM"));
+                            details.put("hasLivingHall", rs.getString("HASLIVINGHALL"));
+                        } else {
+                            details.put("roomNumber", rs.getString("ROOMNUMBER"));
+                            details.put("floorLevel", rs.getString("FLOORLEVEL"));
+                            details.put("chaletCategory", rs.getString("CHALETCATEGORY"));
+                        }
+                    }
+                }
+            } catch (SQLException e) { e.printStackTrace(); }
+            return details;
+        }
+
+        public boolean updateAccommodation(Accommodation acc, Integer numberOfRooms,
+                String hasLivingHall, String roomNumber, String floorLevel, String chaletCategory) {
+
             boolean success = false;
 
             String sql =
@@ -405,10 +436,11 @@ public class AccommodationDAO {
                 "ACCOMMODATIONTYPE = ?, " +
                 "DESCRIPTION = ? " +
                 "WHERE ACCOMMODATIONID = ?";
-            try (
-                    Connection con = DBConnection.getConnection();
-                    PreparedStatement ps = con.prepareStatement(sql)
-                ) {
+            Connection con = null;
+            try {
+                    con = DBConnection.getConnection();
+                    con.setAutoCommit(false);
+                    try (PreparedStatement ps = con.prepareStatement(sql)) {
                     ps.setString(1, acc.getAccommodationName());
                     ps.setString(2, acc.getLocation());
                     ps.setDouble(3, acc.getPricePerNight());
@@ -417,10 +449,35 @@ public class AccommodationDAO {
                     ps.setString(6, acc.getDescription());
                     ps.setString(7, acc.getAccommodationId());
 
-                    success = ps.executeUpdate() > 0;
+                    if (ps.executeUpdate() == 0) { con.rollback(); return false; }
+                    }
+
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "DELETE FROM " + ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "CHALET" : "HOMESTAY")
+                            + " WHERE ACCOMMODATIONID=?")) {
+                        ps.setString(1, acc.getAccommodationId()); ps.executeUpdate();
+                    }
+                    String subtypeSql = "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType())
+                            ? "MERGE INTO HOMESTAY H USING (SELECT ? ACCOMMODATIONID FROM DUAL) S ON (H.ACCOMMODATIONID=S.ACCOMMODATIONID) WHEN MATCHED THEN UPDATE SET H.NUMBEROFROOM=?, H.HASLIVINGHALL=? WHEN NOT MATCHED THEN INSERT (ACCOMMODATIONID,NUMBEROFROOM,HASLIVINGHALL) VALUES (?,?,?)"
+                            : "MERGE INTO CHALET C USING (SELECT ? ACCOMMODATIONID FROM DUAL) S ON (C.ACCOMMODATIONID=S.ACCOMMODATIONID) WHEN MATCHED THEN UPDATE SET C.ROOMNUMBER=?, C.FLOORLEVEL=?, C.CHALETCATEGORY=? WHEN NOT MATCHED THEN INSERT (ACCOMMODATIONID,ROOMNUMBER,FLOORLEVEL,CHALETCATEGORY) VALUES (?,?,?,?)";
+                    try (PreparedStatement ps = con.prepareStatement(subtypeSql)) {
+                        String id = acc.getAccommodationId(); ps.setString(1, id);
+                        if ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType())) {
+                            ps.setInt(2, numberOfRooms); ps.setString(3, hasLivingHall);
+                            ps.setString(4, id); ps.setInt(5, numberOfRooms); ps.setString(6, hasLivingHall);
+                        } else {
+                            ps.setString(2, roomNumber); ps.setString(3, floorLevel); ps.setString(4, chaletCategory);
+                            ps.setString(5, id); ps.setString(6, roomNumber); ps.setString(7, floorLevel); ps.setString(8, chaletCategory);
+                        }
+                        ps.executeUpdate();
+                    }
+                    con.commit(); success = true;
 
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (con != null) try { con.rollback(); } catch (SQLException ignored) { }
+                } finally {
+                    if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ignored) { }
                 }
 
                 return success;

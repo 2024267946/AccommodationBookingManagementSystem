@@ -2,13 +2,13 @@ package controller;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 import dao.GuestDAO;
 import dao.DashboardDAO;
@@ -602,39 +602,61 @@ public class StaffServlet extends HttpServlet {
     @SuppressWarnings("unchecked")
     private byte[] createDashboardPdf(Map<String, Object> data, String role)
             throws IOException {
-        List<String> lines = new ArrayList<>();
-        lines.add("Cuti Murah Melaka - " + role + " Dashboard Report");
-        lines.add("Generated: " + LocalDateTime.now().format(
-                DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm a", Locale.ENGLISH)));
-        lines.add("");
-        lines.add("DASHBOARD STATISTICS");
-        lines.add("Total bookings: " + number(data, "totalBookings").intValue());
-        lines.add("Total revenue: RM " + money(number(data, "totalRevenue").doubleValue()));
-        lines.add("Total cancelled: " + number(data, "totalCancelled").intValue());
-        lines.add("Active customers: " + number(data, "activeCustomers").intValue());
-        lines.add("Active staff: " + number(data, "activeStaff").intValue());
-        lines.add("Upcoming stays: " + number(data, "upcomingStays").intValue());
-        lines.add("Average booking amount: RM "
-                + money(number(data, "averageBookingAmount").doubleValue()));
-        lines.add("Average days booked: "
-                + String.format(Locale.US, "%.1f nights", number(data, "averageBookedDays").doubleValue()));
-        lines.add("");
-        lines.add("TOP 5 HIGHEST AVERAGE REVENUE");
-        appendRanking(lines, (List<Map<String, Object>>) data.get("revenueByAccommodation"), "RM ");
-        lines.add("");
-        lines.add("TOP 5 LONGEST AVERAGE BOOKED DAYS");
-        appendRanking(lines, (List<Map<String, Object>>) data.get("stayLengthByAccommodation"), "");
-        lines.add("");
+        List<Map<String, Object>> revenueRows =
+                (List<Map<String, Object>>) data.get("revenueByAccommodation");
+        List<Map<String, Object>> stayRows =
+                (List<Map<String, Object>>) data.get("stayLengthByAccommodation");
         long weekdays = number(data, "weekdayNights").longValue();
         long weekends = number(data, "weekendNights").longValue();
         long totalNights = weekdays + weekends;
         double weekdayPercent = totalNights == 0 ? 0 : weekdays * 100.0 / totalNights;
         double weekendPercent = totalNights == 0 ? 0 : weekends * 100.0 / totalNights;
-        lines.add("WEEKDAY VS WEEKEND");
-        lines.add(String.format(Locale.US, "Weekdays: %d nights (%.1f%%)", weekdays, weekdayPercent));
-        lines.add(String.format(Locale.US, "Weekends: %d nights (%.1f%%)", weekends, weekendPercent));
 
-        return buildSimplePdf(lines);
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html><html><head><meta charset='UTF-8'/><style>")
+            .append("@page{size:A4;margin:22mm 18mm 18mm;}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#20352f;margin:0;font-size:10px}")
+            .append(".hero{background:#073e31;color:white;padding:28px;border-radius:14px;margin-bottom:18px}.brand{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#bcd7ce}.hero h1{font-size:27px;margin:8px 0 6px}.hero p{margin:0;color:#d8e7e2}")
+            .append(".section-title{font-size:16px;color:#073e31;margin:22px 0 10px;border-bottom:2px solid #d5a64c;padding-bottom:7px}.metrics{width:100%;border-spacing:8px;border-collapse:separate;margin:-8px}.metric{width:25%;background:#f4f7f5;border:1px solid #dce7e2;border-radius:9px;padding:13px;vertical-align:top}.label{font-size:8px;color:#6d7975;text-transform:uppercase;letter-spacing:.7px}.value{font-size:18px;font-weight:bold;color:#073e31;margin-top:6px}.note{font-size:8px;color:#8b918f;margin-top:3px}")
+            .append(".ranking{width:100%;border-collapse:collapse}.ranking th{background:#073e31;color:white;text-align:left;padding:9px}.ranking td{padding:9px;border-bottom:1px solid #e5e9e7}.rank{width:34px;color:#b18435;font-weight:bold}.number{text-align:right;font-weight:bold}.bar-bg{height:6px;background:#e7eeeb;border-radius:4px;margin-top:5px}.bar{height:6px;background:#1b7057;border-radius:4px}")
+            .append(".day-table{width:100%;border-spacing:12px;border-collapse:separate;margin:-12px}.day-card{width:50%;padding:17px;border-radius:10px;background:#f4f7f5;border-left:5px solid #17634d}.day-card.weekend{border-left-color:#d5a64c}.day-value{font-size:25px;font-weight:bold;color:#073e31}.share{height:18px;background:#e8eeeb;border-radius:9px;overflow:hidden;margin-top:12px}.weekday-share{height:18px;background:#17634d;float:left}.weekend-share{height:18px;background:#d5a64c;float:left}")
+            .append(".footer{margin-top:26px;padding-top:9px;border-top:1px solid #dce3df;color:#7b8581;font-size:8px;text-align:center}tr{page-break-inside:avoid}")
+            .append("</style></head><body>")
+            .append("<div class='hero'><div class='brand'>Cuti Murah Melaka</div><h1>")
+            .append(escapeHtml(role)).append(" Dashboard Report</h1><p>Generated on ")
+            .append(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                    "dd MMMM yyyy, hh:mm a", Locale.ENGLISH)))
+            .append("</p></div><h2 class='section-title'>Performance Overview</h2>")
+            .append("<table class='metrics'><tr>")
+            .append(metric("Total Bookings", number(data,"totalBookings").intValue(), "All recorded bookings"))
+            .append(metric("Total Revenue", "RM " + money(number(data,"totalRevenue").doubleValue()), "Paid payments"))
+            .append(metric("Cancelled", number(data,"totalCancelled").intValue(), "Cancelled bookings"))
+            .append(metric("Active Customers", number(data,"activeCustomers").intValue(), "Active guest accounts"))
+            .append("</tr><tr>")
+            .append(metric("Active Staff", number(data,"activeStaff").intValue(), "Active staff accounts"))
+            .append(metric("Upcoming Stays", number(data,"upcomingStays").intValue(), "Future and current stays"))
+            .append(metric("Average Booking", "RM " + money(number(data,"averageBookingAmount").doubleValue()), "Excluding cancellations"))
+            .append(metric("Average Stay", String.format(Locale.US,"%.1f nights",number(data,"averageBookedDays").doubleValue()), "Nights per booking"))
+            .append("</tr></table><h2 class='section-title'>Top 5 Highest Average Revenue</h2>")
+            .append(rankingTable(revenueRows, true))
+            .append("<h2 class='section-title'>Top 5 Longest Average Booked Days</h2>")
+            .append(rankingTable(stayRows, false))
+            .append("<h2 class='section-title'>Weekday vs Weekend</h2><table class='day-table'><tr><td class='day-card'><div class='label'>Weekday Nights</div><div class='day-value'>")
+            .append(weekdays).append("</div><div>").append(String.format(Locale.US,"%.1f%%",weekdayPercent))
+            .append(" of booked nights</div></td><td class='day-card weekend'><div class='label'>Weekend Nights</div><div class='day-value'>")
+            .append(weekends).append("</div><div>").append(String.format(Locale.US,"%.1f%%",weekendPercent))
+            .append(" of booked nights</div></td></tr></table><div class='share'><div class='weekday-share' style='width:")
+            .append(String.format(Locale.US,"%.2f",weekdayPercent)).append("%'></div><div class='weekend-share' style='width:")
+            .append(String.format(Locale.US,"%.2f",weekendPercent)).append("%'></div></div>")
+            .append("<div class='footer'>Confidential management report | Cuti Murah Melaka</div></body></html>");
+
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.useFastMode();
+            builder.withHtmlContent(html.toString(), null);
+            builder.toStream(output);
+            builder.run();
+            return output.toByteArray();
+        }
     }
 
     private Number number(Map<String, Object> data, String key) {
@@ -646,81 +668,36 @@ public class StaffServlet extends HttpServlet {
         return String.format(Locale.US, "%,.2f", value);
     }
 
-    private void appendRanking(List<String> lines, List<Map<String, Object>> rows, String prefix) {
+    private String metric(String label, Object value, String note) {
+        return "<td class='metric'><div class='label'>" + escapeHtml(label)
+                + "</div><div class='value'>" + escapeHtml(String.valueOf(value))
+                + "</div><div class='note'>" + escapeHtml(note) + "</div></td>";
+    }
+
+    private String rankingTable(List<Map<String, Object>> rows, boolean currency) {
+        StringBuilder table = new StringBuilder("<table class='ranking'><tr><th>#</th><th>Accommodation</th><th style='text-align:right'>Average</th></tr>");
         if (rows == null || rows.isEmpty()) {
-            lines.add("No data available.");
-            return;
+            return table.append("<tr><td colspan='3'>No data available.</td></tr></table>").toString();
         }
+        double max = rows.stream().mapToDouble(row -> ((Number) row.get("value")).doubleValue()).max().orElse(1);
         int rank = 1;
         for (Map<String, Object> row : rows) {
-            double value = row.get("value") instanceof Number
-                    ? ((Number) row.get("value")).doubleValue() : 0;
-            String suffix = prefix.isEmpty() ? " nights" : "";
-            lines.add(rank++ + ". " + row.get("label") + " - " + prefix
-                    + String.format(Locale.US, "%,.2f", value) + suffix);
+            double value = ((Number) row.get("value")).doubleValue();
+            double width = max <= 0 ? 0 : value * 100 / max;
+            table.append("<tr><td class='rank'>").append(rank++).append("</td><td>")
+                .append(escapeHtml(String.valueOf(row.get("label"))))
+                .append("<div class='bar-bg'><div class='bar' style='width:")
+                .append(String.format(Locale.US,"%.2f",width)).append("%'></div></div></td><td class='number'>")
+                .append(currency ? "RM " + money(value) : String.format(Locale.US,"%.2f nights",value))
+                .append("</td></tr>");
         }
+        return table.append("</table>").toString();
     }
 
-    private byte[] buildSimplePdf(List<String> lines) throws IOException {
-        StringBuilder content = new StringBuilder("BT\n/F1 18 Tf\n50 790 Td\n");
-        for (int i = 0; i < lines.size(); i++) {
-            if (i == 1) content.append("/F1 10 Tf\n");
-            if ("DASHBOARD STATISTICS".equals(lines.get(i))
-                    || lines.get(i).startsWith("TOP 5")
-                    || "WEEKDAY VS WEEKEND".equals(lines.get(i))) {
-                content.append("/F1 13 Tf\n");
-            }
-            content.append('(').append(escapePdf(lines.get(i))).append(") Tj\n0 -20 Td\n");
-            if (i > 1 && ("DASHBOARD STATISTICS".equals(lines.get(i))
-                    || lines.get(i).startsWith("TOP 5")
-                    || "WEEKDAY VS WEEKEND".equals(lines.get(i)))) {
-                content.append("/F1 10 Tf\n");
-            }
-        }
-        content.append("ET\n");
-
-        List<byte[]> objects = new ArrayList<>();
-        objects.add("<< /Type /Catalog /Pages 2 0 R >>".getBytes(StandardCharsets.US_ASCII));
-        objects.add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>".getBytes(StandardCharsets.US_ASCII));
-        objects.add(("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
-                + "/Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>")
-                .getBytes(StandardCharsets.US_ASCII));
-        byte[] stream = content.toString().getBytes(StandardCharsets.US_ASCII);
-        ByteArrayOutputStream streamObject = new ByteArrayOutputStream();
-        streamObject.write(("<< /Length " + stream.length + " >>\nstream\n")
-                .getBytes(StandardCharsets.US_ASCII));
-        streamObject.write(stream);
-        streamObject.write("endstream".getBytes(StandardCharsets.US_ASCII));
-        objects.add(streamObject.toByteArray());
-        objects.add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
-                .getBytes(StandardCharsets.US_ASCII));
-
-        ByteArrayOutputStream pdf = new ByteArrayOutputStream();
-        pdf.write("%PDF-1.4\n".getBytes(StandardCharsets.US_ASCII));
-        List<Integer> offsets = new ArrayList<>();
-        for (int i = 0; i < objects.size(); i++) {
-            offsets.add(pdf.size());
-            pdf.write(((i + 1) + " 0 obj\n").getBytes(StandardCharsets.US_ASCII));
-            pdf.write(objects.get(i));
-            pdf.write("\nendobj\n".getBytes(StandardCharsets.US_ASCII));
-        }
-        int xref = pdf.size();
-        pdf.write(("xref\n0 " + (objects.size() + 1) + "\n")
-                .getBytes(StandardCharsets.US_ASCII));
-        pdf.write("0000000000 65535 f \n".getBytes(StandardCharsets.US_ASCII));
-        for (Integer offset : offsets) {
-            pdf.write(String.format(Locale.US, "%010d 00000 n \n", offset)
-                    .getBytes(StandardCharsets.US_ASCII));
-        }
-        pdf.write(("trailer\n<< /Size " + (objects.size() + 1)
-                + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF")
-                .getBytes(StandardCharsets.US_ASCII));
-        return pdf.toByteArray();
-    }
-
-    private String escapePdf(String value) {
-        String ascii = value == null ? "" : value.replaceAll("[^\\x20-\\x7E]", "?");
-        return ascii.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)");
+    private String escapeHtml(String value) {
+        if (value == null) return "";
+        return value.replace("&", "&amp;").replace("<", "&lt;")
+                .replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     private void redirectUnauthorized(

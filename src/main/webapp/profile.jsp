@@ -19,9 +19,6 @@
         <div class="profile-grid">
             <div class="profile-card">
                 <div class="profile-header">
-                    <div class="profile-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
                     <h2>${profile.name != null ? profile.name : "Guest User"}</h2>
                     <p class="badge badge-guest" style="margin-top: 0.25rem;">${profile.role != null ? profile.role : "GUEST"} Account</p>
                 </div>

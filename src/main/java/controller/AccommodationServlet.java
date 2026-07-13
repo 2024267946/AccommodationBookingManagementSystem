@@ -578,6 +578,9 @@ public class AccommodationServlet extends HttpServlet {
             request.setAttribute(
                     "accommodation",
                     accommodation);
+            request.setAttribute("subtypeDetails",
+                    accommodationDAO.getAccommodationSubtype(
+                            accommodation.getAccommodationId(), accommodation.getAccommodationType()));
     
             if ("OWNER".equalsIgnoreCase(role)) {
     
@@ -641,6 +644,11 @@ public class AccommodationServlet extends HttpServlet {
     
             String description =
                     request.getParameter("description");
+            String numberOfRoomsParam = request.getParameter("numberOfRooms");
+            String hasLivingHall = request.getParameter("hasLivingHall");
+            String roomNumber = request.getParameter("roomNumber");
+            String floorLevel = request.getParameter("floorLevel");
+            String chaletCategory = request.getParameter("chaletCategory");
     
             if (isBlank(accommodationId)
                     || isBlank(accommodationName)
@@ -666,6 +674,22 @@ public class AccommodationServlet extends HttpServlet {
                 int maxCapacity =
                         Integer.parseInt(
                                 maxCapacityParam.trim());
+                String normalizedType = accommodationType.trim().toUpperCase(Locale.ROOT);
+                boolean homestay = "HOMESTAY".equals(normalizedType);
+                boolean chalet = "CHALET".equals(normalizedType);
+                Integer numberOfRooms = homestay && !isBlank(numberOfRoomsParam)
+                        ? Integer.valueOf(numberOfRoomsParam.trim()) : null;
+                boolean validSubtype = homestay
+                        ? numberOfRooms != null && numberOfRooms > 0
+                            && ("YES".equalsIgnoreCase(hasLivingHall) || "NO".equalsIgnoreCase(hasLivingHall))
+                        : chalet && !isBlank(roomNumber) && !isBlank(floorLevel)
+                            && ("STANDARD".equalsIgnoreCase(chaletCategory)
+                                || "PREMIUM".equalsIgnoreCase(chaletCategory)
+                                || "LUXURY".equalsIgnoreCase(chaletCategory));
+                if (!validSubtype) {
+                    redirectBackToEdit(request, response, accommodationId, "subtypeField");
+                    return;
+                }
     
                 if (pricePerNight < 0 || maxCapacity < 1) {
                     redirectBackToEdit(
@@ -686,7 +710,7 @@ public class AccommodationServlet extends HttpServlet {
                         accommodationName.trim());
     
                 accommodation.setAccommodationType(
-                        accommodationType.trim());
+                        normalizedType);
     
                 accommodation.setLocation(
                         location.trim());
@@ -701,8 +725,11 @@ public class AccommodationServlet extends HttpServlet {
                         description.trim());
     
                 boolean accommodationUpdated =
-                        accommodationDAO.updateAccommodation(
-                                accommodation);
+                        accommodationDAO.updateAccommodation(accommodation, numberOfRooms,
+                                homestay ? hasLivingHall.toUpperCase(Locale.ROOT) : null,
+                                chalet ? roomNumber.trim() : null,
+                                chalet ? floorLevel.trim() : null,
+                                chalet ? chaletCategory.toUpperCase(Locale.ROOT) : null);
     
                 if (!accommodationUpdated) {
                     redirectBackToEdit(

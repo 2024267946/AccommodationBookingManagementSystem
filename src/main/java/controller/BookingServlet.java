@@ -18,15 +18,12 @@ import jakarta.servlet.http.HttpSession;
 import model.Booking;
 import model.Accommodation;
 import model.Guest;
-import model.Staff;
 
 @WebServlet(urlPatterns = {
     "/booking",
     "/booking/create-booking",
     "/booking/cancel-booking",
     "/booking/my-booking",
-    "/staff/booking/verify",
-    "/owner/booking/verify",
     "/staff/booking/view-bookings",
     "/owner/booking/view-bookings"
 })
@@ -106,14 +103,6 @@ public class BookingServlet extends HttpServlet {
 
             case "/booking/cancel-booking":
                 cancelBooking(request, response);
-                break;
-
-            case "/staff/booking/verify":
-                verifyBooking(request, response);
-                break;
-
-            case "/owner/booking/verify":
-                verifyBooking(request, response);
                 break;
 
             default:
@@ -223,7 +212,7 @@ public class BookingServlet extends HttpServlet {
             booking.setBookingStatus(
                     "PENDING");
 
-            // Staff is assigned later when staff verifies the booking.
+            // A paid booking is confirmed automatically by PaymentDAO.
             booking.setStaffID(
                     null);
 
@@ -311,6 +300,15 @@ public class BookingServlet extends HttpServlet {
             HttpServletResponse response)
             throws IOException {
 
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loggedGuest") == null) {
+            response.sendRedirect(request.getContextPath()
+                    + "/login.jsp?error=unauthorized");
+            return;
+        }
+
+        Guest loggedGuest = (Guest) session.getAttribute("loggedGuest");
+
         String bookingID =
                 request.getParameter("bookingID");
 
@@ -321,13 +319,11 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        Booking booking = new Booking();
-        booking.setBookingID(bookingID.trim());
-
         BookingDAO bookingDAO = new BookingDAO();
 
         boolean success =
-                bookingDAO.cancelBooking(booking);
+                bookingDAO.cancelBooking(
+                        bookingID.trim(), loggedGuest.getGuestId());
 
         if (success) {
             response.sendRedirect(
@@ -373,67 +369,6 @@ public class BookingServlet extends HttpServlet {
         request.getRequestDispatcher(
                 "/myBooking.jsp")
                .forward(request, response);
-    }
-
-    // Staff verifies a booking.
-    private void verifyBooking(
-            HttpServletRequest request,
-            HttpServletResponse response)
-            throws IOException {
-
-        HttpSession session = request.getSession(false);
-
-        if (session == null
-                || session.getAttribute("loggedStaff") == null) {
-
-            response.sendRedirect(
-                    request.getContextPath() + "/login.jsp");
-            return;
-        }
-
-        Staff loggedStaff =
-                (Staff) session.getAttribute("loggedStaff");
-
-        String bookingID =
-                request.getParameter("bookingID");
-
-        boolean ownerRequest =
-                "/owner/booking/verify".equals(request.getServletPath());
-
-        String returnPath = ownerRequest
-                ? "/owner/booking/view-bookings"
-                : "/staff/booking/view-bookings";
-
-        if (isBlank(bookingID)) {
-            response.sendRedirect(
-                    request.getContextPath()
-                    + returnPath + "?verify=failed");
-            return;
-        }
-
-        Booking booking = new Booking();
-
-        booking.setBookingID(
-                bookingID.trim());
-
-        booking.setStaffID(
-                loggedStaff.getStaffId());
-
-        BookingDAO bookingDAO =
-                new BookingDAO();
-
-        boolean success =
-                bookingDAO.verifyBooking(booking);
-
-        if (success) {
-            response.sendRedirect(
-                    request.getContextPath()
-                    + returnPath + "?verify=success");
-        } else {
-            response.sendRedirect(
-                    request.getContextPath()
-                    + returnPath + "?verify=failed");
-        }
     }
 
     // Display all bookings for staff.

@@ -6,6 +6,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import model.Profile;
+import model.Guest;
+import model.Staff;
 import dao.ProfileDAO;
 
 @WebServlet(urlPatterns = {
@@ -96,6 +98,17 @@ public class ProfileServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
 
+        if (name == null || name.trim().isEmpty()
+                || phone == null || phone.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath()
+                    + ("OWNER".equalsIgnoreCase(role)
+                        ? "/Owner/myProfile?error=invalidProfile"
+                        : "/profile/edit?error=invalidProfile"));
+            return;
+        }
+        name = name.trim();
+        phone = phone.trim();
+
         Profile currentProfile = profileDAO.getProfileById(userId, role);
         if (currentProfile == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp?error=profileNotFound");
@@ -115,6 +128,16 @@ public class ProfileServlet extends HttpServlet {
         if (success) {
             session.setAttribute("staffName", name);
             session.setAttribute("guestName", name);
+            Object loggedGuest = session.getAttribute("loggedGuest");
+            if (loggedGuest instanceof Guest) {
+                ((Guest) loggedGuest).setGuestName(name);
+                ((Guest) loggedGuest).setGuestPhoneNumber(phone);
+            }
+            Object loggedStaff = session.getAttribute("loggedStaff");
+            if (loggedStaff instanceof Staff) {
+                ((Staff) loggedStaff).setStaffName(name);
+                ((Staff) loggedStaff).setStaffPhoneNumber(phone);
+            }
             response.sendRedirect(request.getContextPath()
                     + ("OWNER".equalsIgnoreCase(role)
                         ? "/Owner/myProfile?updateSuccess=true"

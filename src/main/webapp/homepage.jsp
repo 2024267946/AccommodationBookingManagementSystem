@@ -134,7 +134,7 @@
 
                 <a href="${pageContext.request.contextPath}/homestays/search"
                    class="btn-emily-outline">
-                    Search Availability
+                    Check Availability
                 </a>
 
             </div>

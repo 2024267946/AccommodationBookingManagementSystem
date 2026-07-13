@@ -41,6 +41,12 @@
         <div class="success-message">Payment successful. Your booking has been recorded.</div>
     <% } %>
 
+    <% if ("success".equals(request.getParameter("cancel"))) { %>
+        <div class="success-message">Your booking has been cancelled successfully.</div>
+    <% } else if ("failed".equals(request.getParameter("cancel"))) { %>
+        <div class="message message-error">The booking could not be cancelled.</div>
+    <% } %>
+
     <% if (bookingsList == null || bookingsList.isEmpty()) { %>
         <div class="empty-box">
             <h2>No booking found</h2>
@@ -75,7 +81,10 @@
                            !"COMPLETED".equalsIgnoreCase(booking.getBookingStatus())) { %>
                         <form action="${pageContext.request.contextPath}/booking/cancel-booking" method="POST" style="margin:0;">
                             <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
-                            <button type="submit" class="cancel-btn">Cancel Booking</button>
+                            <button type="submit" class="cancel-btn"
+                                    onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                Cancel Booking
+                            </button>
                         </form>
                     <% } %>
                 </div>

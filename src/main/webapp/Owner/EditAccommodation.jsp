@@ -240,6 +240,8 @@
                             </select>
                         </div>
 
+                        <%@ include file="../accommodationSubtypeFields.jsp" %>
+
                         <div class="form-group">
                             <label for="maxCapacity">Maximum Capacity</label>
                             <input id="maxCapacity"
