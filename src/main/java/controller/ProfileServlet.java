@@ -10,6 +10,8 @@ import dao.ProfileDAO;
 
 @WebServlet(urlPatterns = {
     "/profile",
+    "/profile/edit",
+    "/Owner/myProfile",
     "/profile/update-profile"
 })
 public class ProfileServlet extends HttpServlet {
@@ -25,7 +27,8 @@ public class ProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         String path = request.getServletPath();
         
-        if (path.equals("/profile")) {
+        if (path.equals("/profile") || path.equals("/profile/edit")
+                || path.equals("/Owner/myProfile")) {
             displayProfile(request, response);
         }
     }
@@ -50,20 +53,27 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        // Pull active logged-in parameters from context
-        String email = (String) session.getAttribute("email"); 
         String role = (String) session.getAttribute("role");
-
-        // Temporary test driver seed if your LoginServlet hasn't saved the email attribute to session yet
-        if (email == null) {
-            email = "jane@email.com"; // Default matching profile.jsp template layout
+        String userId = "GUEST".equalsIgnoreCase(role)
+                ? (String) session.getAttribute("guestID")
+                : (String) session.getAttribute("staffID");
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
+            return;
         }
 
-        Profile userProfile = profileDAO.getProfileByEmail(email, role);
+        Profile userProfile = profileDAO.getProfileById(userId, role);
+        if (userProfile == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=profileNotFound");
+            return;
+        }
         request.setAttribute("profile", userProfile);
-        
-        // Forward target contextual data to front view layout
-        request.getRequestDispatcher("/profile.jsp").forward(request, response);
+
+        String path = request.getServletPath();
+        String view = "/profile/edit".equals(path)
+                ? "/editAccount.jsp"
+                : ("OWNER".equalsIgnoreCase(role) ? "/Owner/myProfile.jsp" : "/profile.jsp");
+        request.getRequestDispatcher(view).forward(request, response);
     }
 
     private void executeProfileUpdate(HttpServletRequest request, HttpServletResponse response) 
@@ -74,29 +84,43 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        int userId = Integer.parseInt(request.getParameter("userId"));
+        String role = (String) session.getAttribute("role");
+        String userId = "GUEST".equalsIgnoreCase(role)
+                ? (String) session.getAttribute("guestID")
+                : (String) session.getAttribute("staffID");
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
+            return;
+        }
         String name = request.getParameter("fullName");
         String phone = request.getParameter("phone");
-        String email = request.getParameter("email");
         String password = request.getParameter("password");
-        String role = (String) session.getAttribute("role");
+
+        Profile currentProfile = profileDAO.getProfileById(userId, role);
+        if (currentProfile == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=profileNotFound");
+            return;
+        }
 
         Profile updatedProfile = new Profile();
         updatedProfile.setId(userId);
         updatedProfile.setName(name);
         updatedProfile.setPhone(phone);
-        updatedProfile.setEmail(email);
+        updatedProfile.setEmail(currentProfile.getEmail());
         updatedProfile.setPassword(password);
         updatedProfile.setRole(role);
 
         boolean success = profileDAO.updateProfile(updatedProfile);
 
         if (success) {
-            // Update email inside session state context if changed
-            session.setAttribute("email", email);
-            response.sendRedirect(request.getContextPath() + "/profile");
+            session.setAttribute("staffName", name);
+            session.setAttribute("guestName", name);
+            response.sendRedirect(request.getContextPath()
+                    + ("OWNER".equalsIgnoreCase(role)
+                        ? "/Owner/myProfile?updateSuccess=true"
+                        : "/profile?updateSuccess=true"));
         } else {
-            response.sendRedirect(request.getContextPath() + "/editAccount.jsp?error=updatefailed");
+            response.sendRedirect(request.getContextPath() + "/profile/edit?error=updatefailed");
         }
     }
 }

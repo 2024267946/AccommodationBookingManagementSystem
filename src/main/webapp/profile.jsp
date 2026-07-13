@@ -32,7 +32,7 @@
                 </div>
                 
                 <div class="profile-actions">
-                    <a href="editAccount.jsp" class="btn-primary btn-block text-center" style="text-decoration: none; display: block; text-align: center;">Edit Profile</a>
+                    <a href="${pageContext.request.contextPath}/profile/edit" class="btn-primary btn-block text-center" style="text-decoration: none; display: block; text-align: center;">Edit Profile</a>
                 </div>
             </div>
 

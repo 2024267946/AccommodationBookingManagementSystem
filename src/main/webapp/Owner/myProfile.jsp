@@ -1,4 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="model.Profile" %>
+<%
+    Profile profile = (Profile) request.getAttribute("profile");
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -44,13 +48,14 @@
                     <!-- Profile Form Section -->
                     <div style="padding: 32px;">
                         <form id="profileForm" action="${pageContext.request.contextPath}/profile/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+                            <input type="hidden" name="userId" value="<%= profile.getId() %>">
                             
                             <!-- 1. Full Name Field -->
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Full Name</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
                                     
-                                    <input type="text" id="ownerName" name="ownerName" value="Ridzuan" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="text" id="ownerName" name="fullName" value="<%= profile.getName() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -59,7 +64,7 @@
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Email</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
                                     
-                                    <input type="email" id="ownerEmail" name="ownerEmail" value="owner@cmm.com" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="email" id="ownerEmail" value="<%= profile.getEmail() %>" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -68,7 +73,7 @@
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Phone Number</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
                                     
-                                    <input type="text" id="ownerPhone" name="ownerPhone" value="+6012-3456789" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="text" id="ownerPhone" name="phone" value="<%= profile.getPhone() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -97,7 +102,6 @@
             const form = document.getElementById('profileForm');
             const inputs = form.querySelectorAll('input');
             const actionBtn = document.getElementById('actionBtn');
-            const btnIcon = document.getElementById('btnIcon');
             const btnText = document.getElementById('btnText');
             const containers = form.querySelectorAll('.input-container');
 
@@ -107,7 +111,6 @@
                 containers.forEach(container => container.style.background = '#ffffff');
                 document.getElementById('ownerName').focus();
                 
-                btnIcon.className = 'fas fa-save';
                 btnText.innerText = 'Save Changes';
                 isEditMode = true;
             } else {

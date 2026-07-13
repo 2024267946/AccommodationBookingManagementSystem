@@ -23,6 +23,7 @@
             
             <!-- Points to your single-servlet path mapping matching Member 3 specs -->
             <form action="${pageContext.request.contextPath}/profile/update-profile" method="POST">
+                <input type="hidden" name="userId" value="${profile.id}">
                 
                 <!-- Hidden email identifier for the ProfileDAO database update query -->
                 <input type="hidden" name="email" value="${profile.email}">

@@ -544,7 +544,7 @@
                             </div>
 
                             <a class="btn-book"
-                               href="${pageContext.request.contextPath}/booking.jsp?id=<%= acc.getAccommodationId() %>&checkIn=<%= checkIn %>&checkOut=<%= checkOut %>&pax=<%= pax %>&price=<%= acc.getPricePerNight() %>">
+                               href="${pageContext.request.contextPath}/booking?id=<%= acc.getAccommodationId() %>&checkIn=<%= checkIn %>&checkOut=<%= checkOut %>&pax=<%= pax %>">
                                 Book Now
                             </a>
 
@@ -580,7 +580,7 @@
         </p>
         <% if (isAvailable) { %>
             <a class="btn-book modal-action"
-               href="<%= request.getContextPath() %>/booking.jsp?id=<%= accommodationChosen.getAccommodationId() %>&checkIn=<%= checkIn %>&checkOut=<%= checkOut %>&pax=<%= pax %>&price=<%= accommodationChosen.getPricePerNight() %>">
+               href="<%= request.getContextPath() %>/booking?id=<%= accommodationChosen.getAccommodationId() %>&checkIn=<%= checkIn %>&checkOut=<%= checkOut %>&pax=<%= pax %>">
                 Continue to Booking
             </a>
         <% } else { %>

@@ -38,10 +38,10 @@ Number weekendNights = (Number) analytics.getOrDefault("weekendNights", 0L);
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
-        .analytics-page{width:min(1280px,100%);margin:0}.analytics-heading{margin-bottom:28px;text-align:left}.analytics-heading h1{margin:0 0 7px;color:#123a30;font-size:38px}.analytics-heading p{margin:0;color:#77716b}
+        .analytics-page{width:min(1280px,100%);margin:0}.analytics-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:28px;text-align:left}.analytics-heading h1{margin:0 0 7px;color:#123a30;font-size:38px}.analytics-heading p{margin:0;color:#77716b}.report-button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 21px;border-radius:9px;background:#003d2f;color:#fff;font-size:13px;font-weight:800;letter-spacing:.06em;text-decoration:none;text-transform:uppercase;white-space:nowrap}
         .metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:30px}.metric-card{padding:22px;background:#fff;border:1px solid #e4dcd2;border-radius:15px;box-shadow:0 6px 18px rgba(15,45,36,.05);border-top:4px solid #1b6a53}.metric-label{display:block;margin-bottom:10px;color:#747b77;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.metric-value{display:block;color:#123a30;font-size:31px;font-weight:800;line-height:1.15}.metric-note{display:block;margin-top:7px;color:#989088;font-size:12px}
         .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.chart-card{min-width:0;padding:24px;background:#fff;border:1px solid #e4dcd2;border-radius:16px;box-shadow:0 6px 18px rgba(15,45,36,.05)}.chart-card h2{margin:0 0 5px;color:#123a30;font-size:21px}.chart-card p{margin:0 0 20px;color:#807970;font-size:13px}.chart-wrap{position:relative;height:330px}.pie-card{grid-column:1/-1}.pie-card .chart-wrap{height:350px;max-width:560px;margin:0 auto}
-        @media(max-width:1000px){.metric-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.metric-grid,.chart-grid{grid-template-columns:1fr}.pie-card{grid-column:auto}.analytics-heading h1{font-size:32px}}
+        @media(max-width:1000px){.metric-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:760px){.metric-grid,.chart-grid{grid-template-columns:1fr}.pie-card{grid-column:auto}.analytics-heading{align-items:stretch;flex-direction:column}.analytics-heading h1{font-size:32px}.report-button{width:100%;box-sizing:border-box}}
     </style>
 </head>
 <body class="admin-body">
@@ -49,7 +49,7 @@ Number weekendNights = (Number) analytics.getOrDefault("weekendNights", 0L);
 <div class="admin-layout">
 <% if (owner) { %><jsp:include page="Owner/sidebar.jsp" /><% } else { %><jsp:include page="Staff/StaffSidebar.jsp" /><% } %>
 <main class="main-content"><div class="container analytics-page">
-    <header class="analytics-heading"><h1>Dashboard Overview</h1><p>Booking, revenue, customer and accommodation performance at a glance.</p></header>
+    <header class="analytics-heading"><div><h1>Dashboard Overview</h1><p>Booking, revenue, customer and accommodation performance at a glance.</p></div><a class="report-button" href="${pageContext.request.contextPath}/<%= owner ? "owner" : "staff" %>/dashboard/report">Download Report</a></header>
     <section class="metric-grid">
         <article class="metric-card"><span class="metric-label">Total Bookings</span><span class="metric-value"><%= totalBookings.intValue() %></span><span class="metric-note">All recorded bookings</span></article>
         <article class="metric-card"><span class="metric-label">Total Revenue</span><span class="metric-value">RM <%= String.format("%,.2f", totalRevenue.doubleValue()) %></span><span class="metric-note">Paid payments</span></article>

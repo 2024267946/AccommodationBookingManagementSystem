@@ -6,31 +6,30 @@ import DBConnection.DBConnection;
 
 public class ProfileDAO {
 
-    // Retrieves account details by email and active session role
-    public Profile getProfileByEmail(String email, String role) {
+    // Retrieves the authenticated account directly from the database.
+    public Profile getProfileById(String userId, String role) {
         Profile profile = null;
-        Connection conn = DBConnection.getConnection();
         String sql = "";
 
         if ("GUEST".equalsIgnoreCase(role)) {
-            sql = "SELECT GUESTID, GUESTNAME, GUESTEMAIL, GUESTPHONENUMBER FROM GUEST WHERE GUESTEMAIL = ?";
+            sql = "SELECT GUESTID, GUESTNAME, GUESTEMAIL, GUESTPHONENUMBER FROM GUEST WHERE GUESTID = ?";
         } else {
-            sql = "SELECT STAFFID, STAFFNAME, STAFFEMAIL, STAFFPHONENUMBER FROM STAFF WHERE STAFFEMAIL = ?";
+            sql = "SELECT STAFFID, STAFFNAME, STAFFEMAIL, STAFFPHONENUMBER FROM STAFF WHERE STAFFID = ?";
         }
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, email);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     profile = new Profile();
-                    profile.setId(rs.getInt(1));
+                    profile.setId(rs.getString(1));
                     profile.setName(rs.getString(2));
                     profile.setEmail(rs.getString(3));
                     profile.setPhone(rs.getString(4));
                     profile.setRole(role.toUpperCase());
                 }
             }
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -40,7 +39,6 @@ public class ProfileDAO {
     // Updates user's own profile columns based on active role
     public boolean updateProfile(Profile profile) {
         boolean success = false;
-        Connection conn = DBConnection.getConnection();
         String sql = "";
 
         boolean hasPassword = profile.getPassword() != null && !profile.getPassword().trim().isEmpty();
@@ -55,19 +53,19 @@ public class ProfileDAO {
                 "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONENUMBER = ? WHERE STAFFID = ?";
         }
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, profile.getName());
             ps.setString(2, profile.getPhone());
             
             if (hasPassword) {
                 ps.setString(3, profile.getPassword());
-                ps.setInt(4, profile.getId());
+                ps.setString(4, profile.getId());
             } else {
-                ps.setInt(3, profile.getId());
+                ps.setString(3, profile.getId());
             }
 
             success = ps.executeUpdate() > 0;
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

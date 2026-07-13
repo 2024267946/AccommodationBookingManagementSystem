@@ -1,5 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@ page import="model.Accommodation" %>
+<%
+    Accommodation bookingAccommodation =
+            (Accommodation) request.getAttribute("bookingAccommodation");
+    if (bookingAccommodation == null) {
+        response.sendRedirect(request.getContextPath() + "/homestays/search");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,7 +36,7 @@ body.booking-page .guest-top-nav .navbar {
 		<div class="auth-card" style="margin: 2rem auto;">
 			<div class="auth-header">
 				<h2>Complete Your Booking</h2>
-				<p>Standard Chalet A1</p>
+				<p><%= bookingAccommodation.getAccommodationName() %></p>
 			</div>
 
 <form action="${pageContext.request.contextPath}/booking/create-booking"
@@ -35,11 +44,7 @@ body.booking-page .guest-top-nav .navbar {
 
     <input type="hidden"
            name="accommodationID"
-           value="<%= request.getParameter("id") %>">
-
-    <input type="hidden"
-           name="pricePerNight"
-           value="<%= request.getParameter("price") %>">
+           value="<%= bookingAccommodation.getAccommodationId() %>">
 
     <div class="form-group">
         <label>Check-in Date</label>

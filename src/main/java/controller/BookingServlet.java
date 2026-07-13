@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import dao.BookingDAO;
+import dao.AccommodationDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,10 +16,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Booking;
+import model.Accommodation;
 import model.Guest;
 import model.Staff;
 
 @WebServlet(urlPatterns = {
+    "/booking",
     "/booking/create-booking",
     "/booking/cancel-booking",
     "/booking/my-booking",
@@ -41,6 +44,10 @@ public class BookingServlet extends HttpServlet {
 
         switch (path) {
 
+            case "/booking":
+                openBookingPage(request, response);
+                break;
+
             case "/booking/my-booking":
                 myBooking(request, response);
                 break;
@@ -60,6 +67,27 @@ public class BookingServlet extends HttpServlet {
                         request.getContextPath() + "/Homepage.jsp");
                 break;
         }
+    }
+
+    private void openBookingPage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String accommodationId = request.getParameter("id");
+        if (isBlank(accommodationId)) {
+            response.sendRedirect(request.getContextPath()
+                    + "/homestays/search?error=missingAccommodation");
+            return;
+        }
+
+        Accommodation accommodation = new AccommodationDAO()
+                .getAccommodationById(accommodationId.trim());
+        if (accommodation == null) {
+            response.sendRedirect(request.getContextPath()
+                    + "/homestays/search?error=accommodationNotFound");
+            return;
+        }
+
+        request.setAttribute("bookingAccommodation", accommodation);
+        request.getRequestDispatcher("/booking.jsp").forward(request, response);
     }
 
     @Override
@@ -137,14 +165,10 @@ public class BookingServlet extends HttpServlet {
         String numberOfPaxParam =
                 request.getParameter("numberOfPax");
 
-        String pricePerNightParam =
-                request.getParameter("pricePerNight");
-
         if (isBlank(accommodationID)
                 || isBlank(checkInDate)
                 || isBlank(checkOutDate)
-                || isBlank(numberOfPaxParam)
-                || isBlank(pricePerNightParam)) {
+                || isBlank(numberOfPaxParam)) {
 
             redirectBookingFailure(request, response, "missingField");
             return;
@@ -154,8 +178,13 @@ public class BookingServlet extends HttpServlet {
             int numberOfPax =
                     Integer.parseInt(numberOfPaxParam.trim());
 
-            double pricePerNight =
-                    Double.parseDouble(pricePerNightParam.trim());
+            Accommodation accommodation = new AccommodationDAO()
+                    .getAccommodationById(accommodationID.trim());
+            if (accommodation == null) {
+                redirectBookingFailure(request, response, "accommodationNotFound");
+                return;
+            }
+            double pricePerNight = accommodation.getPricePerNight();
 
             LocalDate checkIn =
                     LocalDate.parse(checkInDate.trim());
