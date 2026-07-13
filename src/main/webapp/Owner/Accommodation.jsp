@@ -495,7 +495,7 @@
 
                             <a href="${pageContext.request.contextPath}/UpdateAvailabilityServlet?accommodationID=<%= acc.getAccommodationId() %>"
                                class="btn-date">
-                                Availability
+                                Date
                             </a>
 
                             <a href="${pageContext.request.contextPath}/owner/accommodation/archive?id=<%= acc.getAccommodationId() %>"

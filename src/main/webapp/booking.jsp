@@ -80,7 +80,7 @@ body.booking-page .guest-top-nav .navbar {
     </div>
 
     <button type="submit" class="btn-primary">
-        Proceed to Payment
+        Submit
     </button>
 
 </form>

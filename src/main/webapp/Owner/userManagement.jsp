@@ -61,8 +61,8 @@
             </div>
 
             <!-- "Add New" button neatly aligned to the right side -->
-            <a href="${pageContext.request.contextPath}/staff/create-staff" class="btn-primary" style="text-decoration: none; border-radius: 8px !important; padding: 12px 24px !important; white-space: nowrap; height: fit-content;">
-                <i class="fas fa-plus"></i> Add New Staff
+            <a href="${pageContext.request.contextPath}/owner/create-staff" class="btn-primary" style="text-decoration: none; border-radius: 8px !important; padding: 12px 24px !important; white-space: nowrap; height: fit-content;">
+                Add New 
             </a>
 
           </div>
@@ -97,11 +97,11 @@
         <td><%= staff.getStaffPhoneNumber() %></td>
         <td><span style="color: #10b981; font-weight: 600;">Active</span></td>
         <td class="text-center">
-<a href="${pageContext.request.contextPath}/staff/update?staffID=<%= staff.getStaffId() %>"
-           class="btn-primary"
+<!--<a href="${pageContext.request.contextPath}/staff/update?staffID=<%= staff.getStaffId() %>"
+         class="btn-primary"
            style="text-decoration:none; padding:8px 14px; border-radius:8px;">
            Update
-        </a>
+        </a>-->
 
         <form action="${pageContext.request.contextPath}/owner/archive-staff" method="get" style="display:inline; margin:0;">
             <input type="hidden" name="staffID" value="<%= staff.getStaffId() %>">

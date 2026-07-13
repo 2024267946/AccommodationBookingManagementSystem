@@ -32,27 +32,27 @@
             <!-- Points to your single-servlet path mapping matching Member 3 specs -->
             <form action="${pageContext.request.contextPath}/profile/update-profile" method="POST">
                 <div class="form-group">
-                    <label><i class="fas fa-id-card text-muted" style="margin-right: 5px;"></i> Full Name</label>
+                    <label>Full Name</label>
                     <input type="text" name="fullName" class="form-control" value="${profile.name != null ? profile.name : ''}" required>
                 </div>
                 
                 <div class="form-group">
-                    <label><i class="fas fa-phone text-muted" style="margin-right: 5px;"></i> Phone Number</label>
+                    <label></i>Phone Number</label>
                     <input type="tel" name="phone" class="form-control" value="${profile.phone != null ? profile.phone : ''}" required>
                 </div>
                 
                 <div class="form-group">
-                    <label><i class="fas fa-envelope text-muted" style="margin-right: 5px;"></i> Email Address</label>
+                    <label>Email Address</label>
                     <input type="email" class="form-control" value="${profile.email != null ? profile.email : ''}" readonly>
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-lock text-muted" style="margin-right: 5px;"></i> New Password (Optional)</label>
+                    <label>New Password (Optional)</label>
                     <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
                 </div>
                 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <a href="${pageContext.request.contextPath}/profile" class="btn-clear text-center" style="flex: 1; text-decoration: none; text-align: center; line-height: 2.2;">Cancel</a>
-                    <button type="submit" class="btn-primary" style="flex: 1;">Save Changes</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">Save</button>
                 </div>
             </form>
         </div>

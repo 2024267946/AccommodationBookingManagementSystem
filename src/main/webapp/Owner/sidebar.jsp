@@ -31,7 +31,7 @@
         <a href="${pageContext.request.contextPath}/owner/booking/view-bookings"
            class="nav-link <%= currentPage.contains("manageBookings.jsp") || currentPage.contains("/owner/booking/view-bookings") ? "active-admin-link" : "" %>"
            style="display: block; width: 100%; padding: 14px 20px; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; box-sizing: border-box;">
-            Bookings
+            Booking
         </a>
         
     </nav>

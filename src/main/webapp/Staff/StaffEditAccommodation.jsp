@@ -236,7 +236,7 @@
                             <button type="submit"
                                     class="btn-primary"
                                     style="padding: 12px 24px; border-radius: 8px;">
-                                Update Accommodation
+                                Save
                             </button>
 
                             <a href="${pageContext.request.contextPath}/staff/accommodation"

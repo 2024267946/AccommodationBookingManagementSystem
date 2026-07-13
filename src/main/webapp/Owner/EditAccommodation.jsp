@@ -288,7 +288,7 @@
                     <div class="form-actions">
                         <button type="submit"
                                 class="page-btn page-btn-primary">
-                            Update Accommodation
+                            Save
                         </button>
 
                         <a href="${pageContext.request.contextPath}/OwnerAccommodationListServlet"

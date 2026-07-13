@@ -484,7 +484,7 @@
 
                                 <button type="submit"
                                         class="primary-action">
-                                    Save Amenity
+                                    Save
                                 </button>
 
                             </form>

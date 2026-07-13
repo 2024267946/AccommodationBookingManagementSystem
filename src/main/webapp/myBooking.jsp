@@ -83,7 +83,7 @@
                             <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
                             <button type="submit" class="cancel-btn"
                                     onclick="return confirm('Are you sure you want to cancel this booking?');">
-                                Cancel Booking
+                                Cancel
                             </button>
                         </form>
                     <% } %>

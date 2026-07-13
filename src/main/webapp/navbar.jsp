@@ -34,7 +34,7 @@ if ("OWNER".equalsIgnoreCase(navbarRole)) {
                     <ul class="d-flex align-items-center list-unstyled mb-0"
                         style="gap: 25px; margin: 0; padding: 0;">
                         <li><a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Home</a></li>
-                        <li><a class="nav-link" href="${pageContext.request.contextPath}/homestays">Homestays</a></li>
+                        <li><a class="nav-link" href="${pageContext.request.contextPath}/homestays">Accommodation</a></li>
                     </ul>
 
                     <div class="d-flex align-items-center" style="gap: 15px; margin-left: 10px;">

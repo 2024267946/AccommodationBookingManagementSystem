@@ -16,7 +16,7 @@ public class UserDAO {
                 "INSERT INTO GUEST " +
                 "(GUESTID, GUESTNAME, GUESTEMAIL, " +
                 "GUESTPHONENUMBER, GUESTPASSWORD) " +
-                "VALUES (GUEST_SEQ.NEXTVAL, ?, ?, ?, ?)";
+                "VALUES ('G'||LPAD(GUEST_SEQ.NEXTVAL, 3,'0'), ?, ?, ?, ?)";
 
         try (
             Connection conn = DBConnection.getConnection();

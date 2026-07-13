@@ -31,7 +31,7 @@
 
                 <div class="auth-card" style="padding: 40px !important; border-radius: 16px !important; margin: 0 auto !important;">
                     
-                    <form action="${pageContext.request.contextPath}/staff/create-staff" method="POST">
+                    <form action="${pageContext.request.contextPath}/owner/create-staff" method="POST">
                         <input type="hidden" name="staffRoles" value="STAFF">
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
@@ -56,11 +56,11 @@
                         </div>
 
                         <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 10px;">
-                            <a href="${pageContext.request.contextPath}/staff/view-staff" class="btn-primary" style="background-color: transparent !important; color: var(--text-main) !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; padding: 12px 24px !important;">
+                            <a href="${pageContext.request.contextPath}/owner/view-staff" class="btn-primary" style="background-color: transparent !important; color: var(--text-main) !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; padding: 12px 24px !important;">
                                 Cancel
                             </a>
                             <button type="submit" class="btn-primary" style="border-radius: 8px !important; padding: 12px 24px !important;">
-                                Save Staff
+                                Save
                             </button>
                         </div>
                     </form>

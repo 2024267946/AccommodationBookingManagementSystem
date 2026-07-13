@@ -39,22 +39,22 @@
 
                 <li>
                     <a class="guest-nav-link"
-                       href="${pageContext.request.contextPath}/homestays">
-                        Homestays
+                       href="${pageContext.request.contextPath}/homestays/search">
+                        Accommodation
                     </a>
                 </li>
 
-                <li>
+                <!--  <li>
                     <a class="guest-nav-link"
                        href="${pageContext.request.contextPath}/homestays/search">
                         Check Availability
                     </a>
-                </li>
+                </li> -->
 
                 <li>
                     <a class="guest-nav-link"
                        href="${pageContext.request.contextPath}/booking/my-booking">
-                        My Bookings
+                        My Booking
                     </a>
                 </li>
 
@@ -69,7 +69,7 @@
 
                 <a class="guest-account-button"
                    href="${pageContext.request.contextPath}/profile">
-                    My profile
+                    Account
                 </a>
 
                 <a class="guest-logout-button"

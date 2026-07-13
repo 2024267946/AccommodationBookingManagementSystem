@@ -343,7 +343,7 @@
                     <div class="form-actions">
                         <button type="submit"
                                 class="page-btn page-btn-primary">
-                            Create Accommodation
+                            Save
                         </button>
 
                         <a href="${pageContext.request.contextPath}/OwnerAccommodationListServlet"
