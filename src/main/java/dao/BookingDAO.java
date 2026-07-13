@@ -198,7 +198,6 @@ public class BookingDAO {
 
         } catch (Exception e) {
             logger.info(e.getMessage());
-            model.Logger.log(e.getMessage());
             e.printStackTrace();
         }
 

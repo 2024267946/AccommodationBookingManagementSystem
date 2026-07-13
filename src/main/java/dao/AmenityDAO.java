@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import model.Logger;
 import DBConnection.DBConnection;
 import model.Amenity;
 
@@ -90,7 +89,6 @@ public class AmenityDAO {
             }
 
         } catch (SQLException e) {
-            Logger.log(e.getMessage());
             e.printStackTrace();
         }
 

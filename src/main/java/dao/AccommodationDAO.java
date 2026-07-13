@@ -9,8 +9,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Logger;
-
 import DBConnection.DBConnection;
 import model.Accommodation;
 
@@ -49,8 +47,6 @@ public class AccommodationDAO {
 
             LocalDate requestedCheckIn = LocalDate.parse(checkIn);
             LocalDate requestedCheckOut = LocalDate.parse(checkOut);
-            Logger.log("here");
-
             while (rs.next()) {
                 String unavailableDates =
                         rs.getString("UNAVAILABLEDATES");
@@ -77,12 +73,8 @@ public class AccommodationDAO {
 
             rs.close();
 
-            Logger.log(accommodationList.toString());
-            Logger.log("here");
-
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.log(e.getMessage());
         }
 
         return accommodationList;

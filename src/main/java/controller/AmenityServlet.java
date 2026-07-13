@@ -3,7 +3,6 @@ package controller;
 import java.io.IOException;
 import java.util.*;
 
-import model.Logger;
 import dao.AccommodationDAO;
 import dao.AmenityDAO;
 import jakarta.servlet.ServletException;
