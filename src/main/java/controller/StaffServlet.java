@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import dao.GuestDAO;
+import dao.DashboardDAO;
 import dao.StaffDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -36,11 +37,13 @@ public class StaffServlet extends HttpServlet {
 
     private StaffDAO staffDAO;
     private GuestDAO guestDAO;
+    private DashboardDAO dashboardDAO;
 
     @Override
     public void init() {
         staffDAO = new StaffDAO();
         guestDAO = new GuestDAO();
+        dashboardDAO = new DashboardDAO();
     }
 
     @Override
@@ -58,27 +61,7 @@ public class StaffServlet extends HttpServlet {
                     return;
                 }
 
-                request.setAttribute("staffList", staffDAO.getAllStaff());
-                request.setAttribute("guestList", guestDAO.getAllGuest());
-
-                request.setAttribute(
-                        "archivedStaffCount",
-                        staffDAO.getArchivedStaffCount());
-
-                request.setAttribute(
-                        "archivedGuestCount",
-                        guestDAO.getArchivedGuestCount());
-
-                request.setAttribute(
-                        "archivedStaffList",
-                        staffDAO.getArchivedStaff());
-
-                request.setAttribute(
-                        "archivedGuestList",
-                        guestDAO.getArchivedGuests());
-
-                request.getRequestDispatcher("/Owner/dashboard.jsp")
-                       .forward(request, response);
+                openDashboard(request, response, "OWNER");
                 break;
 
             case "/owner/view-staff":
@@ -172,17 +155,7 @@ public class StaffServlet extends HttpServlet {
                     return;
                 }
 
-                request.setAttribute(
-                        "totalGuest",
-                        guestDAO.getTotalGuest());
-
-                request.setAttribute(
-                        "totalStaff",
-                        staffDAO.getTotalStaff());
-
-                request.getRequestDispatcher(
-                        "/Staff/StaffDashboard.jsp")
-                       .forward(request, response);
+                openDashboard(request, response, "STAFF");
                 break;
 
             case "/staff/view-staff":
@@ -572,6 +545,20 @@ public class StaffServlet extends HttpServlet {
                        .trim();
 
         return requiredRole.equalsIgnoreCase(role);
+    }
+
+    private void openDashboard(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String role)
+            throws ServletException, IOException {
+
+        request.setAttribute(
+                "dashboardAnalytics",
+                dashboardDAO.getDashboardAnalytics());
+        request.setAttribute("dashboardRole", role);
+        request.getRequestDispatcher("/dashboard.jsp")
+               .forward(request, response);
     }
 
     private void redirectUnauthorized(

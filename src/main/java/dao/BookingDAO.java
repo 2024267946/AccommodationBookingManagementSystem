@@ -22,39 +22,58 @@ public class BookingDAO {
             return null;
         }
 
-        String sql =
+        String bookingSql =
             "INSERT INTO BOOKING " +
-            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, " +
+            "(BOOKINGID, GUESTID, STAFFID, " +
             "CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
-            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
+            "VALUES (?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
             "TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
 
-        try (
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)
-        ) {
+        String detailSql =
+            "INSERT INTO BOOKINGDETAIL (BOOKINGID, ACCOMMODATIONID) " +
+            "VALUES (?, ?)";
 
-            ps.setString(1, bookingID);
-            ps.setString(2, booking.getGuestID());
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
 
-            if (booking.getStaffID() == null
-                    || booking.getStaffID().trim().isEmpty()) {
-                ps.setNull(3, Types.VARCHAR);
-            } else {
-                ps.setString(3, booking.getStaffID());
+            try (
+                PreparedStatement bookingPs =
+                        conn.prepareStatement(bookingSql);
+                PreparedStatement detailPs =
+                        conn.prepareStatement(detailSql)
+            ) {
+                bookingPs.setString(1, bookingID);
+                bookingPs.setString(2, booking.getGuestID());
+
+                if (booking.getStaffID() == null
+                        || booking.getStaffID().trim().isEmpty()) {
+                    bookingPs.setNull(3, Types.VARCHAR);
+                } else {
+                    bookingPs.setString(3, booking.getStaffID());
+                }
+
+                bookingPs.setString(4, booking.getCheckInDate());
+                bookingPs.setString(5, booking.getCheckOutDate());
+                bookingPs.setInt(6, booking.getNumberOfPax());
+                bookingPs.setDouble(7, booking.getTotalPrice());
+                bookingPs.setString(8, booking.getBookingStatus());
+
+                detailPs.setString(1, bookingID);
+                detailPs.setString(2, booking.getAccommodationID());
+
+                int bookingResult = bookingPs.executeUpdate();
+                int detailResult = detailPs.executeUpdate();
+
+                if (bookingResult > 0 && detailResult > 0) {
+                    conn.commit();
+                    return bookingID;
+                }
+
+                conn.rollback();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
             }
-
-            ps.setString(4, booking.getAccommodationID());
-            ps.setString(5, booking.getCheckInDate());
-            ps.setString(6, booking.getCheckOutDate());
-            ps.setInt(7, booking.getNumberOfPax());
-            ps.setDouble(8, booking.getTotalPrice());
-            ps.setString(9, booking.getBookingStatus());
-
-            if (ps.executeUpdate() > 0) {
-                return bookingID;
-            }
-
         } catch (Exception e) {
             logger.info(e.getMessage());
             e.printStackTrace();
@@ -117,7 +136,8 @@ public class BookingDAO {
     public boolean verifyBooking(Booking booking) {
 
         String sql =
-            "UPDATE BOOKING SET BOOKINGSTATUS = 'Verified', STAFFID = ? WHERE BOOKINGID = ?";
+            "UPDATE BOOKING SET BOOKINGSTATUS = 'CONFIRMED', STAFFID = ? " +
+            "WHERE BOOKINGID = ? AND BOOKINGSTATUS = 'PENDING'";
 
         try (
             Connection conn = DBConnection.getConnection();
@@ -142,12 +162,14 @@ public class BookingDAO {
         List<Booking> list = new ArrayList<>();
 
         String sql =
-            "SELECT BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS, " +
-            "TO_CHAR(CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
-            "TO_CHAR(CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
-            "FROM BOOKING " +
-            "WHERE GUESTID = ? " +
-            "ORDER BY BOOKINGID DESC";
+            "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
+            "BD.ACCOMMODATIONID, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
+            "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
+            "FROM BOOKING B " +
+            "JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
+            "WHERE B.GUESTID = ? " +
+            "ORDER BY B.BOOKINGID DESC";
 
         try (
             Connection conn = DBConnection.getConnection();
@@ -176,6 +198,7 @@ public class BookingDAO {
 
         } catch (Exception e) {
             logger.info(e.getMessage());
+            model.Logger.log(e.getMessage());
             e.printStackTrace();
         }
 
@@ -188,11 +211,13 @@ public class BookingDAO {
         List<Booking> list = new ArrayList<>();
 
         String sql =
-            "SELECT BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS, " +
-            "TO_CHAR(CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
-            "TO_CHAR(CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
-            "FROM BOOKING " +
-            "ORDER BY BOOKINGID DESC";
+            "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
+            "BD.ACCOMMODATIONID, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
+            "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
+            "FROM BOOKING B " +
+            "JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
+            "ORDER BY B.BOOKINGID DESC";
 
         try (
             Connection conn = DBConnection.getConnection();

@@ -40,7 +40,7 @@ public class StaffDAO {
         return newID;
     }
 
-    public void addStaff(Staff staff) {
+    public boolean addStaff(Staff staff) {
 
         String sql =
                 "INSERT INTO STAFF " +
@@ -61,9 +61,11 @@ public class StaffDAO {
             ps.setString(6, staff.getStaffRoles());
 
             ps.executeUpdate();
+            return true;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 

@@ -27,8 +27,10 @@
 
                 <!-- Sub-navigation tabs inside Account -->
                 <div class="sub-nav-tabs">
-                    <a href="myProfile.jsp" class="active">My Profile</a>
-                    <a href="userManagement.jsp">User Management</a>
+                    <a href="${pageContext.request.contextPath}/Owner/myProfile" class="active">My Profile</a>
+                    <a href="${pageContext.request.contextPath}/owner/view-staff">User Management</a>
+                    <a href="${pageContext.request.contextPath}/owner/view-archived-staff">Archived Staff</a>
+                    <a href="${pageContext.request.contextPath}/owner/view-archived-guest">Archived Guest</a>
                 </div>
 
                 <!-- Personal Information Profile Card -->

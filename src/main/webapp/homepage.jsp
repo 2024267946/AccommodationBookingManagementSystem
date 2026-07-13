@@ -28,7 +28,7 @@
 
 <body class="afterglow-luxury">
 
-    <jsp:include page="guestNavbar.jsp" />
+    <jsp:include page="navbar.jsp" />
 
     <section class="emily-hero">
 
@@ -49,7 +49,7 @@
 
             <div class="emily-hero-actions">
 
-                <a href="${pageContext.request.contextPath}/homestays.jsp"
+                <a href="${pageContext.request.contextPath}/homestays"
                    class="btn-emily-solid">
                     Explore The Stays
                 </a>
@@ -132,7 +132,7 @@
                     </h2>
                 </div>
 
-                <a href="${pageContext.request.contextPath}/searchAvailability.jsp"
+                <a href="${pageContext.request.contextPath}/homestays/search"
                    class="btn-emily-outline">
                     Search Availability
                 </a>

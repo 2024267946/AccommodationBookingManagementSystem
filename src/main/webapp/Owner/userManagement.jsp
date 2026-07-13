@@ -37,7 +37,9 @@
           <!-- Sub-navigation tabs inside Account -->
           <div class="sub-nav-tabs">
               <a href="${pageContext.request.contextPath}/Owner/myProfile">My Profile</a>
-              <a href="${pageContext.request.contextPath}/staff/view-staff" class="active">User Management</a>
+              <a href="${pageContext.request.contextPath}/owner/view-staff" class="active">User Management</a>
+              <a href="${pageContext.request.contextPath}/owner/view-archived-staff">Archived Staff</a>
+              <a href="${pageContext.request.contextPath}/owner/view-archived-guest">Archived Guest</a>
           </div>
 
           <!-- FIXED SEARCH BAR CONTAINER CLASS WITH ADD STAFF ALIGNMENT -->
@@ -45,13 +47,12 @@
             
             <!-- Your search filter box takes up the left space -->
             <div class="owner-search-filter" style="flex: 1; margin: 0 !important;">
-              <form action="${pageContext.request.contextPath}/staff/view-staff" method="GET" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 15px;">
+              <form id="user-search-form" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 15px;">
                 <div class="search-input-wrapper">
                   <input
                     type="text"
-                    name="query"
+                    id="user-search-input"
                     placeholder="Search Guest, Staff, or Owner Name..."
-                    value="<%= request.getParameter("query") != null ? request.getParameter("query") : "" %>"
                     class="search-input"
                   />
                 </div>
@@ -73,9 +74,9 @@
             </div>
             
             <div class="table-responsive">
-              <table class="data-table">
+              <table class="data-table" id="user-management-table">
                 <thead>
-                  <tr>
+    <tr class="user-data-row">
                     <th>Name</th>
                     <th>Role</th>
                     <th>Email</th>
@@ -125,7 +126,7 @@ if (guestList != null) {
     for (Guest guest : guestList) {
 %>
 
-<tr>
+<tr class="user-data-row">
 
     <td><%= guest.getGuestName() %></td>
 
@@ -155,6 +156,9 @@ if (guestList != null) {
     }
 }
 %>
+<tr id="no-search-results" style="display:none;">
+    <td colspan="6" class="text-center text-muted">No matching users found.</td>
+</tr>
 </tbody>
               </table>
             </div>
@@ -163,5 +167,30 @@ if (guestList != null) {
         </div>
       </main>
     </div>
+    <script>
+      const userSearchForm = document.getElementById("user-search-form");
+      const userSearchInput = document.getElementById("user-search-input");
+      const userRows = document.querySelectorAll("#user-management-table .user-data-row");
+      const noSearchResults = document.getElementById("no-search-results");
+
+      function filterUsers() {
+        const query = userSearchInput.value.trim().toLowerCase();
+        let visibleRows = 0;
+
+        userRows.forEach(function (row) {
+          const matches = row.textContent.toLowerCase().includes(query);
+          row.style.display = matches ? "" : "none";
+          if (matches) visibleRows++;
+        });
+
+        noSearchResults.style.display = visibleRows === 0 ? "" : "none";
+      }
+
+      userSearchInput.addEventListener("input", filterUsers);
+      userSearchForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        filterUsers();
+      });
+    </script>
 </body>
 </html>

@@ -5,11 +5,21 @@
 <%
     List<Accommodation> accommodationList =
         (List<Accommodation>) request.getAttribute("accommodationList");
+    Accommodation accommodationChosen =
+        (Accommodation) request.getAttribute("accomodationChoosen");
+
+    String selectedAccommodationId = request.getParameter("id");
+    String availability = request.getParameter("availability");
+    String bookingError = request.getParameter("error");
 
     String message = (String) request.getAttribute("message");
     String checkIn = (String) request.getAttribute("checkIn");
     String checkOut = (String) request.getAttribute("checkOut");
     String pax = (String) request.getAttribute("pax");
+
+    if (checkIn == null) checkIn = request.getParameter("checkIn");
+    if (checkOut == null) checkOut = request.getParameter("checkOut");
+    if (pax == null) pax = request.getParameter("pax");
 
     if (checkIn == null) checkIn = "";
     if (checkOut == null) checkOut = "";
@@ -270,6 +280,73 @@
             color: #173f34;
         }
 
+        .availability-modal {
+            position: fixed;
+            z-index: 3000;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(8, 28, 22, 0.62);
+            backdrop-filter: blur(5px);
+        }
+
+        .availability-modal-card {
+            width: min(460px, 100%);
+            padding: 38px 34px 32px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 22px;
+            background: #fffdf9;
+            box-shadow: 0 24px 70px rgba(4, 30, 22, 0.28);
+            text-align: center;
+            animation: modal-enter 0.24s ease-out;
+        }
+
+        .availability-modal-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 22px;
+            border-radius: 50%;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .availability-modal-icon.available {
+            background: #e5f7ee;
+            color: #08734f;
+        }
+
+        .availability-modal-icon.unavailable {
+            background: #fff0ed;
+            color: #b33c2f;
+        }
+
+        .availability-modal-card h2 {
+            margin: 0 0 12px;
+            color: #123a30;
+            font-family: "Playfair Display", Georgia, serif;
+            font-size: 30px;
+        }
+
+        .availability-modal-card p {
+            margin: 0 0 26px;
+            color: #6f6b66;
+            line-height: 1.65;
+        }
+
+        .modal-action {
+            width: 100%;
+        }
+
+        @keyframes modal-enter {
+            from { opacity: 0; transform: translateY(14px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
         @media (max-width: 900px) {
             .search-form {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -303,7 +380,7 @@
 
 <body>
 
-<jsp:include page="guestNavbar.jsp" />
+<jsp:include page="navbar.jsp" />
 
 <main class="availability-page">
 
@@ -322,9 +399,14 @@
 
     <section class="search-card">
 
-        <form action="${pageContext.request.contextPath}/SearchAvailabilityServlet"
+        <form action="${pageContext.request.contextPath}/homestays/search"
               method="get"
               class="search-form">
+
+            <% if (selectedAccommodationId != null
+                    && !selectedAccommodationId.trim().isEmpty()) { %>
+                <input type="hidden" name="id" value="<%= selectedAccommodationId %>">
+            <% } %>
 
             <div class="form-group">
                 <label for="checkIn">Check-in Date</label>
@@ -364,6 +446,37 @@
         </form>
 
     </section>
+
+    <% if (selectedAccommodationId != null && accommodationChosen != null) { %>
+        <div class="results-heading">
+            <h2>Selected Homestay</h2>
+            <span>Checking this accommodation</span>
+        </div>
+
+        <div class="result-grid" id="selected-accommodation">
+            <article class="accommodation-card">
+                <div class="card-image"></div>
+                <div class="card-body">
+                    <div class="card-type"><%= accommodationChosen.getAccommodationType() %></div>
+                    <h3><%= accommodationChosen.getAccommodationName() %></h3>
+                    <div class="details-grid">
+                        <div class="info"><strong>Accommodation ID:</strong> <%= accommodationChosen.getAccommodationId() %></div>
+                        <div class="info"><strong>Location:</strong> <%= accommodationChosen.getLocation() %></div>
+                        <div class="info"><strong>Maximum Capacity:</strong> <%= accommodationChosen.getMaxCapacity() %> guests</div>
+                    </div>
+                    <div class="description">
+                        <%= accommodationChosen.getDescription() == null
+                                ? "No description available."
+                                : accommodationChosen.getDescription() %>
+                    </div>
+                    <div class="price">
+                        RM <%= String.format("%.2f", accommodationChosen.getPricePerNight()) %>
+                        <small>/ night</small>
+                    </div>
+                </div>
+            </article>
+        </div>
+    <% } %>
 
     <% if (accommodationList != null) { %>
 
@@ -448,6 +561,63 @@
     <% } %>
 
 </main>
+
+<% if (availability != null && accommodationChosen != null) {
+       boolean isAvailable = "true".equalsIgnoreCase(availability);
+%>
+<div class="availability-modal" id="availability-result-modal" role="dialog" aria-modal="true" aria-labelledby="availability-result-title">
+    <div class="availability-modal-card">
+        <div class="availability-modal-icon <%= isAvailable ? "available" : "unavailable" %>">
+            <%= isAvailable ? "&#10003;" : "&#10005;" %>
+        </div>
+        <h2 id="availability-result-title">
+            <%= isAvailable ? "Your Stay Is Available" : "Dates Not Available" %>
+        </h2>
+        <p>
+            <%= isAvailable
+                    ? "Great news! This accommodation is available for your selected dates. Continue to complete your booking."
+                    : "This accommodation is unavailable for part of your selected date range. Please choose different dates and try again." %>
+        </p>
+        <% if (isAvailable) { %>
+            <a class="btn-book modal-action"
+               href="<%= request.getContextPath() %>/booking.jsp?id=<%= accommodationChosen.getAccommodationId() %>&checkIn=<%= checkIn %>&checkOut=<%= checkOut %>&pax=<%= pax %>&price=<%= accommodationChosen.getPricePerNight() %>">
+                Continue to Booking
+            </a>
+        <% } else { %>
+            <button type="button" class="btn-search modal-action" id="close-availability-modal">
+                Choose Different Dates
+            </button>
+        <% } %>
+    </div>
+</div>
+<% if (!isAvailable) { %>
+<script>
+    document.getElementById("close-availability-modal").addEventListener("click", function () {
+        document.getElementById("availability-result-modal").remove();
+    });
+</script>
+<% } %>
+<% } %>
+
+<% if ("bookingFailed".equals(bookingError)) { %>
+<div class="availability-modal" id="booking-error-modal" role="dialog" aria-modal="true" aria-labelledby="booking-error-title">
+    <div class="availability-modal-card">
+        <div class="availability-modal-icon unavailable">!</div>
+        <h2 id="booking-error-title">Something Went Wrong</h2>
+        <p>
+            We couldn’t create your booking. Your selected accommodation and dates have been kept, so you can review them and try again.
+        </p>
+        <button type="button" class="btn-search modal-action" id="close-booking-error-modal">
+            Review Search
+        </button>
+    </div>
+</div>
+<script>
+    document.getElementById("close-booking-error-modal").addEventListener("click", function () {
+        document.getElementById("booking-error-modal").remove();
+    });
+</script>
+<% } %>
 
 </body>
 </html>

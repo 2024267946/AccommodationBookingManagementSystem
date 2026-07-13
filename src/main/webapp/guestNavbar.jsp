@@ -39,14 +39,14 @@
 
                 <li>
                     <a class="guest-nav-link"
-                       href="${pageContext.request.contextPath}/homestays.jsp">
+                       href="${pageContext.request.contextPath}/homestays">
                         Homestays
                     </a>
                 </li>
 
                 <li>
                     <a class="guest-nav-link"
-                       href="${pageContext.request.contextPath}/searchAvailability.jsp">
+                       href="${pageContext.request.contextPath}/homestays/search">
                         Check Availability
                     </a>
                 </li>

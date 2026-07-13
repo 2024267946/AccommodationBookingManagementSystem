@@ -1,6 +1,8 @@
 package controller;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -21,7 +23,9 @@ import model.Staff;
     "/booking/cancel-booking",
     "/booking/my-booking",
     "/staff/booking/verify",
-    "/staff/booking/view-bookings"
+    "/owner/booking/verify",
+    "/staff/booking/view-bookings",
+    "/owner/booking/view-bookings"
 })
 public class BookingServlet extends HttpServlet {
 
@@ -42,6 +46,12 @@ public class BookingServlet extends HttpServlet {
                 break;
 
             case "/staff/booking/view-bookings":
+                request.setAttribute("roles", "staff");
+                viewBookings(request, response);
+                break;
+
+            case "/owner/booking/view-bookings":
+                request.setAttribute("roles", "owner");
                 viewBookings(request, response);
                 break;
 
@@ -71,6 +81,10 @@ public class BookingServlet extends HttpServlet {
                 break;
 
             case "/staff/booking/verify":
+                verifyBooking(request, response);
+                break;
+
+            case "/owner/booking/verify":
                 verifyBooking(request, response);
                 break;
 
@@ -132,9 +146,7 @@ public class BookingServlet extends HttpServlet {
                 || isBlank(numberOfPaxParam)
                 || isBlank(pricePerNightParam)) {
 
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/Homepage.jsp?booking=failed&reason=missingField");
+            redirectBookingFailure(request, response, "missingField");
             return;
         }
 
@@ -158,9 +170,7 @@ public class BookingServlet extends HttpServlet {
                     || pricePerNight < 0
                     || numberOfNights < 1) {
 
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/Homepage.jsp?booking=failed&reason=invalidValue");
+                redirectBookingFailure(request, response, "invalidValue");
                 return;
             }
 
@@ -229,25 +239,41 @@ public class BookingServlet extends HttpServlet {
 
             } else {
 
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/Homepage.jsp?booking=failed&reason=dao");
+                redirectBookingFailure(request, response, "dao");
             }
 
         } catch (NumberFormatException e) {
 
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/Homepage.jsp?booking=failed&reason=invalidNumber");
+            redirectBookingFailure(request, response, "invalidNumber");
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/Homepage.jsp?booking=failed&reason=systemError");
+            redirectBookingFailure(request, response, "systemError");
         }
+    }
+
+    private void redirectBookingFailure(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String reason)
+            throws IOException {
+
+        response.sendRedirect(
+                request.getContextPath()
+                + "/homestays/search?error=bookingFailed"
+                + "&reason=" + encode(reason)
+                + "&id=" + encode(request.getParameter("accommodationID"))
+                + "&checkIn=" + encode(request.getParameter("checkInDate"))
+                + "&checkOut=" + encode(request.getParameter("checkOutDate"))
+                + "&pax=" + encode(request.getParameter("numberOfPax")));
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(
+                value == null ? "" : value,
+                StandardCharsets.UTF_8);
     }
 
     // Guest cancels a booking.
@@ -342,10 +368,17 @@ public class BookingServlet extends HttpServlet {
         String bookingID =
                 request.getParameter("bookingID");
 
+        boolean ownerRequest =
+                "/owner/booking/verify".equals(request.getServletPath());
+
+        String returnPath = ownerRequest
+                ? "/owner/booking/view-bookings"
+                : "/staff/booking/view-bookings";
+
         if (isBlank(bookingID)) {
             response.sendRedirect(
                     request.getContextPath()
-                    + "/staff/booking/view-bookings?verify=failed");
+                    + returnPath + "?verify=failed");
             return;
         }
 
@@ -366,11 +399,11 @@ public class BookingServlet extends HttpServlet {
         if (success) {
             response.sendRedirect(
                     request.getContextPath()
-                    + "/staff/booking/view-bookings?verify=success");
+                    + returnPath + "?verify=success");
         } else {
             response.sendRedirect(
                     request.getContextPath()
-                    + "/staff/booking/view-bookings?verify=failed");
+                    + returnPath + "?verify=failed");
         }
     }
 
@@ -400,9 +433,17 @@ public class BookingServlet extends HttpServlet {
                 "masterBookingsList",
                 masterList);
 
-        request.getRequestDispatcher(
-                "/Staff/StaffBooking.jsp")
-               .forward(request, response);
+        String roles = (String) request.getAttribute("roles");
+
+        if(roles.equals("owner"))
+                request.getRequestDispatcher(
+                        "/Owner/manageBookings.jsp")
+                .forward(request, response);
+        else{
+                request.getRequestDispatcher(
+                        "/Staff/manageBookings.jsp")
+                .forward(request, response);
+        }
     }
 
     private boolean isBlank(String value) {

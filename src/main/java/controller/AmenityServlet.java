@@ -1,8 +1,9 @@
 package controller;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
+import model.Logger;
 import dao.AccommodationDAO;
 import dao.AmenityDAO;
 import jakarta.servlet.ServletException;
@@ -14,10 +15,11 @@ import model.Accommodation;
 import model.Amenity;
 
 @WebServlet(urlPatterns = {
-    "/amenity",
-    "/amenity/create",
-    "/amenity/update",
-    "/amenity/archive"
+    "/owner/amenity",
+    "/owner/amenity/create",
+    "/owner/amenity/update",
+    "/owner/amenity/archive",
+    "/owner/amenity/restore",
 })
 public class AmenityServlet extends HttpServlet {
 
@@ -42,17 +44,21 @@ public class AmenityServlet extends HttpServlet {
 
         switch (path) {
 
-            case "/amenity":
+            case "/owner/amenity":
                 listAmenities(request, response);
                 break;
 
-            case "/amenity/archive":
+            case "/owner/amenity/archive":
                 executeArchive(request, response);
+                break;
+
+            case "/owner/amenity/restore":
+                executeRestore(request, response);
                 break;
 
             default:
                 response.sendRedirect(
-                        request.getContextPath() + "/amenity");
+                        request.getContextPath() + "/owner/amenity");
                 break;
         }
     }
@@ -67,17 +73,17 @@ public class AmenityServlet extends HttpServlet {
 
         switch (path) {
 
-            case "/amenity/create":
+            case "/owner/amenity/create":
                 executeCreate(request, response);
                 break;
 
-            case "/amenity/update":
+            case "/owner/amenity/update":
                 executeUpdate(request, response);
                 break;
 
             default:
                 response.sendRedirect(
-                        request.getContextPath() + "/amenity");
+                        request.getContextPath() + "/owner/amenity");
                 break;
         }
     }
@@ -90,21 +96,50 @@ public class AmenityServlet extends HttpServlet {
         List<Amenity> amenityList =
                 amenityDAO.getAllActiveAmenities();
 
+        List<Amenity> archivedAmenityList =
+                amenityDAO.getArchivedAmenities();
+
         List<Accommodation> accommodationList =
                 accommodationDAO.getAllAccommodation();
 
-        request.setAttribute(
-                "amenityList",
-                amenityList);
+        List<Accommodation> allAccommodationList =
+                accommodationDAO.getAllAccommodationIncludingArchived();
 
-        request.setAttribute(
-                "accommodationList",
-                accommodationList);
+        Map<String, Map<String, Object>> amenityAccomodation =
+                mapAmenities(amenityList, allAccommodationList);
+        Map<String, Map<String, Object>> archivedAmenityAccommodation =
+                mapAmenities(archivedAmenityList, allAccommodationList);
 
-        request.getRequestDispatcher(
-                "/Owner/amenity.jsp")
-               .forward(request, response);
+        request.setAttribute("amenityList", amenityAccomodation);
+        request.setAttribute("archivedAmenityList", archivedAmenityAccommodation);
+        request.setAttribute("accommodationList", accommodationList);
+
+        request.getRequestDispatcher("/Owner/amenity.jsp").forward(request, response);
     }
+
+    private Map<String, Map<String, Object>> mapAmenities(
+            List<Amenity> amenities, List<Accommodation> accommodations) {
+        Map<String, Map<String, Object>> result = new LinkedHashMap<>();
+
+        for (Amenity amenity : amenities) {
+                String accomID = amenity.getAccommodationId();
+                String accomName = "Unknown";
+
+                for (Accommodation accom : accommodations) {
+                        if (accom.getAccommodationId().equals(accomID)) {
+                            accomName = accom.getAccommodationName();
+                            break;
+                        }
+                }
+
+                Map<String,Object> res = new HashMap<>();
+                res.put("amenity", amenity);
+                res.put("accomName", accomName);
+                result.put(String.valueOf(amenity.getAmenityId()), res);
+        }
+        return result;
+    }
+
 
     private void executeCreate(
             HttpServletRequest request,
@@ -122,7 +157,7 @@ public class AmenityServlet extends HttpServlet {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?error=missingField");
+                    + "/owner/amenity?error=missingField");
             return;
         }
 
@@ -135,13 +170,13 @@ public class AmenityServlet extends HttpServlet {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?message=createSuccess");
+                    + "/owner/amenity?message=createSuccess");
 
         } else {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?error=createFailed");
+                    + "/owner/amenity?error=createFailed");
         }
     }
 
@@ -161,13 +196,13 @@ public class AmenityServlet extends HttpServlet {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?error=missingField");
+                    + "/owner/amenity?error=missingField");
             return;
         }
 
         try {
-            int amenityId =
-                    Integer.parseInt(amenityIdParam);
+            String amenityId =
+                    amenityIdParam;
 
             Amenity amenity =
                     new Amenity();
@@ -185,20 +220,20 @@ public class AmenityServlet extends HttpServlet {
 
                 response.sendRedirect(
                         request.getContextPath()
-                        + "/amenity?message=updateSuccess");
+                        + "/owner/amenity?message=updateSuccess");
 
             } else {
 
                 response.sendRedirect(
                         request.getContextPath()
-                        + "/amenity?error=updateFailed");
+                        + "/owner/amenity?error=updateFailed");
             }
 
         } catch (NumberFormatException e) {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?error=invalidId");
+                    + "/owner/amenity?error=invalidId");
         }
     }
 
@@ -214,13 +249,12 @@ public class AmenityServlet extends HttpServlet {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?error=missingId");
+                    + "/owner/amenity?error=missingId");
             return;
         }
 
         try {
-            int amenityId =
-                    Integer.parseInt(amenityIdParam);
+            String amenityId = amenityIdParam.trim();
 
             boolean success =
                     amenityDAO.archiveAmenity(amenityId);
@@ -229,21 +263,36 @@ public class AmenityServlet extends HttpServlet {
 
                 response.sendRedirect(
                         request.getContextPath()
-                        + "/amenity?message=archiveSuccess");
+                        + "/owner/amenity?message=archiveSuccess");
 
             } else {
 
                 response.sendRedirect(
                         request.getContextPath()
-                        + "/amenity?error=archiveFailed");
+                        + "/owner/amenity?error=archiveFailed");
             }
 
         } catch (NumberFormatException e) {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/amenity?error=invalidId");
+                    + "/owner/amenity?error=invalidId");
         }
+    }
+
+    private void executeRestore(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String amenityId = request.getParameter("id");
+        if (isBlank(amenityId)) {
+            response.sendRedirect(request.getContextPath()
+                    + "/owner/amenity?tab=archived&error=missingId");
+            return;
+        }
+
+        boolean success = amenityDAO.restoreAmenity(amenityId.trim());
+        response.sendRedirect(request.getContextPath()
+                + "/owner/amenity?tab=archived&"
+                + (success ? "message=restoreSuccess" : "error=restoreFailed"));
     }
 
     private boolean isBlank(String value) {

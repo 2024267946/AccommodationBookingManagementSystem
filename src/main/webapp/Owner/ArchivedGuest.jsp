@@ -211,6 +211,17 @@
 
             <div class="container archived-page">
 
+                <div class="page-header" style="text-align: left; margin-bottom: 20px;">
+                    <h1>Account Settings</h1>
+                </div>
+
+                <div class="sub-nav-tabs">
+                    <a href="${pageContext.request.contextPath}/Owner/myProfile">My Profile</a>
+                    <a href="${pageContext.request.contextPath}/owner/view-staff">User Management</a>
+                    <a href="${pageContext.request.contextPath}/owner/view-archived-staff">Archived Staff</a>
+                    <a href="${pageContext.request.contextPath}/owner/view-archived-guest" class="active">Archived Guest</a>
+                </div>
+
                 <section class="archived-card">
 
                     <div class="archived-header">

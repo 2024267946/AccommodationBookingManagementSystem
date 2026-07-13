@@ -8,7 +8,20 @@
 <jsp:include page="header.jsp" />
 
 </head>
-<body class="auth-body">
+<body class="auth-body booking-page">
+<style>
+body.booking-page {
+    padding-top: 0 !important;
+}
+
+body.booking-page .guest-user-nav,
+body.booking-page .guest-top-nav,
+body.booking-page .guest-top-nav .navbar {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+}
+</style>
 <jsp:include page="navbar.jsp" />
 	<div class="container booking-container">
 		<div class="auth-card" style="margin: 2rem auto;">

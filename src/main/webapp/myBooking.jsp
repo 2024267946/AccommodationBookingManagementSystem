@@ -31,7 +31,7 @@
     </style>
 </head>
 <body class="afterglow-luxury">
-<jsp:include page="guestNavbar.jsp" />
+<jsp:include page="navbar.jsp" />
 
 <main class="booking-page">
     <h1>My Bookings</h1>
@@ -45,7 +45,7 @@
         <div class="empty-box">
             <h2>No booking found</h2>
             <p>You have not made any booking yet.</p>
-            <a class="receipt-btn" href="${pageContext.request.contextPath}/searchAvailability.jsp">Check Availability</a>
+            <a class="receipt-btn" href="${pageContext.request.contextPath}/homestays/search">Check Availability</a>
         </div>
     <% } else { %>
         <% for (Booking booking : bookingsList) { %>

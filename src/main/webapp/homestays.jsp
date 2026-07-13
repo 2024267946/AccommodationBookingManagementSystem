@@ -1,11 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="model.Accommodation" %>
+<%@ page import="model.Amenity" %>
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Chalet Units - Cuti Murah Melaka</title>
    	<jsp:include page="guestHeader.jsp" />
-    <jsp:include page="guestNavbar.jsp" />
+    <jsp:include page="navbar.jsp" />
 </head>
 <body>
     
@@ -21,65 +26,58 @@
     <main class="container grid-section">
         <div class="chalet-grid">
             
-            <!-- Example of ONE Chalet Card -->
-            <div class="chalet-card">
-                <div class="chalet-img-placeholder">
-                    <i class="fas fa-image fa-3x text-muted"></i>
-                </div>
-                <div class="chalet-details">
-                    <h3>Standard Chalet A1</h3>
-                    <p class="chalet-desc">A comfortable standard unit perfect for couples or solo travelers.</p>
-                    <div class="chalet-features">
-                        <span><i class="fas fa-bed"></i> 1 Bed</span>
-                        <span><i class="fas fa-bath"></i> 1 Bath</span>
-                        <span><i class="fas fa-wifi"></i> Free WiFi</span>
-                    </div>
-                    <div class="chalet-footer">
-                        <span class="price">RM 150 <small>/ night</small></span>
-                        <a href="homestayDetails.jsp?id=1" class="btn-primary">View Details</a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Example Card 2 -->
-            <div class="chalet-card">
-                <div class="chalet-img-placeholder">
-                    <i class="fas fa-image fa-3x text-muted"></i>
-                </div>
-                <div class="chalet-details">
-                    <h3>Family Suite B1</h3>
-                    <p class="chalet-desc">Spacious family suite with extra amenities for a comfortable group stay.</p>
-                    <div class="chalet-features">
-                        <span><i class="fas fa-bed"></i> 3 Beds</span>
-                        <span><i class="fas fa-bath"></i> 2 Baths</span>
-                        <span><i class="fas fa-parking"></i> Parking</span>
-                    </div>
-                    <div class="chalet-footer">
-                        <span class="price">RM 280 <small>/ night</small></span>
-                        <a href="homestayDetails.jsp?id=2" class="btn-primary">View Details</a>
-                    </div>
-                </div>
-            </div>
+            <%
+            List<Accommodation> homestays =
+                (List<Accommodation>) request.getAttribute("accommodationList");
+            Map<String, List<Amenity>> amenitiesMap =
+                (Map<String, List<Amenity>>) request.getAttribute("amenitiesMap");
 
-            <!-- Example Card 3 (ADDED) -->
-            <div class="chalet-card">
-                <div class="chalet-img-placeholder">
-                    <i class="fas fa-image fa-3x text-muted"></i>
-                </div>
-                <div class="chalet-details">
-                    <h3>Luxury Nature Villa C1</h3>
-                    <p class="chalet-desc">Luxurious villa with breathtaking views of the surrounding forest scenery.</p>
-                    <div class="chalet-features">
-                        <span><i class="fas fa-bed"></i> 4 Beds</span>
-                        <span><i class="fas fa-bath"></i> 3 Baths</span>
-                        <span><i class="fas fa-snowflake"></i> AirCon</span>
+            if (homestays != null && !homestays.isEmpty()) {
+
+                for (Accommodation hs : homestays) {
+                    List<Amenity> amenities = amenitiesMap == null
+                        ? null
+                        : amenitiesMap.get(hs.getAccommodationId());
+            %>
+                <div class="chalet-card">
+                    <div class="chalet-img-placeholder">
+                        <i class="fas fa-image fa-3x text-muted"></i>
                     </div>
-                    <div class="chalet-footer">
-                        <span class="price">RM 350 <small>/ night</small></span>
-                        <a href="homestayDetails.jsp?id=3" class="btn-primary">View Details</a>
+                    <div class="chalet-details">
+                        <h3><%= hs.getAccommodationName() %></h3>
+                        <p class="chalet-desc"><%= hs.getDescription() %></p>
+                        <div class="chalet-features">
+                            <span><i class="fas fa-users"></i> Up to <%= hs.getMaxCapacity() %> guests</span>
+                            <span><i class="fas fa-home"></i> <%= hs.getAccommodationType() %></span>
+                            <span><i class="fas fa-map-marker-alt"></i> <%= hs.getLocation() %></span>
+                            <%
+                            if (amenities != null) {
+                                for (Amenity amenity : amenities) {
+                            %>
+                                <span><i class="fas fa-check"></i> <%= amenity.getAmenityName() %></span>
+                            <%
+                                }
+                            }
+                            %>
+                        </div>
+                        <div class="chalet-footer">
+                            <span class="price">RM <%= String.format("%.2f", hs.getPricePerNight()) %> <small>/ night</small></span>
+                            <a href="<%= request.getContextPath() %>/homestays/details?id=<%= hs.getAccommodationId() %>" class="btn-primary">View Details</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+            <%
+                }
+
+            } else {
+            %>
+
+                <p>No accommodation available.</p>
+
+            <%
+            }
+            %>
 
         </div>
     </main>

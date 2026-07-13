@@ -62,6 +62,26 @@
             box-shadow: 0 0 0 4px rgba(22, 63, 52, 0.10);
         }
 
+        .subtype-fields {
+            display: none;
+            grid-column: 1 / -1;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px 26px;
+            padding: 22px;
+            border: 1px solid #dce8e3;
+            border-radius: 12px;
+            background: #f6faf8;
+        }
+
+        .subtype-fields.visible { display: grid; }
+
+        .subtype-title {
+            grid-column: 1 / -1;
+            margin: 0;
+            color: #174a3c;
+            font-size: 18px;
+        }
+
         textarea.form-control {
             min-height: 130px;
             resize: vertical;
@@ -134,6 +154,9 @@
                 grid-column: auto;
             }
 
+            .subtype-fields { grid-template-columns: 1fr; }
+            .subtype-title { grid-column: auto; }
+
             .form-card {
                 padding: 22px;
             }
@@ -184,6 +207,12 @@
                     Failed to create accommodation.
                 </div>
             <%
+                } else if ("subtypeField".equals(error)) {
+            %>
+                <div class="message message-error">
+                    Please complete all fields required for the selected accommodation type.
+                </div>
+            <%
                 } else if ("systemError".equals(error)) {
             %>
                 <div class="message message-error">
@@ -220,6 +249,51 @@
                                 <option value="CHALET">CHALET</option>
                                 <option value="HOMESTAY">HOMESTAY</option>
                             </select>
+                        </div>
+
+                        <div id="homestayFields" class="subtype-fields">
+                            <h3 class="subtype-title">Homestay Details</h3>
+                            <div class="form-group">
+                                <label for="numberOfRooms">Number of Rooms</label>
+                                <input id="numberOfRooms" class="form-control subtype-input"
+                                       type="number" name="numberOfRooms" min="1"
+                                       placeholder="Enter number of rooms">
+                            </div>
+                            <div class="form-group">
+                                <label for="hasLivingHall">Has Living Hall</label>
+                                <select id="hasLivingHall" class="form-control subtype-input"
+                                        name="hasLivingHall">
+                                    <option value="">-- Select --</option>
+                                    <option value="YES">Yes</option>
+                                    <option value="NO">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="chaletFields" class="subtype-fields">
+                            <h3 class="subtype-title">Chalet Details</h3>
+                            <div class="form-group">
+                                <label for="roomNumber">Room Number</label>
+                                <input id="roomNumber" class="form-control subtype-input"
+                                       type="text" name="roomNumber" maxlength="20"
+                                       placeholder="Example: C101">
+                            </div>
+                            <div class="form-group">
+                                <label for="floorLevel">Floor Level</label>
+                                <input id="floorLevel" class="form-control subtype-input"
+                                       type="text" name="floorLevel" maxlength="20"
+                                       placeholder="Example: 1">
+                            </div>
+                            <div class="form-group">
+                                <label for="chaletCategory">Chalet Category</label>
+                                <select id="chaletCategory" class="form-control subtype-input"
+                                        name="chaletCategory">
+                                    <option value="">-- Select Category --</option>
+                                    <option value="STANDARD">Standard</option>
+                                    <option value="PREMIUM">Premium</option>
+                                    <option value="LUXURY">Luxury</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -287,6 +361,33 @@
     </main>
 
 </div>
+
+<script>
+    const accommodationType = document.getElementById("accommodationType");
+    const homestayFields = document.getElementById("homestayFields");
+    const chaletFields = document.getElementById("chaletFields");
+
+    function setSubtypeVisibility() {
+        const selectedType = accommodationType.value;
+        const showHomestay = selectedType === "HOMESTAY";
+        const showChalet = selectedType === "CHALET";
+
+        homestayFields.classList.toggle("visible", showHomestay);
+        chaletFields.classList.toggle("visible", showChalet);
+
+        homestayFields.querySelectorAll(".subtype-input").forEach(function (field) {
+            field.required = showHomestay;
+            field.disabled = !showHomestay;
+        });
+        chaletFields.querySelectorAll(".subtype-input").forEach(function (field) {
+            field.required = showChalet;
+            field.disabled = !showChalet;
+        });
+    }
+
+    accommodationType.addEventListener("change", setSubtypeVisibility);
+    setSubtypeVisibility();
+</script>
 
 </body>
 </html>

@@ -5,9 +5,14 @@
 <%
     List<Accommodation> accommodationList =
         (List<Accommodation>) request.getAttribute("accommodationList");
+    List<Accommodation> archivedAccommodationList =
+        (List<Accommodation>) request.getAttribute("archivedAccommodationList");
 
     String message = request.getParameter("message");
     String error = request.getParameter("error");
+    boolean archivedTab = "archived".equalsIgnoreCase(request.getParameter("tab"));
+    List<Accommodation> displayedAccommodationList =
+        archivedTab ? archivedAccommodationList : accommodationList;
 %>
 
 <!DOCTYPE html>
@@ -60,6 +65,28 @@
             font-size: 13px;
             letter-spacing: 0.04em;
             white-space: nowrap;
+        }
+
+        .record-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 22px;
+        }
+
+        .record-tab {
+            padding: 10px 20px;
+            border: 1px solid #d7cec3;
+            border-radius: 999px;
+            color: #5f6f69;
+            background: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .record-tab.active {
+            border-color: #003d2f;
+            background: #003d2f;
+            color: #ffffff;
         }
 
         .btn-create {
@@ -326,7 +353,7 @@
                         Accommodation
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/Owner/amenity.jsp"
+                    <a href="${pageContext.request.contextPath}/owner/amenity"
                        class="module-tab">
                         Amenity
                     </a>
@@ -357,6 +384,10 @@
                     <div class="message message-success">
                         Availability successfully updated.
                     </div>
+                <% } else if ("archiveSuccess".equals(message)) { %>
+                    <div class="message message-success">Accommodation successfully archived.</div>
+                <% } else if ("restoreSuccess".equals(message)) { %>
+                    <div class="message message-success">Accommodation successfully restored.</div>
                 <% } %>
 
                 <% if (error != null) { %>
@@ -365,26 +396,33 @@
                     </div>
                 <% } %>
 
+                <div class="record-tabs">
+                    <a class="record-tab <%= !archivedTab ? "active" : "" %>"
+                       href="${pageContext.request.contextPath}/OwnerAccommodationListServlet?tab=active">Active</a>
+                    <a class="record-tab <%= archivedTab ? "active" : "" %>"
+                       href="${pageContext.request.contextPath}/OwnerAccommodationListServlet?tab=archived">Archived</a>
+                </div>
+
                 <div class="summary-bar">
                     <span>
-                        Accommodation records available in the system
+                        <%= archivedTab ? "Archived accommodation records" : "Active accommodation records" %>
                     </span>
 
                     <strong>
                         Total:
-                        <%= accommodationList == null
+                        <%= displayedAccommodationList == null
                                 ? 0
-                                : accommodationList.size() %>
+                                : displayedAccommodationList.size() %>
                     </strong>
                 </div>
 
                 <div class="accommodation-list">
 
                     <%
-                        if (accommodationList != null
-                                && !accommodationList.isEmpty()) {
+                        if (displayedAccommodationList != null
+                                && !displayedAccommodationList.isEmpty()) {
 
-                            for (Accommodation acc : accommodationList) {
+                            for (Accommodation acc : displayedAccommodationList) {
                     %>
 
                     <div class="accommodation-card">
@@ -448,6 +486,8 @@
 
                         <div class="action-buttons">
 
+                            <% if (!archivedTab) { %>
+
                             <a href="${pageContext.request.contextPath}/UpdateAccommodationServlet?accommodationId=<%= acc.getAccommodationId() %>"
                                class="btn-edit">
                                 Edit
@@ -458,6 +498,18 @@
                                 Availability
                             </a>
 
+                            <a href="${pageContext.request.contextPath}/owner/accommodation/archive?id=<%= acc.getAccommodationId() %>"
+                               class="btn-archive"
+                               onclick="return confirm('Archive this accommodation?');">
+                                Archive
+                            </a>
+
+                            <% } else { %>
+                            <a href="${pageContext.request.contextPath}/owner/accommodation/restore?id=<%= acc.getAccommodationId() %>"
+                               class="btn-edit">
+                                Restore
+                            </a>
+                            <% } %>
 
                         </div>
 
@@ -470,7 +522,7 @@
                     %>
 
                     <div class="empty-card">
-                        No accommodation records were found in the database.
+                        No <%= archivedTab ? "archived" : "active" %> accommodation records were found.
                     </div>
 
                     <%

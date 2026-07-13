@@ -15,16 +15,14 @@ List<Booking> masterBookingsList =
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/theme.css">
 </head>
 <body class="admin-body">
-<jsp:include page="ownerNavbar.jsp" />
+<jsp:include page="StaffNavbar.jsp" />
     <div class="admin-layout">
-      
-      <!-- Include Sidebar Column -->
-      <jsp:include page="sidebar.jsp" />
 
-      <!-- Workspace Panel -->
+      <jsp:include page="StaffSidebar.jsp" />
+
       <main class="main-content">
         <div class="container">
-          
+
           <div class="page-header">
             <h1>Booking Management</h1>
             <p class="text-muted">Review, track, and verify upcoming homestay reservations.</p>
@@ -32,9 +30,9 @@ List<Booking> masterBookingsList =
 
           <div class="table-card">
             <div class="table-header">
-              <h2>Pending & Past Reservations</h2>
+              <h2>Pending &amp; Past Reservations</h2>
             </div>
-            
+
             <div class="table-responsive">
               <table class="data-table">
                 <thead>
@@ -64,7 +62,7 @@ List<Booking> masterBookingsList =
                     <td><span class="badge-status-pending" style="font-weight:600; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;"><%= booking.getBookingStatus() %></span></td>
                     <td class="text-center">
                       <% if (pending) { %>
-                      <form action="${pageContext.request.contextPath}/owner/booking/verify" method="POST"  style="margin:0;">
+                      <form action="${pageContext.request.contextPath}/staff/booking/verify" method="POST" style="margin:0;">
                         <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
                         <button type="submit" class="btn-primary" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 8px !important;">
                             Verify

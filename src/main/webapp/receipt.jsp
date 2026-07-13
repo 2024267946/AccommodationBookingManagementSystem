@@ -20,7 +20,7 @@
     </style>
 </head>
 <body class="afterglow-luxury">
-<jsp:include page="guestNavbar.jsp" />
+<jsp:include page="navbar.jsp" />
 <div class="receipt-wrap">
     <div class="receipt-actions no-print">
         <a class="back-link" href="${pageContext.request.contextPath}/booking/my-booking">&larr; Back to My Bookings</a>

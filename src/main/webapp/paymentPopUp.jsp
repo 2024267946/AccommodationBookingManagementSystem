@@ -206,7 +206,7 @@
 
 <body>
 
-<jsp:include page="guestNavbar.jsp" />
+<jsp:include page="navbar.jsp" />
 
 <main class="payment-page">
 

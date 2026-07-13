@@ -38,8 +38,8 @@
     	   Accommodation
 	</a>
 	
-	<a href="${pageContext.request.contextPath}/staff/booking"
-   class="nav-link <%= currentPage.contains("StaffBooking.jsp") || currentPage.contains("/staff/booking/view-bookings") ? "active-admin-link" : "" %>"
+	<a href="${pageContext.request.contextPath}/staff/booking/view-bookings"
+   class="nav-link <%= currentPage.contains("manageBookings.jsp") || currentPage.contains("/staff/booking/view-bookings") ? "active-admin-link" : "" %>"
    style="display:block; width:100%; padding:14px 20px; text-decoration:none; border-radius:12px; font-weight:500; font-size:0.95rem; transition:all 0.3s ease; box-sizing:border-box;">
     Booking
 	</a>

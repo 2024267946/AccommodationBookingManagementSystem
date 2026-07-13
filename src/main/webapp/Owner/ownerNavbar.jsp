@@ -17,7 +17,7 @@
         </li>
      
         <li>
-            <a href="${pageContext.request.contextPath}/Owner/dashboard.jsp" 
+            <a href="${pageContext.request.contextPath}/owner/dashboard"
                class="nav-link <%= currentTopPage.contains("/Owner/") ? "active-top-link" : "" %>">
                Dashboard
             </a>

@@ -3,12 +3,26 @@
     pageEncoding="UTF-8" %>
 
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="model.Amenity" %>
 <%@ page import="model.Accommodation" %>
+<%!
+    private String escapeJavaScript(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("<", "\\u003c")
+                .replace(">", "\\u003e");
+    }
+%>
 
 <%
-    List<Amenity> amenityList =
-            (List<Amenity>) request.getAttribute("amenityList");
+    Map<String, Map<String, Object>> amenityList =
+            (Map<String, Map<String, Object>>) request.getAttribute("amenityList");
+    Map<String, Map<String, Object>> archivedAmenityList =
+            (Map<String, Map<String, Object>>) request.getAttribute("archivedAmenityList");
 
     List<Accommodation> accommodationList =
             (List<Accommodation>) request.getAttribute("accommodationList");
@@ -18,6 +32,9 @@
 
     String error =
             request.getParameter("error");
+    boolean archivedTab = "archived".equalsIgnoreCase(request.getParameter("tab"));
+    Map<String, Map<String, Object>> displayedAmenityList =
+            archivedTab ? archivedAmenityList : amenityList;
 %>
 
 <!DOCTYPE html>
@@ -76,10 +93,29 @@
         }
 
         .amenity-layout {
-            display: grid;
-            grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.6fr);
-            gap: 28px;
-            align-items: start;
+            display: block;
+        }
+
+        .record-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 22px;
+        }
+
+        .record-tab {
+            padding: 10px 20px;
+            border: 1px solid #d7cec3;
+            border-radius: 999px;
+            color: #5f6f69;
+            background: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .record-tab.active {
+            border-color: #003d2f;
+            background: #003d2f;
+            color: #ffffff;
         }
 
         .panel-card {
@@ -154,7 +190,6 @@
         }
 
         .primary-action {
-            width: 100%;
             border: 0;
             background: #003d2f;
             color: #ffffff;
@@ -248,6 +283,51 @@
             font-style: italic;
         }
 
+        .amenity-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .amenity-toolbar h2 { margin: 0; }
+
+        .amenity-modal {
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(10, 25, 21, 0.55);
+        }
+
+        .amenity-modal.open { display: flex; }
+
+        .amenity-modal-content {
+            width: min(520px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .modal-close {
+            border: 0;
+            background: transparent;
+            color: #697b75;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
         @media (max-width: 900px) {
             .amenity-layout {
                 grid-template-columns: 1fr;
@@ -294,7 +374,7 @@
                         Accommodation
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/amenity"
+                    <a href="${pageContext.request.contextPath}/owner/amenity"
                        class="module-tab active">
                         Amenity
                     </a>
@@ -313,6 +393,8 @@
                     <div class="message message-success">
                         Amenity successfully archived.
                     </div>
+                <% } else if ("restoreSuccess".equals(message)) { %>
+                    <div class="message message-success">Amenity successfully restored.</div>
                 <% } %>
 
                 <% if (error != null) { %>
@@ -322,16 +404,30 @@
                 <% } %>
 
                 <div class="amenity-layout">
+                    <div class="record-tabs">
+                        <a class="record-tab <%= !archivedTab ? "active" : "" %>"
+                           href="${pageContext.request.contextPath}/owner/amenity?tab=active">Active</a>
+                        <a class="record-tab <%= archivedTab ? "active" : "" %>"
+                           href="${pageContext.request.contextPath}/owner/amenity?tab=archived">Archived</a>
+                    </div>
 
-                    <section class="panel-card">
+                    <div class="amenity-toolbar">
+                        <h2><%= archivedTab ? "Archived" : "Active" %> System Amenities</h2>
+                        <% if (!archivedTab) { %>
+                        <button type="button" class="primary-action" id="open-amenity-modal">
+                            Add Amenity
+                        </button>
+                        <% } %>
+                    </div>
 
-                        <div class="panel-header">
-                            <h2>Add New Amenity</h2>
+                    <div class="amenity-modal" id="amenity-modal" aria-hidden="true">
+                    <section class="panel-card amenity-modal-content" role="dialog" aria-modal="true" aria-labelledby="amenity-modal-title">
+                        <div class="panel-header modal-header-row">
+                            <h2 id="amenity-modal-title">Add New Amenity</h2>
+                            <button type="button" class="modal-close" id="close-amenity-modal" aria-label="Close">&times;</button>
                         </div>
-
                         <div class="create-panel-body">
-
-                            <form action="${pageContext.request.contextPath}/amenity/create"
+                            <form action="${pageContext.request.contextPath}/owner/amenity/create"
                                   method="post">
 
                                 <div class="form-group">
@@ -396,12 +492,9 @@
                         </div>
 
                     </section>
+                    </div>
 
                     <section class="panel-card">
-
-                        <div class="panel-header">
-                            <h2>Active System Amenities</h2>
-                        </div>
 
                         <div class="table-responsive">
 
@@ -411,6 +504,7 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Amenity Name</th>
+                                        <th>Accommodation Name</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -418,10 +512,13 @@
                                 <tbody>
 
                                     <%
-                                        if (amenityList != null
-                                                && !amenityList.isEmpty()) {
+                                        if (displayedAmenityList != null
+                                                && !displayedAmenityList.isEmpty()) {
 
-                                            for (Amenity amenity : amenityList) {
+                                            for (Map.Entry<String, Map<String, Object>> entry : displayedAmenityList.entrySet()) {
+                                                Map<String, Object> amenityData = entry.getValue();
+                                                Amenity amenity = (Amenity) amenityData.get("amenity");
+                                                String accomName = (String) amenityData.get("accomName");
                                     %>
 
                                         <tr>
@@ -434,7 +531,9 @@
 
                                             <td>
 
-                                                <form action="${pageContext.request.contextPath}/amenity/update"
+                                                <% if (!archivedTab) { %>
+
+                                                <form action="${pageContext.request.contextPath}/owner/amenity/update"
                                                       method="post"
                                                       class="amenity-update-form">
 
@@ -455,14 +554,27 @@
 
                                                 </form>
 
+                                                <% } else { %>
+                                                    <%= amenity.getAmenityName() %>
+                                                <% } %>
+
                                             </td>
+
+                                            <td><%= accomName %></td>
 
                                             <td>
 
-                                                <a href="${pageContext.request.contextPath}/amenity/archive?id=<%= amenity.getAmenityId() %>"
+                                                <% if (!archivedTab) { %>
+
+                                                <a href="${pageContext.request.contextPath}/owner/amenity/archive?id=<%= amenity.getAmenityId() %>"
                                                    class="archive-action">
                                                     Archive
                                                 </a>
+
+                                                <% } else { %>
+                                                <a href="${pageContext.request.contextPath}/owner/amenity/restore?id=<%= amenity.getAmenityId() %>"
+                                                   class="update-action">Restore</a>
+                                                <% } %>
 
                                             </td>
 
@@ -475,9 +587,9 @@
                                     %>
 
                                         <tr>
-                                            <td colspan="3"
+                                            <td colspan="4"
                                                 class="empty-state">
-                                                No active amenities found.
+                                                No <%= archivedTab ? "archived" : "active" %> amenities found.
                                             </td>
                                         </tr>
 
@@ -500,6 +612,48 @@
         </main>
 
     </div>
+
+    <script>
+        const amenityList = [
+        <% if (amenityList != null) {
+            for (Map.Entry<String, Map<String, Object>> entry : amenityList.entrySet()) {
+                Amenity consoleAmenity = (Amenity) entry.getValue().get("amenity");
+                String consoleAccomName = (String) entry.getValue().get("accomName");
+        %>
+            {
+                id: "<%= escapeJavaScript(entry.getKey()) %>",
+                amenity: {
+                    amenityId: "<%= escapeJavaScript(consoleAmenity.getAmenityId()) %>",
+                    amenityName: "<%= escapeJavaScript(consoleAmenity.getAmenityName()) %>",
+                    accommodationId: "<%= escapeJavaScript(consoleAmenity.getAccommodationId()) %>"
+                },
+                accomName: "<%= escapeJavaScript(consoleAccomName) %>"
+            },
+        <%  }
+           } %>
+        ];
+        console.log("amenityList:", amenityList);
+
+        const amenityModal = document.getElementById("amenity-modal");
+        const openAmenityModal = document.getElementById("open-amenity-modal");
+        const closeAmenityModal = document.getElementById("close-amenity-modal");
+
+        function setAmenityModal(open) {
+            amenityModal.classList.toggle("open", open);
+            amenityModal.setAttribute("aria-hidden", String(!open));
+            document.body.style.overflow = open ? "hidden" : "";
+            if (open) document.getElementById("amenityName").focus();
+        }
+
+        if (openAmenityModal) openAmenityModal.addEventListener("click", function () { setAmenityModal(true); });
+        closeAmenityModal.addEventListener("click", function () { setAmenityModal(false); });
+        amenityModal.addEventListener("click", function (event) {
+            if (event.target === amenityModal) setAmenityModal(false);
+        });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") setAmenityModal(false);
+        });
+    </script>
 
 </body>
 </html>
