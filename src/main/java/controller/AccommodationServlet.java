@@ -335,9 +335,9 @@ public class AccommodationServlet extends HttpServlet {
                     "accommodationList",
                     accommodationList
                 );
-    
+                request.setAttribute("staffView", Boolean.TRUE);
                 request.getRequestDispatcher(
-                    "/Staff/StaffAccommodation.jsp"
+                    "/Owner/Accommodation.jsp"
                 ).forward(request, response);
     
             } catch (Exception e) {
@@ -348,9 +348,9 @@ public class AccommodationServlet extends HttpServlet {
                     "errorMessage",
                     "Unable to load accommodation records."
                 );
-    
+                request.setAttribute("staffView", Boolean.TRUE);
                 request.getRequestDispatcher(
-                    "/Staff/StaffAccommodation.jsp"
+                    "/Owner/Accommodation.jsp"
                 ).forward(request, response);
             }
         }

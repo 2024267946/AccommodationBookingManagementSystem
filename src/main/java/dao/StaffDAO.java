@@ -8,6 +8,7 @@ import java.util.List;
 
 import DBConnection.DBConnection;
 import model.Staff;
+import util.PasswordUtil;
 
 public class StaffDAO {
 
@@ -55,7 +56,7 @@ public class StaffDAO {
 
             ps.setString(1, generateStaffID());
             ps.setString(2, staff.getStaffName());
-            ps.setString(3, staff.getStaffPassword());
+            ps.setString(3, PasswordUtil.hashIfNeeded(staff.getStaffPassword()));
             ps.setString(4, staff.getStaffEmail());
             ps.setString(5, staff.getStaffPhoneNumber());
             ps.setString(6, staff.getStaffRoles());
@@ -166,7 +167,7 @@ public class StaffDAO {
         ) {
 
             ps.setString(1, staff.getStaffName());
-            ps.setString(2, staff.getStaffPassword());
+            ps.setString(2, PasswordUtil.hashIfNeeded(staff.getStaffPassword()));
             ps.setString(3, staff.getStaffEmail());
             ps.setString(4, staff.getStaffPhoneNumber());
             ps.setString(5, staff.getStaffRoles());

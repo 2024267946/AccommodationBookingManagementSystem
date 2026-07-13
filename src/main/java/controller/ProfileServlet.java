@@ -9,12 +9,14 @@ import model.Profile;
 import model.Guest;
 import model.Staff;
 import dao.ProfileDAO;
+import dao.BookingDAO;
 
 @WebServlet(urlPatterns = {
     "/profile",
     "/profile/edit",
     "/Owner/myProfile",
-    "/profile/update-profile"
+    "/profile/update-profile",
+    "/profile/reset-password"
 })
 public class ProfileServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -42,6 +44,8 @@ public class ProfileServlet extends HttpServlet {
         
         if (path.equals("/profile/update-profile")) {
             executeProfileUpdate(request, response);
+        } else if (path.equals("/profile/reset-password")) {
+            resetGuestPassword(request, response);
         }
     }
 
@@ -70,6 +74,9 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
         request.setAttribute("profile", userProfile);
+        if ("GUEST".equalsIgnoreCase(role)) {
+            request.setAttribute("profileBookings", new BookingDAO().getBookingsByGuest(userId));
+        }
 
         String path = request.getServletPath();
         String view = "/profile/edit".equals(path)
@@ -96,7 +103,6 @@ public class ProfileServlet extends HttpServlet {
         }
         String name = request.getParameter("fullName");
         String phone = request.getParameter("phone");
-        String password = request.getParameter("password");
 
         if (name == null || name.trim().isEmpty()
                 || phone == null || phone.trim().isEmpty()) {
@@ -120,7 +126,7 @@ public class ProfileServlet extends HttpServlet {
         updatedProfile.setName(name);
         updatedProfile.setPhone(phone);
         updatedProfile.setEmail(currentProfile.getEmail());
-        updatedProfile.setPassword(password);
+        updatedProfile.setPassword(null);
         updatedProfile.setRole(role);
 
         boolean success = profileDAO.updateProfile(updatedProfile);
@@ -145,5 +151,38 @@ public class ProfileServlet extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/profile/edit?error=updatefailed");
         }
+    }
+
+    private void resetGuestPassword(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || !"GUEST".equalsIgnoreCase(String.valueOf(session.getAttribute("role")))
+                || session.getAttribute("guestID") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
+            return;
+        }
+        String currentPassword = request.getParameter("currentPassword");
+        String newPassword = request.getParameter("newPassword");
+        String confirmPassword = request.getParameter("confirmPassword");
+        if (isBlank(currentPassword) || isBlank(newPassword) || isBlank(confirmPassword)) {
+            response.sendRedirect(request.getContextPath() + "/profile?passwordError=missing");
+            return;
+        }
+        if (newPassword.length() < 6) {
+            response.sendRedirect(request.getContextPath() + "/profile?passwordError=short");
+            return;
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            response.sendRedirect(request.getContextPath() + "/profile?passwordError=mismatch");
+            return;
+        }
+        boolean success = profileDAO.resetGuestPassword(
+                session.getAttribute("guestID").toString(), currentPassword, newPassword);
+        response.sendRedirect(request.getContextPath()
+                + (success ? "/profile?passwordReset=success" : "/profile?passwordError=current"));
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

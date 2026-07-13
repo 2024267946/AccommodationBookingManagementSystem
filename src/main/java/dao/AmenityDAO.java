@@ -310,12 +310,12 @@ public class AmenityDAO {
         }
     }
 
-    // Update amenity name.
+    // Update amenity name and assigned accommodation.
     public boolean updateAmenity(Amenity amenity) {
 
         String sql =
                 "UPDATE AMENITY " +
-                "SET AMENITYNAME = ? " +
+                "SET AMENITYNAME = ?, ACCOMMODATIONID = ? " +
                 "WHERE AMENITYID = ?";
 
         try (
@@ -329,6 +329,10 @@ public class AmenityDAO {
 
             ps.setString(
                     2,
+                    amenity.getAccommodationId());
+
+            ps.setString(
+                    3,
                     amenity.getAmenityId());
 
             return ps.executeUpdate() > 0;

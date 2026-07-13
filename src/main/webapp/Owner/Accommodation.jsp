@@ -3,6 +3,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
+    boolean staffView = Boolean.TRUE.equals(request.getAttribute("staffView"));
     List<Accommodation> accommodationList =
         (List<Accommodation>) request.getAttribute("accommodationList");
     List<Accommodation> archivedAccommodationList =
@@ -10,7 +11,7 @@
 
     String message = request.getParameter("message");
     String error = request.getParameter("error");
-    boolean archivedTab = "archived".equalsIgnoreCase(request.getParameter("tab"));
+    boolean archivedTab = !staffView && "archived".equalsIgnoreCase(request.getParameter("tab"));
     List<Accommodation> displayedAccommodationList =
         archivedTab ? archivedAccommodationList : accommodationList;
 %>
@@ -19,7 +20,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Accommodation Management | Owner</title>
+    <title>Accommodation Management | <%= staffView ? "Staff" : "Owner" %></title>
 
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/css/style.css">
@@ -331,12 +332,13 @@
 </head>
 
 <body class="admin-body">
+    <style>.accom-success-modal{position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(8,28,22,.62)}.accom-success-card{width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22)}.accom-success-icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold}.accom-success-card h2{margin:0 0 9px;color:#123a30}.accom-success-card p{margin:0 0 22px;color:#746f69}</style>
 
-    <jsp:include page="ownerNavbar.jsp" />
+    <% if (staffView) { %><jsp:include page="../Staff/StaffNavbar.jsp" /><% } else { %><jsp:include page="ownerNavbar.jsp" /><% } %>
 
     <div class="admin-layout">
 
-        <jsp:include page="sidebar.jsp" />
+        <% if (staffView) { %><jsp:include page="../Staff/StaffSidebar.jsp" /><% } else { %><jsp:include page="sidebar.jsp" /><% } %>
 
         <main class="main-content">
 
@@ -346,7 +348,7 @@
                     <h1>Accommodation Systems</h1>
                 </div>
 
-                <div class="module-tabs">
+                <% if (!staffView) { %><div class="module-tabs">
 
                     <a href="${pageContext.request.contextPath}/OwnerAccommodationListServlet"
                        class="module-tab active">
@@ -358,21 +360,21 @@
                         Amenity
                     </a>
 
-                </div>
+                </div><% } %>
 
                 <div class="accommodation-toolbar">
 
                     <div>
                         <h2 style="margin:0 0 6px;">Accommodation Management</h2>
                         <p class="toolbar-text">
-                            Create, edit and update accommodation records.
+                            <%= staffView ? "View and update accommodation records." : "Create, edit and update accommodation records." %>
                         </p>
                     </div>
 
-                    <a href="${pageContext.request.contextPath}/Owner/CreateAccommodation.jsp"
+                    <% if (!staffView) { %><a href="${pageContext.request.contextPath}/Owner/CreateAccommodation.jsp"
                        class="btn-create">
                         Create Accommodation
-                    </a>
+                    </a><% } %>
 
                 </div>
 
@@ -396,12 +398,12 @@
                     </div>
                 <% } %>
 
-                <div class="record-tabs">
+                <% if (!staffView) { %><div class="record-tabs">
                     <a class="record-tab <%= !archivedTab ? "active" : "" %>"
                        href="${pageContext.request.contextPath}/OwnerAccommodationListServlet?tab=active">Active</a>
                     <a class="record-tab <%= archivedTab ? "active" : "" %>"
                        href="${pageContext.request.contextPath}/OwnerAccommodationListServlet?tab=archived">Archived</a>
-                </div>
+                </div><% } %>
 
                 <div class="summary-bar">
                     <span>
@@ -498,11 +500,11 @@
                                 Date
                             </a>
 
-                            <a href="${pageContext.request.contextPath}/owner/accommodation/archive?id=<%= acc.getAccommodationId() %>"
+                            <% if (!staffView) { %><a href="${pageContext.request.contextPath}/owner/accommodation/archive?id=<%= acc.getAccommodationId() %>"
                                class="btn-archive"
-                               onclick="return confirm('Archive this accommodation?');">
+                               data-confirm-message="Archive this accommodation?">
                                 Archive
-                            </a>
+                            </a><% } %>
 
                             <% } else { %>
                             <a href="${pageContext.request.contextPath}/owner/accommodation/restore?id=<%= acc.getAccommodationId() %>"
@@ -537,5 +539,10 @@
 
     </div>
 
+    <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %>
+    <div class="accom-success-modal"><div class="accom-success-card"><div class="accom-success-icon">✓</div><h2>Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully</h2><p>The accommodation information has been saved.</p><a class="btn-edit" href="${pageContext.request.contextPath}/<%= staffView ? "staff/accommodation" : "OwnerAccommodationListServlet" %>">Done</a></div></div>
+    <% } %>
+
+<script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
 </body>
 </html>

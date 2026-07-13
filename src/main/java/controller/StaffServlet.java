@@ -285,19 +285,41 @@ public class StaffServlet extends HttpServlet {
                              HttpServletResponse response)
             throws IOException {
 
+        String staffName = request.getParameter("staffName");
+        String staffPassword = request.getParameter("staffPassword");
+        String confirmStaffPassword = request.getParameter("confirmStaffPassword");
+        String staffEmail = request.getParameter("staffEmail");
+        String staffPhoneNumber = request.getParameter("staffPhoneNumber");
+
+        if (isBlank(staffName) || isBlank(staffPassword)
+                || isBlank(confirmStaffPassword) || isBlank(staffEmail)
+                || isBlank(staffPhoneNumber)) {
+            response.sendRedirect(request.getContextPath()
+                    + "/owner/create-staff?error=missingField");
+            return;
+        }
+
+        if (!staffPassword.equals(confirmStaffPassword)) {
+            response.sendRedirect(request.getContextPath()
+                    + "/owner/create-staff?error=passwordMismatch");
+            return;
+        }
+
+        if (staffPassword.length() < 6) {
+            response.sendRedirect(request.getContextPath()
+                    + "/owner/create-staff?error=invalidPassword");
+            return;
+        }
+
         Staff staff = new Staff();
 
-        staff.setStaffName(
-                request.getParameter("staffName"));
+        staff.setStaffName(staffName.trim());
 
-        staff.setStaffPassword(
-                request.getParameter("staffPassword"));
+        staff.setStaffPassword(staffPassword);
 
-        staff.setStaffEmail(
-                request.getParameter("staffEmail"));
+        staff.setStaffEmail(staffEmail.trim());
 
-        staff.setStaffPhoneNumber(
-                request.getParameter("staffPhoneNumber"));
+        staff.setStaffPhoneNumber(staffPhoneNumber.trim());
 
         staff.setStaffRoles("STAFF");
         staff.setStatus("ACTIVE");
@@ -698,6 +720,10 @@ public class StaffServlet extends HttpServlet {
         if (value == null) return "";
         return value.replace("&", "&amp;").replace("<", "&lt;")
                 .replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     private void redirectUnauthorized(

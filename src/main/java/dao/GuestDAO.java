@@ -8,6 +8,7 @@ import java.util.List;
 
 import DBConnection.DBConnection;
 import model.Guest;
+import util.PasswordUtil;
 
 public class GuestDAO {
 
@@ -58,7 +59,7 @@ public class GuestDAO {
             ps.setString(2, guest.getGuestName());
             ps.setString(3, guest.getGuestEmail());
             ps.setString(4, guest.getGuestPhoneNumber());
-            ps.setString(5, guest.getGuestPassword());
+            ps.setString(5, PasswordUtil.hashIfNeeded(guest.getGuestPassword()));
 
             ps.executeUpdate();
 

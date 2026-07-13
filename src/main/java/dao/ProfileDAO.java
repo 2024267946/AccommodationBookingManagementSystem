@@ -3,6 +3,7 @@ package dao;
 import java.sql.*;
 import model.Profile;
 import DBConnection.DBConnection;
+import util.PasswordUtil;
 
 public class ProfileDAO {
 
@@ -59,7 +60,7 @@ public class ProfileDAO {
             ps.setString(2, profile.getPhone());
             
             if (hasPassword) {
-                ps.setString(3, profile.getPassword());
+                ps.setString(3, PasswordUtil.hash(profile.getPassword()));
                 ps.setString(4, profile.getId());
             } else {
                 ps.setString(3, profile.getId());
@@ -70,5 +71,25 @@ public class ProfileDAO {
             e.printStackTrace();
         }
         return success;
+    }
+
+    public boolean resetGuestPassword(String guestId, String currentPassword, String newPassword) {
+        String selectSql = "SELECT GUESTPASSWORD FROM GUEST WHERE GUESTID=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement select = conn.prepareStatement(selectSql)) {
+            select.setString(1, guestId);
+            try (ResultSet rs = select.executeQuery()) {
+                if (!rs.next() || !PasswordUtil.matches(currentPassword, rs.getString(1))) return false;
+            }
+            try (PreparedStatement update = conn.prepareStatement(
+                    "UPDATE GUEST SET GUESTPASSWORD=? WHERE GUESTID=?")) {
+                update.setString(1, PasswordUtil.hash(newPassword));
+                update.setString(2, guestId);
+                return update.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

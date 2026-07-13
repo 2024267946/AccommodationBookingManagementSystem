@@ -189,9 +189,12 @@ public class AmenityServlet extends HttpServlet {
 
         String amenityName =
                 request.getParameter("amenityName");
+        String accommodationId =
+                request.getParameter("accommodationId");
 
         if (isBlank(amenityIdParam)
-                || isBlank(amenityName)) {
+                || isBlank(amenityName)
+                || isBlank(accommodationId)) {
 
             response.sendRedirect(
                     request.getContextPath()
@@ -211,6 +214,7 @@ public class AmenityServlet extends HttpServlet {
 
             amenity.setAmenityName(
                     amenityName.trim());
+            amenity.setAccommodationId(accommodationId.trim());
 
             boolean success =
                     amenityDAO.updateAmenity(amenity);

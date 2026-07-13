@@ -59,7 +59,7 @@ function searchGuest() {
 <body>
 
 <% if (errorMessage != null) { %>
-<script>alert("<%= errorMessage %>");</script>
+<script>window.addEventListener("DOMContentLoaded",function(){showAppMessage("Operation Failed","<%= errorMessage %>");});</script>
 <% session.removeAttribute("errorMessage"); } %>
 
 <div class="header">
@@ -131,7 +131,7 @@ function searchGuest() {
                     <td>
                         <a class="delete"
                            href="<%=request.getContextPath()%>/staff/archive-guest?guestID=<%=guest.getGuestId()%>"
-                           onclick="return confirm('Are you sure you want to delete this guest?');">
+                           data-confirm-message="Are you sure you want to archive this guest?">
                            Delete
                         </a>
                     </td>
@@ -151,5 +151,6 @@ function searchGuest() {
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
 </body>
 </html>

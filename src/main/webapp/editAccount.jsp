@@ -45,11 +45,6 @@
                     <label>Email Address</label>
                     <input type="email" class="form-control" value="${profile.email != null ? profile.email : ''}" readonly>
                 </div>
-                <div class="form-group">
-                    <label>New Password (Optional)</label>
-                    <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
-                </div>
-                
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <a href="${pageContext.request.contextPath}/profile" class="btn-clear text-center" style="flex: 1; text-decoration: none; text-align: center; line-height: 2.2;">Cancel</a>
                     <button type="submit" class="btn-primary" style="flex: 1;">Save</button>

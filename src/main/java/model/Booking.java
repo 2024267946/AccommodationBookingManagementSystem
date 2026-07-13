@@ -11,6 +11,8 @@ public class Booking {
     private String staffID;
     private String guestID;
     private String accommodationID;
+    private boolean paid;
+    private String accommodationName;
 
     public Booking() {
     }
@@ -107,4 +109,9 @@ public class Booking {
     public void setAccommodationID(String accommodationID) {
         this.accommodationID = accommodationID;
     }
+
+    public boolean isPaid() { return paid; }
+    public void setPaid(boolean paid) { this.paid = paid; }
+    public String getAccommodationName() { return accommodationName; }
+    public void setAccommodationName(String accommodationName) { this.accommodationName = accommodationName; }
 }

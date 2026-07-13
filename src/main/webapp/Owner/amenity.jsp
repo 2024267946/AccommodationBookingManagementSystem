@@ -328,6 +328,9 @@
             cursor: pointer;
         }
 
+        .modal-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:24px; }
+        .secondary-action { display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:0 17px;border:1px solid #d8d0c6;border-radius:8px;background:#f3f0eb;color:#4d4a46;font:inherit;font-weight:700;cursor:pointer; }
+
         @media (max-width: 900px) {
             .amenity-layout {
                 grid-template-columns: 1fr;
@@ -482,16 +485,41 @@
 
                                 </div>
 
-                                <button type="submit"
-                                        class="primary-action">
-                                    Save
-                                </button>
+                                <div class="modal-actions">
+                                    <button type="button" class="secondary-action" id="cancel-amenity-modal">Cancel</button>
+                                    <button type="submit" class="primary-action">Save</button>
+                                </div>
 
                             </form>
 
                         </div>
 
                     </section>
+                    </div>
+
+                    <div class="amenity-modal" id="update-amenity-modal" aria-hidden="true">
+                        <section class="panel-card amenity-modal-content" role="dialog" aria-modal="true">
+                            <div class="panel-header modal-header-row"><h2>Update Amenity</h2><button type="button" class="modal-close" id="close-update-modal">&times;</button></div>
+                            <div class="create-panel-body">
+                                <form action="${pageContext.request.contextPath}/owner/amenity/update" method="post">
+                                    <input type="hidden" id="updateAmenityId" name="amenityId">
+                                    <div class="form-group"><label for="updateAmenityName">Amenity Name</label><input id="updateAmenityName" name="amenityName" class="amenity-input" required></div>
+                                    <div class="form-group"><label for="updateAccommodationId">Accommodation</label><select id="updateAccommodationId" name="accommodationId" class="amenity-input" required>
+                                        <% if (accommodationList != null) for (Accommodation accommodation : accommodationList) { %>
+                                        <option value="<%= accommodation.getAccommodationId() %>"><%= accommodation.getAccommodationId() %> - <%= accommodation.getAccommodationName() %></option>
+                                        <% } %>
+                                    </select></div>
+                                    <div class="modal-actions"><button type="button" class="secondary-action" id="cancel-update-modal">Cancel</button><button type="submit" class="primary-action">Update</button></div>
+                                </form>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="amenity-modal" id="archive-amenity-modal" aria-hidden="true">
+                        <section class="panel-card amenity-modal-content" role="dialog" aria-modal="true">
+                            <div class="panel-header modal-header-row"><h2>Archive Amenity</h2><button type="button" class="modal-close" id="close-archive-modal">&times;</button></div>
+                            <div class="create-panel-body"><p style="margin-top:0;color:#655f59;">Are you sure you want to archive <strong id="archiveAmenityName"></strong>?</p><div class="modal-actions"><button type="button" class="secondary-action" id="cancel-archive-modal">Cancel</button><a id="confirmArchiveAmenity" class="archive-action" href="#">Archive</a></div></div>
+                        </section>
                     </div>
 
                     <section class="panel-card">
@@ -533,26 +561,7 @@
 
                                                 <% if (!archivedTab) { %>
 
-                                                <form action="${pageContext.request.contextPath}/owner/amenity/update"
-                                                      method="post"
-                                                      class="amenity-update-form">
-
-                                                    <input type="hidden"
-                                                           name="amenityId"
-                                                           value="<%= amenity.getAmenityId() %>">
-
-                                                    <input type="text"
-                                                           name="amenityName"
-                                                           class="amenity-input"
-                                                           value="<%= amenity.getAmenityName() %>"
-                                                           required>
-
-                                                    <button type="submit"
-                                                            class="update-action">
-                                                        Update
-                                                    </button>
-
-                                                </form>
+                                                <%= amenity.getAmenityName() %>
 
                                                 <% } else { %>
                                                     <%= amenity.getAmenityName() %>
@@ -566,10 +575,8 @@
 
                                                 <% if (!archivedTab) { %>
 
-                                                <a href="${pageContext.request.contextPath}/owner/amenity/archive?id=<%= amenity.getAmenityId() %>"
-                                                   class="archive-action">
-                                                    Archive
-                                                </a>
+                                                <button type="button" class="update-action open-update-modal" data-id="<%= amenity.getAmenityId() %>">Update</button>
+                                                <button type="button" class="archive-action open-archive-modal" data-id="<%= amenity.getAmenityId() %>">Archive</button>
 
                                                 <% } else { %>
                                                 <a href="${pageContext.request.contextPath}/owner/amenity/restore?id=<%= amenity.getAmenityId() %>"
@@ -637,6 +644,7 @@
         const amenityModal = document.getElementById("amenity-modal");
         const openAmenityModal = document.getElementById("open-amenity-modal");
         const closeAmenityModal = document.getElementById("close-amenity-modal");
+        const cancelAmenityModal = document.getElementById("cancel-amenity-modal");
 
         function setAmenityModal(open) {
             amenityModal.classList.toggle("open", open);
@@ -647,12 +655,50 @@
 
         if (openAmenityModal) openAmenityModal.addEventListener("click", function () { setAmenityModal(true); });
         closeAmenityModal.addEventListener("click", function () { setAmenityModal(false); });
+        cancelAmenityModal.addEventListener("click", function () { setAmenityModal(false); });
         amenityModal.addEventListener("click", function (event) {
             if (event.target === amenityModal) setAmenityModal(false);
         });
         document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape") setAmenityModal(false);
+            if (event.key === "Escape") {
+                setAmenityModal(false);
+                setUpdateModal(false);
+                setArchiveModal(false);
+            }
         });
+
+        const updateModal = document.getElementById("update-amenity-modal");
+        const archiveModal = document.getElementById("archive-amenity-modal");
+        function findAmenity(id) { return amenityList.find(function (item) { return item.id === id; }); }
+        function setUpdateModal(open) { updateModal.classList.toggle("open", open); updateModal.setAttribute("aria-hidden", String(!open)); document.body.style.overflow = open ? "hidden" : ""; }
+        function setArchiveModal(open) { archiveModal.classList.toggle("open", open); archiveModal.setAttribute("aria-hidden", String(!open)); document.body.style.overflow = open ? "hidden" : ""; }
+
+        document.querySelectorAll(".open-update-modal").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const item = findAmenity(button.dataset.id);
+                if (!item) return;
+                document.getElementById("updateAmenityId").value = item.amenity.amenityId;
+                document.getElementById("updateAmenityName").value = item.amenity.amenityName;
+                document.getElementById("updateAccommodationId").value = item.amenity.accommodationId;
+                setUpdateModal(true);
+                document.getElementById("updateAmenityName").focus();
+            });
+        });
+        document.querySelectorAll(".open-archive-modal").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const item = findAmenity(button.dataset.id);
+                if (!item) return;
+                document.getElementById("archiveAmenityName").textContent = item.amenity.amenityName;
+                document.getElementById("confirmArchiveAmenity").href = "${pageContext.request.contextPath}/owner/amenity/archive?id=" + encodeURIComponent(item.amenity.amenityId);
+                setArchiveModal(true);
+            });
+        });
+        document.getElementById("close-update-modal").addEventListener("click", function(){setUpdateModal(false);});
+        document.getElementById("cancel-update-modal").addEventListener("click", function(){setUpdateModal(false);});
+        document.getElementById("close-archive-modal").addEventListener("click", function(){setArchiveModal(false);});
+        document.getElementById("cancel-archive-modal").addEventListener("click", function(){setArchiveModal(false);});
+        updateModal.addEventListener("click", function(event){if(event.target===updateModal)setUpdateModal(false);});
+        archiveModal.addEventListener("click", function(event){if(event.target===archiveModal)setArchiveModal(false);});
     </script>
 
 </body>

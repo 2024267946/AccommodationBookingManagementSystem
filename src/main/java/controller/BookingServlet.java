@@ -120,10 +120,14 @@ public class BookingServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        if (session == null) {
+        if (session == null || session.getAttribute("loggedGuest") == null) {
+            String returnTo = "/booking?id=" + encode(request.getParameter("accommodationID"))
+                    + "&checkIn=" + encode(request.getParameter("checkInDate"))
+                    + "&checkOut=" + encode(request.getParameter("checkOutDate"))
+                    + "&pax=" + encode(request.getParameter("numberOfPax"));
             response.sendRedirect(
                     request.getContextPath()
-                    + "/login.jsp?error=unauthorized");
+                    + "/login.jsp?bookingLogin=required&returnTo=" + encode(returnTo));
             return;
         }
 
@@ -135,13 +139,6 @@ public class BookingServlet extends HttpServlet {
          * Example:
          * session.setAttribute("loggedGuest", guest);
          */
-        if (loggedGuest == null) {
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/login.jsp?error=guestSessionMissing");
-            return;
-        }
-
         String accommodationID =
                 request.getParameter("accommodationID");
 
@@ -226,34 +223,9 @@ public class BookingServlet extends HttpServlet {
                     BookingDAO.createBooking(booking);
 
             if (bookingID != null) {
-
-                session.setAttribute(
-                        "bookingID",
-                        bookingID);
-
-                session.setAttribute(
-                        "totalAmount",
-                        totalPrice);
-
-                session.setAttribute(
-                        "selectedAccommodationID",
-                        accommodationID.trim());
-
-                session.setAttribute(
-                        "bookingCheckIn",
-                        checkInDate.trim());
-
-                session.setAttribute(
-                        "bookingCheckOut",
-                        checkOutDate.trim());
-
-                session.setAttribute(
-                        "bookingPax",
-                        numberOfPax);
-
                 response.sendRedirect(
                         request.getContextPath()
-                        + "/paymentPopUp.jsp");
+                        + "/booking/my-booking?booking=created");
 
             } else {
 

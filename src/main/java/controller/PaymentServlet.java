@@ -22,7 +22,7 @@ import model.Booking;
 import model.Guest;
 import model.Payment;
 
-@WebServlet(urlPatterns = {"/PaymentServlet", "/PaymentCallbackServlet", "/PaymentReturnServlet", "/booking/receipt"})
+@WebServlet(urlPatterns = {"/PaymentServlet", "/PaymentCallbackServlet", "/PaymentReturnServlet", "/booking/pay", "/booking/receipt", "/booking/invoice"})
 public class PaymentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String SECRET_KEY = "qlp9i554-uc58-ej30-urd4-60ko8r3joprp";
@@ -33,7 +33,9 @@ public class PaymentServlet extends HttpServlet {
             throws ServletException, IOException {
         switch (request.getServletPath()) {
             case "/PaymentReturnServlet": paymentReturn(request, response); break;
+            case "/booking/pay": openPayment(request, response); break;
             case "/booking/receipt": receipt(request, response); break;
+            case "/booking/invoice": invoice(request, response); break;
             default: response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
     }
@@ -52,12 +54,15 @@ public class PaymentServlet extends HttpServlet {
 
     private void startPayment(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        String bookingID = request.getParameter("bookingID");
-        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("bookingID") == null
+                || session.getAttribute("totalAmount") == null) {
+            response.sendRedirect(request.getContextPath() + "/booking/my-booking?payment=invalid");
+            return;
+        }
+        String bookingID = session.getAttribute("bookingID").toString();
+        double totalAmount = ((Number) session.getAttribute("totalAmount")).doubleValue();
         int amountInSen = (int) (totalAmount * 100);
-        HttpSession session = request.getSession();
-        session.setAttribute("bookingID", bookingID);
-        session.setAttribute("totalAmount", totalAmount);
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":"
                 + request.getServerPort() + request.getContextPath();
         String params =
@@ -92,6 +97,36 @@ public class PaymentServlet extends HttpServlet {
         }
         String billCode = result.split("\"BillCode\":\"")[1].split("\"")[0];
         response.sendRedirect("https://dev.toyyibpay.com/" + billCode);
+    }
+
+    private void openPayment(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        Guest guest = session == null ? null : (Guest) session.getAttribute("loggedGuest");
+        if (guest == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
+            return;
+        }
+        String bookingId = request.getParameter("bookingID");
+        Booking selected = null;
+        for (Booking booking : new BookingDAO().getBookingsByGuest(guest.getGuestId())) {
+            if (booking.getBookingID().equals(bookingId)
+                    && "PENDING".equalsIgnoreCase(booking.getBookingStatus())) {
+                selected = booking;
+                break;
+            }
+        }
+        if (selected == null) {
+            response.sendRedirect(request.getContextPath() + "/booking/my-booking?payment=invalid");
+            return;
+        }
+        session.setAttribute("bookingID", selected.getBookingID());
+        session.setAttribute("totalAmount", selected.getTotalPrice());
+        session.setAttribute("selectedAccommodationID", selected.getAccommodationID());
+        session.setAttribute("bookingCheckIn", selected.getCheckInDate());
+        session.setAttribute("bookingCheckOut", selected.getCheckOutDate());
+        session.setAttribute("bookingPax", selected.getNumberOfPax());
+        request.getRequestDispatcher("/paymentPopUp.jsp").forward(request, response);
     }
 
     private void paymentReturn(HttpServletRequest request, HttpServletResponse response)
@@ -145,12 +180,35 @@ public class PaymentServlet extends HttpServlet {
         for (Booking booking : bookings) {
             if (bookingID.equals(booking.getBookingID())) { selected = booking; break; }
         }
-        if (selected == null) {
+        if (selected == null || !selected.isPaid()) {
             response.sendRedirect(request.getContextPath() + "/booking/my-booking?error=receiptNotFound");
             return;
         }
         request.setAttribute("booking", selected);
         request.getRequestDispatcher("/receipt.jsp").forward(request, response);
+    }
+
+    private void invoice(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        Guest guest = session == null ? null : (Guest) session.getAttribute("loggedGuest");
+        if (guest == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
+            return;
+        }
+        String bookingId = request.getParameter("bookingID");
+        Booking selected = null;
+        for (Booking booking : new BookingDAO().getBookingsByGuest(guest.getGuestId())) {
+            if (booking.getBookingID().equals(bookingId) && booking.isPaid()) { selected = booking; break; }
+        }
+        Payment payment = selected == null ? null : new PaymentDAO().getPaidPaymentByBookingId(bookingId);
+        if (selected == null || payment == null) {
+            response.sendRedirect(request.getContextPath() + "/profile?error=invoiceNotFound");
+            return;
+        }
+        request.setAttribute("booking", selected);
+        request.setAttribute("payment", payment);
+        request.getRequestDispatcher("/invoice.jsp").forward(request, response);
     }
 
     private String enc(String value) {

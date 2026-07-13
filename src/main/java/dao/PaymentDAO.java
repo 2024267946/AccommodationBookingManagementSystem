@@ -60,7 +60,8 @@ public class PaymentDAO {
             }
 
             try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE BOOKING SET BOOKINGSTATUS='CONFIRMED' WHERE BOOKINGID=?")) {
+                    "UPDATE BOOKING SET BOOKINGSTATUS='CONFIRMED' "
+                    + "WHERE BOOKINGID=? AND UPPER(BOOKINGSTATUS)='PENDING'")) {
                 ps.setString(1, payment.getBookingID());
                 if (ps.executeUpdate() == 0) { conn.rollback(); return false; }
             }
@@ -75,5 +76,27 @@ public class PaymentDAO {
         }
 
         return success;
+    }
+
+    public Payment getPaidPaymentByBookingId(String bookingId) {
+        String sql = "SELECT PAYMENTID, BOOKINGID, TO_CHAR(PAYMENTDATE,'YYYY-MM-DD') PAYMENTDATE, "
+                + "TOTALAMOUNT, PAYMENTMETHOD, PAYMENTSTATUS FROM PAYMENT "
+                + "WHERE BOOKINGID=? AND UPPER(PAYMENTSTATUS)='PAID' ORDER BY PAYMENTDATE DESC FETCH FIRST 1 ROWS ONLY";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Payment payment = new Payment();
+                    payment.setPaymentID(rs.getString("PAYMENTID"));
+                    payment.setBookingID(rs.getString("BOOKINGID"));
+                    payment.setPaymentDate(rs.getString("PAYMENTDATE"));
+                    payment.setTotalAmount(rs.getDouble("TOTALAMOUNT"));
+                    payment.setPaymentMethod(rs.getString("PAYMENTMETHOD"));
+                    payment.setPaymentStatus(rs.getString("PAYMENTSTATUS"));
+                    return payment;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 }

@@ -27,6 +27,7 @@
 </head>
 
 <body class="admin-body">
+    <style>.accom-success-modal{position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(8,28,22,.62)}.accom-success-card{width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22)}.accom-success-icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold}.accom-success-card h2{margin:0 0 9px;color:#123a30}.accom-success-card p{margin:0 0 22px;color:#746f69}</style>
 
     <!-- Staff top navigation -->
     <jsp:include page="StaffNavbar.jsp" />
@@ -240,6 +241,10 @@
         </main>
 
     </div>
+
+    <% if ("updated".equals(request.getParameter("success"))) { %>
+    <div class="accom-success-modal"><div class="accom-success-card"><div class="accom-success-icon">✓</div><h2>Accommodation Updated Successfully</h2><p>The accommodation information has been saved.</p><a class="btn-primary" href="${pageContext.request.contextPath}/staff/accommodation" style="display:inline-flex;text-decoration:none;">Done</a></div></div>
+    <% } %>
 
 </body>
 </html>

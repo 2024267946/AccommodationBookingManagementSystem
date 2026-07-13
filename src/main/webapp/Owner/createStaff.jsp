@@ -30,13 +30,25 @@
                 </div>
 
                 <div class="auth-card" style="padding: 40px !important; border-radius: 16px !important; margin: 0 auto !important;">
+
+                    <% if ("passwordMismatch".equals(request.getParameter("error"))) { %>
+                        <div class="message message-error" style="margin-bottom:20px;">Temporary passwords do not match.</div>
+                    <% } else if ("missingField".equals(request.getParameter("error"))) { %>
+                        <div class="message message-error" style="margin-bottom:20px;">Please complete every required field.</div>
+                    <% } else if ("invalidPassword".equals(request.getParameter("error"))) { %>
+                        <div class="message message-error" style="margin-bottom:20px;">Temporary password must contain at least 6 characters.</div>
+                    <% } %>
                     
-                    <form action="${pageContext.request.contextPath}/owner/create-staff" method="POST">
-                        <input type="hidden" name="staffRoles" value="STAFF">
+                    <form id="createStaffForm" action="${pageContext.request.contextPath}/owner/create-staff" method="POST">
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
                             <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Full Name</label>
                             <input type="text" name="staffName" class="form-control" placeholder="Enter staff's full name" required>
+                        </div>
+
+                        <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
+                            <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Role</label>
+                            <input type="text" name="staffRoles" class="form-control" value="STAFF" readonly aria-readonly="true" style="background:#f2f0eb; cursor:not-allowed;">
                         </div>
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
@@ -55,6 +67,12 @@
                             <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Staff members can update their password later via profile configurations.</small>
                         </div>
 
+                        <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 30px; text-align: left;">
+                            <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Confirm Temporary Password</label>
+                            <input id="confirmStaffPassword" type="password" name="confirmStaffPassword" class="form-control" minlength="6" placeholder="Enter the temporary password again" required>
+                            <small id="passwordMatchMessage" style="color:#a61b1b; font-size:0.8rem; margin-top:4px; display:none;">Passwords do not match.</small>
+                        </div>
+
                         <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 10px;">
                             <a href="${pageContext.request.contextPath}/owner/view-staff" class="btn-primary" style="background-color: transparent !important; color: var(--text-main) !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; padding: 12px 24px !important;">
                                 Cancel
@@ -70,6 +88,21 @@
             </div>
         </main>
     </div>
+
+    <script>
+        const password = document.querySelector('[name="staffPassword"]');
+        const confirmation = document.getElementById('confirmStaffPassword');
+        const matchMessage = document.getElementById('passwordMatchMessage');
+
+        function validatePasswordMatch() {
+            const mismatch = confirmation.value !== '' && password.value !== confirmation.value;
+            confirmation.setCustomValidity(mismatch ? 'Passwords do not match.' : '');
+            matchMessage.style.display = mismatch ? 'block' : 'none';
+        }
+
+        password.addEventListener('input', validatePasswordMatch);
+        confirmation.addEventListener('input', validatePasswordMatch);
+    </script>
 
 </body>
 </html>

@@ -46,17 +46,18 @@ Accommodation accommodation = (Accommodation) request.getAttribute("accomodation
         <p class="mb-0">&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
     </footer>
     
+    <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         if (params.get("error") === "-1") {
-            alert("The accommodation was not found.");
+            showAppMessage("Accommodation Not Found", "The requested accommodation was not found.");
         }
 
         const status = params.get("status");
         if (status === "failed") {
             const which = params.get("which");
             if (which === "create-booking") {
-                alert("Failed to create booking");
+                showAppMessage("Booking Failed", "The booking could not be created. Please try again.");
             }
         }
     </script>

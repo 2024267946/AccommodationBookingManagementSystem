@@ -142,11 +142,13 @@ public class BookingDAO {
 
         String sql =
             "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
-            "BD.ACCOMMODATIONID, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "BD.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "CASE WHEN EXISTS (SELECT 1 FROM PAYMENT P WHERE P.BOOKINGID=B.BOOKINGID AND UPPER(P.PAYMENTSTATUS)='PAID') THEN 1 ELSE 0 END ISPAID, " +
             "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
             "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
             "FROM BOOKING B " +
             "JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
+            "JOIN ACCOMMODATION A ON A.ACCOMMODATIONID=BD.ACCOMMODATIONID " +
             "WHERE B.GUESTID = ? " +
             "ORDER BY B.BOOKINGID DESC";
 
@@ -166,11 +168,13 @@ public class BookingDAO {
                 b.setGuestID(rs.getString("GUESTID"));
                 b.setStaffID(rs.getString("STAFFID"));
                 b.setAccommodationID(rs.getString("ACCOMMODATIONID"));
+                b.setAccommodationName(rs.getString("ACCOMMODATIONNAME"));
                 b.setCheckInDate(rs.getString("CHECKINSTR"));
                 b.setCheckOutDate(rs.getString("CHECKOUTSTR"));
                 b.setNumberOfPax(rs.getInt("NUMBEROFPAX"));
                 b.setTotalPrice(rs.getDouble("TOTALPRICE"));
                 b.setBookingStatus(rs.getString("BOOKINGSTATUS"));
+                b.setPaid(rs.getInt("ISPAID") == 1);
 
                 list.add(b);
             }

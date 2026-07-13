@@ -44,44 +44,73 @@ public class AuthenticationServlet extends HttpServlet {
 
     private void register(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        String returnTo = safeReturnTo(request.getParameter("returnTo"));
+        String name = request.getParameter("name");
+        String phone = request.getParameter("phone");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
+        if (isBlank(name) || isBlank(phone) || isBlank(email)
+                || isBlank(password) || isBlank(confirmPassword)) {
+            response.sendRedirect(request.getContextPath() + appendReturn("/register.jsp?error=missing", returnTo));
+            return;
+        }
+        if (!password.equals(confirmPassword)) {
+            response.sendRedirect(request.getContextPath() + appendReturn("/register.jsp?error=mismatch", returnTo));
+            return;
+        }
+        if (password.length() < 6) {
+            response.sendRedirect(request.getContextPath() + appendReturn("/register.jsp?error=short", returnTo));
+            return;
+        }
+        if (userDAO.emailExists(email.trim())) {
+            response.sendRedirect(request.getContextPath() + appendReturn("/register.jsp?error=emailExists", returnTo));
+            return;
+        }
         Guest guest = new Guest();
-        guest.setGuestName(request.getParameter("name"));
-        guest.setGuestEmail(request.getParameter("email"));
-        guest.setGuestPhoneNumber(request.getParameter("phone"));
-        guest.setGuestPassword(request.getParameter("password"));
+        guest.setGuestName(name.trim());
+        guest.setGuestEmail(email.trim());
+        guest.setGuestPhoneNumber(phone.trim());
+        guest.setGuestPassword(password);
         response.sendRedirect(request.getContextPath()
                 + (userDAO.registerGuest(guest)
-                ? "/login.jsp?register=success" : "/register.jsp?error=1"));
+                ? appendReturn("/register.jsp?register=success", returnTo)
+                : appendReturn("/register.jsp?error=failed", returnTo)));
     }
 
     private void login(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        String returnTo = safeReturnTo(request.getParameter("returnTo"));
         if (isBlank(email) || isBlank(password)) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp?error=missing");
+            response.sendRedirect(request.getContextPath() + appendReturn("/login.jsp?error=missing", returnTo));
             return;
         }
 
         Guest guest = userDAO.loginGuest(email.trim(), password);
         if (guest != null) {
             HttpSession session = request.getSession(true);
+            session.setMaxInactiveInterval(300);
             session.setAttribute("role", "GUEST");
             session.setAttribute("loggedGuest", guest);
             session.setAttribute("guestID", guest.getGuestId());
             session.setAttribute("guestName", guest.getGuestName());
-            response.sendRedirect(request.getContextPath() + "/homepage.jsp");
+            response.sendRedirect(request.getContextPath()
+                    + (returnTo == null ? "/homepage.jsp" : returnTo));
             return;
         }
 
         Staff staff = userDAO.loginStaff(email.trim(), password);
         if (staff == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp?error=1");
+            response.sendRedirect(request.getContextPath() + appendReturn("/login.jsp?error="
+                    + (userDAO.emailExists(email.trim()) ? "incorrect" : "notFound"), returnTo));
             return;
         }
 
         String role = staff.getStaffRoles();
         HttpSession session = request.getSession(true);
+        session.setMaxInactiveInterval(300);
         session.setAttribute("role", role);
         session.setAttribute("loggedStaff", staff);
         session.setAttribute("staffID", staff.getStaffId());
@@ -106,5 +135,15 @@ public class AuthenticationServlet extends HttpServlet {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private String safeReturnTo(String value) {
+        return value != null && value.startsWith("/booking?") && !value.contains("\r")
+                && !value.contains("\n") ? value : null;
+    }
+
+    private String appendReturn(String path, String returnTo) {
+        return returnTo == null ? path : path + "&returnTo="
+                + java.net.URLEncoder.encode(returnTo, java.nio.charset.StandardCharsets.UTF_8);
     }
 }

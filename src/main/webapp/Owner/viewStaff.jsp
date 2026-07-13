@@ -203,7 +203,7 @@ function searchStaff() {
 
 <% if (errorMessage != null) { %>
 <script>
-alert("<%= errorMessage %>");
+window.addEventListener("DOMContentLoaded",function(){showAppMessage("Operation Failed","<%= errorMessage %>");});
 </script>
 <%
 session.removeAttribute("errorMessage");
@@ -287,7 +287,7 @@ session.removeAttribute("errorMessage");
                     <td class="action">
                         <a class="update" href="<%=request.getContextPath()%>/staff/update?staffID=<%=staff.getStaffId()%>">Update</a>
                         <a class="delete" href="<%=request.getContextPath()%>/staff/archive-staff?staffID=<%=staff.getStaffId()%>"
-                           onclick="return confirm('Are you sure you want to delete this staff?');">Delete</a>
+                           data-confirm-message="Are you sure you want to archive this staff?">Delete</a>
                     </td>
                 </tr>
             <%
@@ -305,5 +305,6 @@ session.removeAttribute("errorMessage");
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
 </body>
 </html>

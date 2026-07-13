@@ -19,6 +19,9 @@
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/theme.css">
 </head>
 <body class="admin-body">
+    <style>
+      #user-management-table tbody tr[hidden] { display: none !important; }
+    </style>
 
     <jsp:include page="ownerNavbar.jsp" />
 
@@ -52,7 +55,7 @@
                   <input
                     type="text"
                     id="user-search-input"
-                    placeholder="Search Guest, Staff, or Owner Name..."
+                    placeholder="Search any name, role, email, phone, or status..."
                     class="search-input"
                   />
                 </div>
@@ -76,7 +79,7 @@
             <div class="table-responsive">
               <table class="data-table" id="user-management-table">
                 <thead>
-    <tr class="user-data-row">
+    <tr>
                     <th>Name</th>
                     <th>Role</th>
                     <th>Email</th>
@@ -90,7 +93,7 @@
 			if (staffList != null && !staffList.isEmpty()) {
     		for (Staff staff : staffList) {
 			%>
-   			 <tr>
+    <tr class="user-data-row" data-user-row>
         	<td><%= staff.getStaffName() %></td>
        	 <td><%= staff.getStaffRoles() %></td>
         	<td><%= staff.getStaffEmail() %></td>
@@ -105,7 +108,7 @@
 
         <form action="${pageContext.request.contextPath}/owner/archive-staff" method="get" style="display:inline; margin:0;">
             <input type="hidden" name="staffID" value="<%= staff.getStaffId() %>">
-            <button type="submit" class="btn-danger">Archive</button>
+            <button type="submit" class="btn-danger" data-confirm-message="Are you sure you want to archive this staff account?">Archive</button>
         </form>
     </td>
 </tr>
@@ -114,7 +117,7 @@
     }
 } else {
 %>
-    <tr>
+    <tr data-empty-row>
         <td colspan="6">No staff found.</td>
     </tr>
 <%
@@ -126,7 +129,7 @@ if (guestList != null) {
     for (Guest guest : guestList) {
 %>
 
-<tr class="user-data-row">
+<tr class="user-data-row" data-user-row>
 
     <td><%= guest.getGuestName() %></td>
 
@@ -146,7 +149,7 @@ if (guestList != null) {
 
  <form action="${pageContext.request.contextPath}/owner/archive-guest" method="get" style="display:inline; margin:0;">
             <input type="hidden" name="guestID" value="<%= guest.getGuestId() %>">
-            <button type="submit" class="btn-danger">Archive</button>
+            <button type="submit" class="btn-danger" data-confirm-message="Are you sure you want to archive this guest account?">Archive</button>
         </form>
     </td>
 
@@ -156,7 +159,7 @@ if (guestList != null) {
     }
 }
 %>
-<tr id="no-search-results" style="display:none;">
+<tr id="no-search-results" hidden>
     <td colspan="6" class="text-center text-muted">No matching users found.</td>
 </tr>
 </tbody>
@@ -167,30 +170,43 @@ if (guestList != null) {
         </div>
       </main>
     </div>
+    <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
     <script>
-      const userSearchForm = document.getElementById("user-search-form");
-      const userSearchInput = document.getElementById("user-search-input");
-      const userRows = document.querySelectorAll("#user-management-table .user-data-row");
-      const noSearchResults = document.getElementById("no-search-results");
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("user-search-form");
+      const input = document.getElementById("user-search-input");
+      const rows = Array.from(document.querySelectorAll("#user-management-table tbody tr[data-user-row]"));
+      const noResults = document.getElementById("no-search-results");
+      const emptyRows = Array.from(document.querySelectorAll("#user-management-table tbody tr[data-empty-row]"));
 
-      function filterUsers() {
-        const query = userSearchInput.value.trim().toLowerCase();
-        let visibleRows = 0;
-
-        userRows.forEach(function (row) {
-          const matches = row.textContent.toLowerCase().includes(query);
-          row.style.display = matches ? "" : "none";
-          if (matches) visibleRows++;
-        });
-
-        noSearchResults.style.display = visibleRows === 0 ? "" : "none";
+      function normalize(value) {
+        return value.toLocaleLowerCase().normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
       }
 
-      userSearchInput.addEventListener("input", filterUsers);
-      userSearchForm.addEventListener("submit", function (event) {
+      function filterUsers() {
+        const query = normalize(input.value);
+        let matches = 0;
+        rows.forEach(function (row) {
+          const rowText = normalize(Array.from(row.cells).map(function (cell) {
+            return cell.textContent;
+          }).join(" "));
+          const visible = query === "" || rowText.includes(query);
+          row.hidden = !visible;
+          if (visible) matches++;
+        });
+        emptyRows.forEach(function (row) { row.hidden = query !== "" || rows.length > 0; });
+        noResults.hidden = matches !== 0;
+      }
+
+      input.addEventListener("input", filterUsers);
+      input.addEventListener("search", filterUsers);
+      form.addEventListener("submit", function (event) {
         event.preventDefault();
         filterUsers();
       });
+      filterUsers();
+    });
     </script>
 </body>
 </html>

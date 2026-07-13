@@ -96,8 +96,16 @@
         </main>
     </div>
 
-    <!-- Success Toast Alert Infrastructure -->
-    <div id="saveToast" class="toast-popup-message">Profile changes saved successfully!</div>
+    <% if ("true".equals(request.getParameter("updateSuccess"))) { %>
+    <div style="position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,28,22,.62);padding:24px;">
+        <div style="width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22);">
+            <div style="display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold;">✓</div>
+            <h2 style="margin:0 0 9px;color:#123a30;">Account Updated Successfully</h2>
+            <p style="margin:0 0 22px;color:#746f69;">Your latest profile information has been saved.</p>
+            <a class="btn-primary" href="${pageContext.request.contextPath}/Owner/myProfile" style="display:inline-flex;text-decoration:none;">Done</a>
+        </div>
+    </div>
+    <% } %>
 
     <script>
         let isEditMode = false;
@@ -127,15 +135,6 @@
             }
         }
 
-        // Show update confirmation toast if redirect parameter matches
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('updateSuccess') === 'true') {
-                const toast = document.getElementById('saveToast');
-                toast.classList.add('visible');
-                setTimeout(() => toast.classList.remove('visible'), 4000);
-            }
-        });
     </script>
 </body>
 </html>
