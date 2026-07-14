@@ -461,7 +461,7 @@
                             <% } else {
                                 for (int imageIndex = 0; imageIndex < cardImages.size(); imageIndex++) { %>
                                 <img class="accommodation-slide <%= imageIndex == 0 ? "is-active" : "" %>"
-                                     src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(acc.getAccommodationId(), "UTF-8") %>&index=<%= imageIndex %>"
+                                     src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(acc.getAccommodationId(), "UTF-8") %>&index=<%= imageIndex %>&v=<%= cardImages.get(imageIndex).hashCode() %>"
                                      alt="<%= acc.getAccommodationName() %> picture <%= imageIndex + 1 %>">
                             <%  }
                                 if (cardImages.size() > 1) { %>

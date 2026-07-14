@@ -46,7 +46,7 @@
                         <% if (pictures.isEmpty()) { %>
                         <img src="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(hs.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>" alt="<%= hs.getAccommodationName() %>">
                         <% } else { for (int pictureIndex = 0; pictureIndex < pictures.size(); pictureIndex++) { %>
-                        <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(hs.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="<%= hs.getAccommodationName() %> picture <%= pictureIndex + 1 %>">
+                        <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(hs.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>&v=<%= pictures.get(pictureIndex).hashCode() %>" alt="<%= hs.getAccommodationName() %> picture <%= pictureIndex + 1 %>">
                         <% } if (pictures.size() > 1) { %>
                         <button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= pictures.size() %></span>
                         <% } } %>

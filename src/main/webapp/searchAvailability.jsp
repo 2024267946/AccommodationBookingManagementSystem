@@ -485,7 +485,7 @@
                     <% if (chosenPictures.isEmpty()) { %>
                         <img src="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(accommodationChosen.getAccommodationType()) ? "chalet1.png" : "cmm3.jpg" %>" alt="Selected Stay" class="card-visual-img">
                     <% } else { for (int pictureIndex = 0; pictureIndex < chosenPictures.size(); pictureIndex++) { %>
-                        <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(accommodationChosen.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="Selected Stay picture <%= pictureIndex + 1 %>" class="card-visual-img">
+                        <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(accommodationChosen.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>&v=<%= chosenPictures.get(pictureIndex).hashCode() %>" alt="Selected Stay picture <%= pictureIndex + 1 %>" class="card-visual-img">
                     <% } if (chosenPictures.size() > 1) { %><button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= chosenPictures.size() %></span><% } } %>
                     </div>
                     <span class="badge-geo"><i class="bi bi-geo-alt-fill"></i> <%= accommodationChosen.getLocation() %></span>
@@ -536,7 +536,7 @@
                         <% if (resultPictures.isEmpty()) { %>
                             <img src="${pageContext.request.contextPath}/<%= "CHALET".equalsIgnoreCase(acc.getAccommodationType()) ? "images/chalet1.png" : "images/cmm3.jpg" %>" alt="Stay Thumbnail" class="card-visual-img">
                         <% } else { for (int pictureIndex = 0; pictureIndex < resultPictures.size(); pictureIndex++) { %>
-                            <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(acc.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="<%= acc.getAccommodationName() %> picture <%= pictureIndex + 1 %>" class="card-visual-img">
+                            <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(acc.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>&v=<%= resultPictures.get(pictureIndex).hashCode() %>" alt="<%= acc.getAccommodationName() %> picture <%= pictureIndex + 1 %>" class="card-visual-img">
                         <% } if (resultPictures.size() > 1) { %><button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= resultPictures.size() %></span><% } } %>
                         </div>
                         <span class="badge-geo"><i class="bi bi-geo-alt-fill"></i> <%= acc.getLocation() %></span>
