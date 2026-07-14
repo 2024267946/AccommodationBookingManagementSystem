@@ -197,8 +197,8 @@
         }
 
         .accommodation-carousel { position:relative;width:100%;height:100%; }
-        .accommodation-slide { display:none;width:100%;height:100%; }
-        .accommodation-slide.is-active { display:block; }
+        .image-box img.accommodation-slide { display:none;width:100%;height:100%; }
+        .image-box img.accommodation-slide.is-active { display:block; }
         .carousel-control { position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:rgba(16,55,45,.78);color:#fff;font-size:20px;line-height:1;cursor:pointer;z-index:2; }
         .carousel-control:hover { background:#0f5c49; }
         .carousel-control.previous { left:8px; }
