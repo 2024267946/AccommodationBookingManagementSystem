@@ -509,7 +509,7 @@
                                         <option value="<%= accommodation.getAccommodationId() %>"><%= accommodation.getAccommodationId() %> - <%= accommodation.getAccommodationName() %></option>
                                         <% } %>
                                     </select></div>
-                                    <div class="modal-actions"><button type="button" class="secondary-action" id="cancel-update-modal">Cancel</button><button type="submit" class="primary-action">Update</button></div>
+                                    <div class="modal-actions"><button type="button" class="secondary-action" id="cancel-update-modal">Cancel</button><button type="submit" class="primary-action">Save</button></div>
                                 </form>
                             </div>
                         </section>

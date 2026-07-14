@@ -91,7 +91,7 @@ public class AuthenticationServlet extends HttpServlet {
         Guest guest = userDAO.loginGuest(email.trim(), password);
         if (guest != null) {
             HttpSession session = request.getSession(true);
-            session.setMaxInactiveInterval(300);
+            session.setMaxInactiveInterval(3600);
             session.setAttribute("role", "GUEST");
             session.setAttribute("loggedGuest", guest);
             session.setAttribute("guestID", guest.getGuestId());

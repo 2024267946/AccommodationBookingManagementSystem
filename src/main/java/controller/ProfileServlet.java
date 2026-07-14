@@ -101,11 +101,15 @@ public class ProfileServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
             return;
         }
+        
         String name = request.getParameter("fullName");
         String phone = request.getParameter("phone");
+        String email = request.getParameter("email"); // Added: Retrieve email parameter
 
+        // Updated: Validate that the email field is not missing or empty
         if (name == null || name.trim().isEmpty()
-                || phone == null || phone.trim().isEmpty()) {
+                || phone == null || phone.trim().isEmpty()
+                || email == null || email.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath()
                     + ("OWNER".equalsIgnoreCase(role)
                         ? "/Owner/myProfile?error=invalidProfile"
@@ -114,6 +118,7 @@ public class ProfileServlet extends HttpServlet {
         }
         name = name.trim();
         phone = phone.trim();
+        email = email.trim(); // Added: Trim whitespace from email
 
         Profile currentProfile = profileDAO.getProfileById(userId, role);
         if (currentProfile == null) {
@@ -125,7 +130,7 @@ public class ProfileServlet extends HttpServlet {
         updatedProfile.setId(userId);
         updatedProfile.setName(name);
         updatedProfile.setPhone(phone);
-        updatedProfile.setEmail(currentProfile.getEmail());
+        updatedProfile.setEmail(email); // Updated: Pass the new form email instead of the old one
         updatedProfile.setPassword(null);
         updatedProfile.setRole(role);
 
@@ -138,11 +143,13 @@ public class ProfileServlet extends HttpServlet {
             if (loggedGuest instanceof Guest) {
                 ((Guest) loggedGuest).setGuestName(name);
                 ((Guest) loggedGuest).setGuestPhoneNumber(phone);
+                ((Guest) loggedGuest).setGuestEmail(email); // Added: Update email inside guest session object
             }
             Object loggedStaff = session.getAttribute("loggedStaff");
             if (loggedStaff instanceof Staff) {
                 ((Staff) loggedStaff).setStaffName(name);
                 ((Staff) loggedStaff).setStaffPhoneNumber(phone);
+                ((Staff) loggedStaff).setStaffEmail(email); // Added: Update email inside staff session object
             }
             response.sendRedirect(request.getContextPath()
                     + ("OWNER".equalsIgnoreCase(role)

@@ -44,26 +44,29 @@ public class ProfileDAO {
 
         boolean hasPassword = profile.getPassword() != null && !profile.getPassword().trim().isEmpty();
 
+        // Updated: Added GUESTEMAIL and STAFFEMAIL to the SQL update queries
         if ("GUEST".equalsIgnoreCase(profile.getRole())) {
             sql = hasPassword ? 
-                "UPDATE GUEST SET GUESTNAME = ?, GUESTPHONENUMBER = ?, GUESTPASSWORD = ? WHERE GUESTID = ?" :
-                "UPDATE GUEST SET GUESTNAME = ?, GUESTPHONENUMBER = ? WHERE GUESTID = ?";
+                "UPDATE GUEST SET GUESTNAME = ?, GUESTPHONENUMBER = ?, GUESTEMAIL = ?, GUESTPASSWORD = ? WHERE GUESTID = ?" :
+                "UPDATE GUEST SET GUESTNAME = ?, GUESTPHONENUMBER = ?, GUESTEMAIL = ? WHERE GUESTID = ?";
         } else {
             sql = hasPassword ? 
-                "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONENUMBER = ?, STAFFPASSWORD = ? WHERE STAFFID = ?" :
-                "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONENUMBER = ? WHERE STAFFID = ?";
+                "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONENUMBER = ?, STAFFEMAIL = ?, STAFFPASSWORD = ? WHERE STAFFID = ?" :
+                "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONENUMBER = ?, STAFFEMAIL = ? WHERE STAFFID = ?";
         }
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, profile.getName());
             ps.setString(2, profile.getPhone());
+            ps.setString(3, profile.getEmail()); // Updated: Pushed email into parameter index 3
             
+            // Updated: Shifted remaining parameter indexes down by 1
             if (hasPassword) {
-                ps.setString(3, PasswordUtil.hash(profile.getPassword()));
-                ps.setString(4, profile.getId());
+                ps.setString(4, PasswordUtil.hash(profile.getPassword()));
+                ps.setString(5, profile.getId());
             } else {
-                ps.setString(3, profile.getId());
+                ps.setString(4, profile.getId());
             }
 
             success = ps.executeUpdate() > 0;

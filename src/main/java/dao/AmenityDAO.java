@@ -46,7 +46,7 @@ public class AmenityDAO {
 
     public List<Amenity> getArchivedAmenities() {
 
-        return getAmenitiesByStatus("ARCHIVED");
+        return getAmenitiesByStatus("INACTIVE");
     }
 
     private List<Amenity> getAmenitiesByStatus(String status) {
@@ -348,7 +348,7 @@ public class AmenityDAO {
 
         String sql =
                 "UPDATE AMENITY " +
-                "SET STATUS = 'ARCHIVED' " +
+                "SET STATUS = 'INACTIVE' " +
                 "WHERE AMENITYID = ?";
 
         try (

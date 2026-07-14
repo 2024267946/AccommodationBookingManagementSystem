@@ -34,7 +34,19 @@ Accommodation accommodation = (Accommodation) request.getAttribute("accomodation
                     <span><i class="fas fa-map-marker-alt"></i> <%= accommodation.getLocation() %></span>
                 </div>
 
-                <a href="search?id=<%= accommodation.getAccommodationId() %>" class="btn-primary btn-block text-center" style="margin-top: 2rem; display: inline-block; text-decoration: none;">
+               <% 
+                    boolean isLoggedIn = session.getAttribute("role") != null;
+                    
+                    String bookingRoute = "/booking?id=" + accommodation.getAccommodationId();
+                    
+                    String loginUrl = request.getContextPath() + "/login.jsp?returnTo="+ java.net.URLEncoder.encode(bookingRoute, "UTF-8");
+                    
+                    String directBookUrl = request.getContextPath() + bookingRoute;
+                %>
+                
+                <a href="<%= isLoggedIn ? directBookUrl : loginUrl %>" 
+                   class="btn-primary btn-block text-center" 
+                   style="margin-top: 2rem; display: inline-block; text-decoration: none;">
                     Proceed to Booking
                 </a>
                 <% } %>

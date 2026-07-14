@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="model.Profile" %>
+<%@ page import="model.Staff" %>
 <%
-    Profile profile = (Profile) request.getAttribute("profile");
+    // Retrieve the currently logged-in staff member from the session
+    Staff loggedStaff = (Staff) session.getAttribute("loggedStaff");
 %>
 <!DOCTYPE html>
 <html>
@@ -15,11 +16,11 @@
 <body class="admin-body">
 
     <!-- Top Navigation Bar Header -->
-    <jsp:include page="ownerNavbar.jsp" />
+    <jsp:include page="StaffNavbar.jsp" />
 
     <div class="admin-layout">
         <!-- Pinned Left Sidebar Component -->
-        <jsp:include page="sidebar.jsp" />
+        <jsp:include page="StaffSidebar.jsp" />
 
         <!-- Main Content Area -->
         <main class="main-content">
@@ -35,10 +36,10 @@
 
                 <!-- Sub-navigation tabs inside Account -->
                 <div class="sub-nav-tabs">
-                    <a href="${pageContext.request.contextPath}/Owner/myProfile" class="active">My Profile</a>
-                    <a href="${pageContext.request.contextPath}/owner/view-staff">User Management</a>
-                    <a href="${pageContext.request.contextPath}/owner/view-archived-staff">Archived Staff</a>
-                    <a href="${pageContext.request.contextPath}/owner/view-archived-guest">Archived Guest</a>
+                    <a href="${pageContext.request.contextPath}/staff/my-profile" class="active">My Profile</a>
+                    <a href="${pageContext.request.contextPath}/staff/user-management">User Management</a>
+                    <a href="${pageContext.request.contextPath}/staff/archived-staff">Archived Staff</a>
+                    <a href="${pageContext.request.contextPath}/staff/archived-guest">Archived Guest</a>
                 </div>
 
                 <!-- Personal Information Profile Card -->
@@ -51,15 +52,15 @@
 
                     <!-- Profile Form Section -->
                     <div style="padding: 32px;">
-                        <form id="profileForm" action="${pageContext.request.contextPath}/profile/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
-                            <input type="hidden" name="userId" value="<%= profile.getId() %>">
+                        <% if (loggedStaff != null) { %>
+                        <form id="profileForm" action="${pageContext.request.contextPath}/staff/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+                            <input type="hidden" name="staffId" value="<%= loggedStaff.getStaffId() %>">
                             
                             <!-- 1. Full Name Field -->
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Full Name</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
-                                    
-                                    <input type="text" id="ownerName" name="fullName" value="<%= profile.getName() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="text" id="staffName" name="staffName" value="<%= loggedStaff.getStaffName() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -67,8 +68,7 @@
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Email</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
-                                    
-                                    <input type="email" id="ownerEmail" name="email" value="<%= profile.getEmail() %>" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="email" id="staffEmail" name="staffEmail" value="<%= loggedStaff.getStaffEmail() %>" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -76,8 +76,7 @@
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Phone Number</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
-                                    
-                                    <input type="text" id="ownerPhone" name="phone" value="<%= profile.getPhone() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="text" id="staffPhone" name="staffPhoneNumber" value="<%= loggedStaff.getStaffPhoneNumber() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -87,8 +86,10 @@
                                     <span id="btnText">Edit Account</span>
                                 </button>
                             </div>
-
                         </form>
+                        <% } else { %>
+                            <p class="text-muted">Profile data could not be loaded.</p>
+                        <% } %>
                     </div>
                 </div>
 
@@ -102,7 +103,7 @@
             <div style="display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold;">✓</div>
             <h2 style="margin:0 0 9px;color:#123a30;">Account Updated Successfully</h2>
             <p style="margin:0 0 22px;color:#746f69;">Your latest profile information has been saved.</p>
-            <a class="btn-primary" href="${pageContext.request.contextPath}/Owner/myProfile" style="display:inline-flex;text-decoration:none;">Done</a>
+            <a class="btn-primary" href="${pageContext.request.contextPath}/staff/my-profile" style="display:inline-flex;text-decoration:none;">Done</a>
         </div>
     </div>
     <% } %>
@@ -112,8 +113,7 @@
 
         function toggleEditMode() {
             const form = document.getElementById('profileForm');
-            // Cleaned up the selector text string perfectly
-            const inputs = form.querySelectorAll('#ownerName, #ownerEmail, #ownerPhone');
+            const inputs = form.querySelectorAll('#staffName, #staffPhone, #staffEmail');
             const actionBtn = document.getElementById('actionBtn');
             const btnText = document.getElementById('btnText');
             const containers = form.querySelectorAll('.input-container');
@@ -122,9 +122,9 @@
                 // Switch to Edit Mode
                 inputs.forEach(input => input.removeAttribute('disabled'));
                 containers.forEach(container => container.style.background = '#ffffff');
-                document.getElementById('ownerName').focus();
+                document.getElementById('staffName').focus();
                 
-                btnText.innerText = 'Save Changes';
+                btnText.innerText = 'Save';
                 isEditMode = true;
             } else {
                 // Validate form first, then submit programmatically 

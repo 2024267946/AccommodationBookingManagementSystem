@@ -58,7 +58,7 @@
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
                             <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Phone Number</label>
-                            <input type="tel" name="staffPhoneNumber" class="form-control" placeholder="e.g. +6012-3456789" required>
+                            <input type="tel" name="staffPhoneNumber" class="form-control" placeholder="e.g. 012-3456789" required>
                         </div>
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 30px; text-align: left;">

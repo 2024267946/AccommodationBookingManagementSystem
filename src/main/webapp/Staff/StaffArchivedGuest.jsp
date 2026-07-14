@@ -1,0 +1,97 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="model.Guest" %>
+<%
+    List<Guest> archivedGuestList = (List<Guest>) request.getAttribute("archivedGuestList");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archived Guest | Cuti Murah Melaka</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
+    <style>
+        .archived-page { width: 100%; max-width: 1240px; margin: 0; }
+        .archived-card { overflow: hidden; background: #ffffff; border: 1px solid #e4dcd2; border-radius: 15px; box-shadow: 0 6px 18px rgba(15, 45, 36, 0.05); }
+        .archived-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 28px; border-bottom: 1px solid #e6ded4; }
+        .archived-header h1 { margin: 0 0 8px; color: #123a30; font-size: 36px; }
+        .archived-header p { margin: 0; color: #77716b; font-size: 15px; }
+        .count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 50px; height: 42px; padding: 0 16px; border-radius: 30px; color: #17483f; background: #edf3f1; font-size: 19px; font-weight: 800; }
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        .archived-table { width: 100%; border-collapse: collapse; background: #ffffff; }
+        .archived-table thead { background: #f4f0ea; }
+        .archived-table th { padding: 20px 25px; text-align: left; color: #173a34; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; white-space: nowrap; }
+        .archived-table td { padding: 20px 25px; color: #152724; font-size: 15px; vertical-align: middle; border-top: 1px solid #ebe5dd; }
+        .archived-table tbody tr:hover { background: #fbfaf8; }
+        .guest-id { color: #123a30; font-weight: 800; }
+        .status-badge { display: inline-flex; align-items: center; justify-content: center; padding: 8px 14px; color: #965d1b; background: #fff6eb; border: 1px solid #edc58e; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em; }
+        .empty-message { padding: 50px 25px; text-align: center; color: #77716b; font-size: 16px; }
+        .view-only-badge { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:bold; background:#f3f4f6; color:#6b7280; }
+    </style>
+</head>
+<body class="admin-body">
+    <jsp:include page="StaffNavbar.jsp" />
+
+    <div class="admin-layout">
+        <jsp:include page="StaffSidebar.jsp" />
+
+        <main class="main-content">
+            <div class="container archived-page">
+                <div class="page-header" style="text-align: left; margin-bottom: 20px;">
+                    <h1>Account Settings</h1>
+                </div>
+
+                <div class="sub-nav-tabs">
+                    <a href="${pageContext.request.contextPath}/staff/my-profile">My Profile</a>
+                    <a href="${pageContext.request.contextPath}/staff/user-management">User Management</a>
+                    <a href="${pageContext.request.contextPath}/staff/archived-staff">Archived Staff</a>
+                    <a href="${pageContext.request.contextPath}/staff/archived-guest" class="active">Archived Guest</a>
+                </div>
+
+                <section class="archived-card">
+                    <div class="archived-header">
+                        <div>
+                            <h1>Archived Guest</h1>
+                            <p>Guest accounts that have been changed to INACTIVE.</p>
+                        </div>
+                        <span class="count-badge"><%= archivedGuestList == null ? 0 : archivedGuestList.size() %></span>
+                    </div>
+
+                    <% if (archivedGuestList != null && !archivedGuestList.isEmpty()) { %>
+                        <div class="table-wrapper">
+                            <table class="archived-table">
+                                <thead>
+                                    <tr>
+                                        <th>GUEST ID</th>
+                                        <th>NAME</th>
+                                        <th>EMAIL</th>
+                                        <th>PHONE NUMBER</th>
+                                        <th>STATUS</th>
+                                        <th>ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <% for (Guest guest : archivedGuestList) { %>
+                                    <tr>
+                                        <td class="guest-id"><%= guest.getGuestId() %></td>
+                                        <td><%= guest.getGuestName() %></td>
+                                        <td><%= guest.getGuestEmail() %></td>
+                                        <td><%= guest.getGuestPhoneNumber() %></td>
+                                        <td><span class="status-badge"><%= guest.getStatus() %></span></td>
+                                        <td><span class="view-only-badge">View Only</span></td>
+                                    </tr>
+                                <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-message">No archived guests found.</div>
+                    <% } %>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

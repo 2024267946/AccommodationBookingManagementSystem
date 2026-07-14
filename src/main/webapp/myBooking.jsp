@@ -86,7 +86,7 @@
                            !"COMPLETED".equalsIgnoreCase(booking.getBookingStatus())) { %>
                         <form action="${pageContext.request.contextPath}/booking/cancel-booking" method="POST" style="margin:0;">
                             <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
-                            <button type="button" class="cancel-btn open-cancel-modal" data-booking-id="<%= booking.getBookingID() %>">Cancel Booking</button>
+                            <button type="button" class="cancel-btn open-cancel-modal" data-booking-id="<%= booking.getBookingID() %>">Cancel</button>
                         </form>
                     <% } %>
                 </div>
@@ -97,7 +97,7 @@
 <div id="cancelBookingModal" style="display:none;position:fixed;z-index:3000;inset:0;align-items:center;justify-content:center;padding:24px;background:rgba(8,28,22,.62);">
     <div style="width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22);">
         <h2 style="margin:0 0 10px;color:#123a30;">Cancel Booking?</h2><p style="color:#746f69;margin:0 0 24px;">Are you sure you want to cancel booking <strong id="cancelBookingIdText"></strong>?</p>
-        <div style="display:flex;justify-content:center;gap:12px;"><button type="button" class="receipt-btn" id="closeCancelModal">Keep Booking</button><button type="button" class="cancel-btn" id="confirmCancelBooking">Cancel Booking</button></div>
+        <div style="display:flex;justify-content:center;gap:12px;"><button type="button" class="receipt-btn" id="closeCancelModal">Confirm</button><button type="button" class="cancel-btn" id="confirmCancelBooking">Cancel</button></div>
     </div>
 </div>
 <script>
