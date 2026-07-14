@@ -206,6 +206,29 @@ public class AccommodationServlet extends HttpServlet {
             String accomId = request.getParameter("id");
             String availability = request.getParameter("availability");
             String error = request.getParameter("error");
+
+            if (checkIn != null && !checkIn.trim().isEmpty()
+                    && checkOut != null && !checkOut.trim().isEmpty()) {
+                try {
+                    LocalDate checkInDate = LocalDate.parse(checkIn.trim());
+                    LocalDate checkOutDate = LocalDate.parse(checkOut.trim());
+                    if (checkInDate.isBefore(LocalDate.now())
+                            || checkOutDate.isBefore(LocalDate.now())) {
+                        forwardInvalidDates(request, response, accomId,
+                                "Past dates cannot be selected. Please choose today or a future date.");
+                        return;
+                    }
+                    if (!checkOutDate.isAfter(checkInDate)) {
+                        forwardInvalidDates(request, response, accomId,
+                                "Check-out must be after the check-in date.");
+                        return;
+                    }
+                } catch (DateTimeParseException e) {
+                    forwardInvalidDates(request, response, accomId,
+                            "Please enter valid check-in and check-out dates.");
+                    return;
+                }
+            }
     
             if (accomId != null && (availability != null || error != null)) {
                 AccommodationDAO dao = new AccommodationDAO();
@@ -273,6 +296,17 @@ public class AccommodationServlet extends HttpServlet {
                         + "&pax=" + URLEncoder.encode(paxParam, StandardCharsets.UTF_8));
             }
     
+        }
+
+        private void forwardInvalidDates(HttpServletRequest request,
+                HttpServletResponse response, String accommodationId, String message)
+                throws ServletException, IOException {
+            if (accommodationId != null && !accommodationId.trim().isEmpty()) {
+                request.setAttribute("accomodationChoosen",
+                        new AccommodationDAO().getAccommodationById(accommodationId.trim()));
+            }
+            request.setAttribute("message", message);
+            request.getRequestDispatcher("/searchAvailability.jsp").forward(request, response);
         }
     }
 

@@ -1,6 +1,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Accommodation" %>
 <%@ page import="util.AccommodationImageStore" %>
+<%@ page import="java.time.LocalDate" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
@@ -444,12 +445,12 @@
 
             <div class="search-field-group">
                 <label for="checkIn">Check-in</label>
-                <input id="checkIn" type="date" name="checkIn" value="<%= checkIn %>" class="search-input-field" required>
+                <input id="checkIn" type="date" name="checkIn" value="<%= checkIn %>" min="<%= LocalDate.now() %>" class="search-input-field" required>
             </div>
 
             <div class="search-field-group">
                 <label for="checkOut">Check-out</label>
-                <input id="checkOut" type="date" name="checkOut" value="<%= checkOut %>" class="search-input-field" required>
+                <input id="checkOut" type="date" name="checkOut" value="<%= checkOut %>" min="<%= LocalDate.now() %>" class="search-input-field" required>
             </div>
 
             <div class="search-field-group">
@@ -644,6 +645,21 @@
 </footer>
 
 <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
+<script>
+(function () {
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+    if (!checkInInput || !checkOutInput) return;
+    function updateCheckoutMinimum() {
+        checkOutInput.min = checkInInput.value || '<%= LocalDate.now() %>';
+        if (checkOutInput.value && checkOutInput.value <= checkInInput.value) {
+            checkOutInput.value = '';
+        }
+    }
+    checkInInput.addEventListener('change', updateCheckoutMinimum);
+    updateCheckoutMinimum();
+})();
+</script>
 
 </body>
 </html>
