@@ -33,7 +33,7 @@
                 <% if (request.getParameter("error") != null) { %>
                     <div class="message message-error">Unable to update your profile. Please check the information and try again.</div>
                 <% } else if (request.getParameter("passwordError") != null) { %>
-                    <div class="message message-error">Unable to reset password. Check your current password and make sure the new passwords match.</div>
+                    <div class="message message-error">Unable to reset password. Make sure both new password fields match and try again.</div>
                 <% } %>
 
                 <!-- Sub-navigation tabs inside Account -->
@@ -55,14 +55,14 @@
                     <!-- Profile Form Section -->
                     <div style="padding: 32px;">
                         <% if (loggedStaff != null) { %>
-                        <form id="profileForm" action="${pageContext.request.contextPath}/staff/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+                        <form id="profileForm" action="${pageContext.request.contextPath}/profile/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
                             <input type="hidden" name="staffId" value="<%= loggedStaff.getStaffId() %>">
                             
                             <!-- 1. Full Name Field -->
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Full Name</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
-                                    <input type="text" id="staffName" name="staffName" value="<%= loggedStaff.getStaffName() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="text" id="staffName" name="fullName" value="<%= loggedStaff.getStaffName() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -70,7 +70,7 @@
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Email</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
-                                    <input type="email" id="staffEmail" name="staffEmail" value="<%= loggedStaff.getStaffEmail() %>" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="email" id="staffEmail" name="email" value="<%= loggedStaff.getStaffEmail() %>" disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
                             </div>
 
@@ -78,8 +78,13 @@
                             <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
                                 <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">Phone Number</label>
                                 <div style="display: flex; align-items: center; background: #f9f9f9; border: 1px solid var(--border-color); border-radius: 12px; padding: 4px 16px; transition: background 0.3s;" class="input-container">
-                                    <input type="text" id="staffPhone" name="staffPhoneNumber" value="<%= loggedStaff.getStaffPhoneNumber() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
+                                    <input type="text" id="staffPhone" name="phone" value="<%= loggedStaff.getStaffPhoneNumber() %>" required disabled style="border: none !important; width: 100%; padding: 12px 0 !important; background: transparent; font-size: 0.95rem; color: var(--text-main); outline: none;">
                                 </div>
+                            </div>
+
+                            <div id="staffPasswordFields" style="display:none;flex-direction:column;gap:16px;text-align:left;">
+                                <div><label style="font-weight:600;font-size:.9rem;">New Password <span class="text-muted" style="font-weight:400;">(Optional)</span></label><input type="password" id="staffNewPassword" name="newPassword" minlength="6" autocomplete="new-password" disabled placeholder="Leave blank to keep current password" style="box-sizing:border-box;width:100%;margin-top:8px;padding:12px 14px;border:1px solid var(--border-color);border-radius:10px;"></div>
+                                <div><label style="font-weight:600;font-size:.9rem;">Confirm New Password <span class="text-muted" style="font-weight:400;">(Optional)</span></label><input type="password" id="staffConfirmPassword" name="confirmPassword" minlength="6" autocomplete="new-password" disabled placeholder="Re-enter the new password" style="box-sizing:border-box;width:100%;margin-top:8px;padding:12px 14px;border:1px solid var(--border-color);border-radius:10px;"><small id="staffPasswordMismatch" style="display:none;color:#a61b1b;margin-top:6px;">New passwords do not match.</small></div>
                             </div>
 
                             <!-- Interactive Button Action Trigger -->
@@ -87,7 +92,6 @@
                                 <button type="button" id="actionBtn" onclick="toggleEditMode()" class="btn-primary" style="border-radius: 12px !important; padding: 12px 28px !important; font-size: 0.9rem !important; display: inline-flex; align-items: center; gap: 8px;">
                                     <span id="btnText">Edit Account</span>
                                 </button>
-                                <button type="button" onclick="showPasswordResetModal('${pageContext.request.contextPath}/profile/reset-password')" class="btn-clear" style="margin-left:10px;padding:12px 28px;border-radius:12px;">Reset Password</button>
                             </div>
                         </form>
                         <% } else { %>
@@ -101,13 +105,14 @@
     </div>
 
     <% if ("true".equals(request.getParameter("updateSuccess"))) { %><script>showAppNotification("Account Updated Successfully","Your latest account information has been saved.","success",3500);</script><% } %>
+    <% if ("true".equals(request.getParameter("passwordUpdated"))) { %><script>showAppNotification("Password Updated Successfully","Your new password has been securely saved.","success",3500);</script><% } %>
 
     <script>
         let isEditMode = false;
 
         function toggleEditMode() {
             const form = document.getElementById('profileForm');
-            const inputs = form.querySelectorAll('#staffName, #staffPhone, #staffEmail');
+            const inputs = form.querySelectorAll('#staffName, #staffPhone, #staffEmail, #staffNewPassword, #staffConfirmPassword');
             const actionBtn = document.getElementById('actionBtn');
             const btnText = document.getElementById('btnText');
             const containers = form.querySelectorAll('.input-container');
@@ -115,6 +120,8 @@
             if (!isEditMode) {
                 // Switch to Edit Mode
                 inputs.forEach(input => input.removeAttribute('disabled'));
+                document.getElementById('staffPasswordFields').style.display = 'flex';
+                setupOptionalPassword();
                 containers.forEach(container => container.style.background = '#ffffff');
                 document.getElementById('staffName').focus();
                 
@@ -129,6 +136,7 @@
                 }
             }
         }
+        function setupOptionalPassword(){const password=document.getElementById('staffNewPassword'),confirmation=document.getElementById('staffConfirmPassword'),error=document.getElementById('staffPasswordMismatch');function validate(){const entered=password.value!==''||confirmation.value!=='';const mismatch=entered&&password.value!==confirmation.value;password.required=confirmation.value!=='';confirmation.required=entered;confirmation.setCustomValidity(mismatch?'New passwords do not match.':'');error.style.display=mismatch?'block':'none';}password.addEventListener('input',validate);confirmation.addEventListener('input',validate);}
     </script>
 </body>
 </html>

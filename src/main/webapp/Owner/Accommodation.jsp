@@ -155,15 +155,27 @@
         }
 
         .accommodation-card {
-            display: grid;
-            grid-template-columns: 220px minmax(0, 1fr) auto;
-            gap: 24px;
-            align-items: center;
             padding: 22px;
             background: #ffffff;
             border: 1px solid #e6ded4;
             border-radius: 16px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+
+        .accommodation-card:hover,
+        .accommodation-card:focus-visible {
+            border-color: #88bd82;
+            box-shadow: 0 10px 28px rgba(15, 65, 50, 0.12);
+            outline: none;
+        }
+
+        .accommodation-summary {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr) auto;
+            gap: 26px;
+            align-items: center;
         }
 
         .image-box {
@@ -182,16 +194,29 @@
         }
 
         .accommodation-info h3 {
-            margin: 0 0 10px;
-            font-size: 22px;
+            margin: 0 0 6px;
+            font-size: 27px;
             color: #1b1b1b;
         }
 
+        .accommodation-type { margin:0 0 18px; color:#52635d; font-size:16px; }
+        .accommodation-id { display:inline-flex;align-items:center;gap:8px;min-width:180px;padding:12px 15px;margin-bottom:16px;background:#f5f1eb;border:1px solid #e3dbd1;border-radius:9px;color:#50605a; }
+        .accommodation-id::before { content:"\1F511"; }
+
         .description {
-            margin: 0 0 16px;
+            margin: 0;
+            padding-top: 14px;
+            border-top: 1px solid #ece5dc;
             color: #6d6964;
             line-height: 1.65;
         }
+
+        .expand-indicator { display:flex;align-items:center;gap:8px;color:#476058;font-weight:700;font-size:13px;white-space:nowrap; }
+        .expand-indicator::after { content:"+";display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#edf4f0;color:#0f5c49;font-size:20px; }
+        .accommodation-card.is-expanded .expand-indicator::after { content:"\2212"; }
+
+        .expand-panel { display:none;margin-top:22px;padding-top:20px;border-top:1px solid #e6ded4;cursor:default; }
+        .accommodation-card.is-expanded .expand-panel { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end; }
 
         .details-grid {
             display: grid;
@@ -217,7 +242,7 @@
 
         .action-buttons {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 10px;
             min-width: 120px;
         }
@@ -280,14 +305,10 @@
 
         @media (max-width: 980px) {
             .accommodation-card {
-                grid-template-columns: 180px minmax(0, 1fr);
+                padding:18px;
             }
-
-            .action-buttons {
-                grid-column: 1 / -1;
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
+            .accommodation-summary { grid-template-columns:180px minmax(0,1fr); }
+            .expand-indicator { grid-column:1 / -1;justify-self:end; }
         }
 
         @media (max-width: 700px) {
@@ -305,9 +326,7 @@
                 flex-direction: column;
             }
 
-            .accommodation-card {
-                grid-template-columns: 1fr;
-            }
+            .accommodation-summary { grid-template-columns:1fr; }
 
             .image-box {
                 height: 210px;
@@ -317,10 +336,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .action-buttons {
-                grid-column: auto;
-                flex-direction: column;
-            }
+            .accommodation-card.is-expanded .expand-panel { grid-template-columns:1fr; }
+            .action-buttons { flex-direction:column; }
 
             .btn-edit,
             .btn-date,
@@ -426,16 +443,22 @@
                             for (Accommodation acc : displayedAccommodationList) {
                     %>
 
-                    <div class="accommodation-card">
+                    <div class="accommodation-card" role="button" tabindex="0" aria-expanded="false">
+
+                        <div class="accommodation-summary">
 
                         <div class="image-box">
-                            <img src="${pageContext.request.contextPath}/images/chalet1.png"
+                            <img src="${pageContext.request.contextPath}/images/<%= "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "cmm1.jpg" : "chalet1.png" %>"
                                  alt="Accommodation image">
                         </div>
 
                         <div class="accommodation-info">
 
                             <h3><%= acc.getAccommodationName() %></h3>
+
+                            <p class="accommodation-type"><%= acc.getAccommodationType() %></p>
+
+                            <div class="accommodation-id">ID: <strong><%= acc.getAccommodationId() %></strong></div>
 
                             <p class="description">
                                 <%
@@ -450,12 +473,15 @@
                                 <% } %>
                             </p>
 
-                            <div class="details-grid">
+                        </div>
 
-                                <div class="detail-item">
-                                    ID:
-                                    <strong><%= acc.getAccommodationId() %></strong>
-                                </div>
+                        <span class="expand-indicator">View details</span>
+
+                        </div>
+
+                        <div class="expand-panel">
+
+                            <div class="details-grid">
 
                                 <div class="detail-item">
                                     Type:
@@ -482,8 +508,6 @@
                                 </div>
 
                             </div>
-
-                        </div>
 
                         <div class="action-buttons">
 
@@ -514,6 +538,8 @@
 
                         </div>
 
+                        </div>
+
                     </div>
 
                     <%
@@ -541,5 +567,26 @@
     <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %><script>showAppNotification("Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully","The accommodation information has been saved.","success",3500);</script><% } %>
 
 <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
+<script>
+document.querySelectorAll('.accommodation-card').forEach(function(card) {
+    function toggleCard() {
+        const expanded = card.classList.toggle('is-expanded');
+        card.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        const label = card.querySelector('.expand-indicator');
+        if (label) label.textContent = expanded ? 'Hide details' : 'View details';
+    }
+    card.addEventListener('click', function(event) {
+        if (event.target.closest('a, button, form')) return;
+        toggleCard();
+    });
+    card.addEventListener('keydown', function(event) {
+        if (event.target.closest('a, button, form')) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleCard();
+        }
+    });
+});
+</script>
 </body>
 </html>

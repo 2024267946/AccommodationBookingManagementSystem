@@ -109,6 +109,33 @@ header, .navbar {
     box-shadow: var(--shadow-sm) !important;
 }
 
+/* Keep every portal navbar visible while the page scrolls. */
+header.navbar,
+.guest-user-nav,
+.guest-top-nav {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    z-index: 1200 !important;
+}
+
+/* The public navbar is nested inside the sticky wrapper. */
+.guest-top-nav .navbar {
+    position: static !important;
+}
+
+body.admin-body,
+body:has(> .guest-user-nav),
+body:has(> .guest-top-nav) {
+    padding-top: 82px !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 950px) {
+    body:has(> .guest-user-nav) { padding-top: 230px !important; }
+}
+
 .logo-img {
     height: 50px;       
     width: auto;         

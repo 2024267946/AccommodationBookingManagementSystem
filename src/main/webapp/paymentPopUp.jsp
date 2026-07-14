@@ -214,8 +214,8 @@
 
         <div class="payment-header">
             <span>Secure Checkout</span>
-            <h1>Booking Payment</h1>
-            <p>Review your booking before continuing to ToyyibPay.</p>
+            <h1>Confirm Payment</h1>
+            <p>Confirm the amount below before continuing to ToyyibPay.</p>
         </div>
 
         <div class="payment-body">
@@ -287,9 +287,9 @@
 
             </form>
 
-            <a href="${pageContext.request.contextPath}/booking/my-booking"
+            <a href="${pageContext.request.contextPath}/booking/pay?bookingID=<%= bookingID %>"
                class="back-link">
-                Back to My Bookings
+                Back to Invoice
             </a>
 
         </div>

@@ -116,6 +116,7 @@ public class BookingDAO {
         String sql =
             "UPDATE BOOKING SET BOOKINGSTATUS = 'CANCELLED' " +
             "WHERE BOOKINGID = ? AND GUESTID = ? " +
+            "AND CHECKINDATE >= TRUNC(SYSDATE) " +
             "AND UPPER(BOOKINGSTATUS) NOT IN ('CANCELLED', 'COMPLETED')";
 
         try (

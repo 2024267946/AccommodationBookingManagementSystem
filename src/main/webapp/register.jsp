@@ -69,10 +69,14 @@ String registerSuffix=encodedRegisterReturn==null?"":"?returnTo="+encodedRegiste
     const registerPassword=document.getElementById('registerPassword'),registerConfirmation=document.getElementById('registerConfirmPassword');
     function validateRegistrationPassword(){const mismatch=registerConfirmation.value!==''&&registerPassword.value!==registerConfirmation.value;registerConfirmation.setCustomValidity(mismatch?'Passwords do not match.':'');document.getElementById('registerPasswordMismatch').style.display=mismatch?'block':'none';}
     registerPassword.addEventListener('input',validateRegistrationPassword);registerConfirmation.addEventListener('input',validateRegistrationPassword);
-    <% if ("emailExists".equals(request.getParameter("error"))) { %>showAppNotification("Email Already Exists","An account is already registered with this email address.","error",3500);<% } %>
+    <% if ("emailExists".equals(request.getParameter("error"))) { %>showAppNotification("Email Already Exists","An account is already registered with this email address.","error");
+    <% } else if ("mismatch".equals(request.getParameter("error"))) { %>showAppNotification("Passwords Do Not Match","Enter the same password in both password fields.","error");
+    <% } else if ("short".equals(request.getParameter("error"))) { %>showAppNotification("Password Too Short","Password must contain at least 6 characters.","error");
+    <% } else if ("missing".equals(request.getParameter("error"))) { %>showAppNotification("Missing Information","Please complete every registration field.","error");
+    <% } else if ("failed".equals(request.getParameter("error"))) { %>showAppNotification("Registration Failed","The account could not be created. Please try again.","error");<% } %>
     <% if ("success".equals(request.getParameter("register"))) { %>
     showAppNotification("Account Created Successfully","Your guest account is ready. Redirecting you to login.","success",3000);
-    window.setTimeout(function(){window.location.href='${pageContext.request.contextPath}/login.jsp<%= registerSuffix %>';},3000);
+    window.setTimeout(function(){window.location.href='${pageContext.request.contextPath}/login.jsp<%= registerSuffix %>';},1500);
     <% } %>
     </script>
 </body>

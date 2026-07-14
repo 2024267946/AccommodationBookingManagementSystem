@@ -9,7 +9,6 @@ import model.Profile;
 import model.Guest;
 import model.Staff;
 import dao.ProfileDAO;
-import dao.BookingDAO;
 
 @WebServlet(urlPatterns = {
     "/profile",
@@ -74,10 +73,6 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
         request.setAttribute("profile", userProfile);
-        if ("GUEST".equalsIgnoreCase(role)) {
-            request.setAttribute("profileBookings", new BookingDAO().getBookingsByGuest(userId));
-        }
-
         String path = request.getServletPath();
         String view = "/profile/edit".equals(path)
                 ? "/editAccount.jsp"
@@ -94,6 +89,8 @@ public class ProfileServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("role");
+        String profilePath = "OWNER".equalsIgnoreCase(role) ? "/Owner/myProfile"
+                : ("STAFF".equalsIgnoreCase(role) ? "/staff/my-profile" : "/profile");
         String userId = "GUEST".equalsIgnoreCase(role)
                 ? (String) session.getAttribute("guestID")
                 : (String) session.getAttribute("staffID");
@@ -105,20 +102,32 @@ public class ProfileServlet extends HttpServlet {
         String name = request.getParameter("fullName");
         String phone = request.getParameter("phone");
         String email = request.getParameter("email"); // Added: Retrieve email parameter
+        String newPassword = request.getParameter("newPassword");
+        String confirmPassword = request.getParameter("confirmPassword");
 
         // Updated: Validate that the email field is not missing or empty
         if (name == null || name.trim().isEmpty()
                 || phone == null || phone.trim().isEmpty()
                 || email == null || email.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath()
-                    + ("OWNER".equalsIgnoreCase(role)
-                        ? "/Owner/myProfile?error=invalidProfile"
-                        : "/profile/edit?error=invalidProfile"));
+                    + ("GUEST".equalsIgnoreCase(role)
+                        ? "/profile/edit?error=invalidProfile"
+                        : profilePath + "?error=invalidProfile"));
             return;
         }
         name = name.trim();
         phone = phone.trim();
         email = email.trim(); // Added: Trim whitespace from email
+
+        boolean changingPassword = !isBlank(newPassword) || !isBlank(confirmPassword);
+        if (changingPassword && (isBlank(newPassword) || isBlank(confirmPassword)
+                || newPassword.length() < 6 || !newPassword.equals(confirmPassword))) {
+            response.sendRedirect(request.getContextPath()
+                    + ("GUEST".equalsIgnoreCase(role)
+                        ? "/profile/edit?error=passwordMismatch"
+                        : profilePath + "?error=passwordMismatch"));
+            return;
+        }
 
         Profile currentProfile = profileDAO.getProfileById(userId, role);
         if (currentProfile == null) {
@@ -131,7 +140,7 @@ public class ProfileServlet extends HttpServlet {
         updatedProfile.setName(name);
         updatedProfile.setPhone(phone);
         updatedProfile.setEmail(email); // Updated: Pass the new form email instead of the old one
-        updatedProfile.setPassword(null);
+        updatedProfile.setPassword(changingPassword ? newPassword : null);
         updatedProfile.setRole(role);
 
         boolean success = profileDAO.updateProfile(updatedProfile);
@@ -152,11 +161,12 @@ public class ProfileServlet extends HttpServlet {
                 ((Staff) loggedStaff).setStaffEmail(email); // Added: Update email inside staff session object
             }
             response.sendRedirect(request.getContextPath()
-                    + ("OWNER".equalsIgnoreCase(role)
-                        ? "/Owner/myProfile?updateSuccess=true"
-                        : "/profile?updateSuccess=true"));
+                    + profilePath + "?updateSuccess=true");
         } else {
-            response.sendRedirect(request.getContextPath() + "/profile/edit?error=updatefailed");
+            response.sendRedirect(request.getContextPath()
+                    + ("GUEST".equalsIgnoreCase(role)
+                        ? "/profile/edit?error=updatefailed"
+                        : profilePath + "?error=updatefailed"));
         }
     }
 
@@ -176,10 +186,9 @@ public class ProfileServlet extends HttpServlet {
         }
         String returnPath = "GUEST".equalsIgnoreCase(role) ? "/profile"
                 : ("OWNER".equalsIgnoreCase(role) ? "/Owner/myProfile" : "/staff/my-profile");
-        String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
-        if (isBlank(currentPassword) || isBlank(newPassword) || isBlank(confirmPassword)) {
+        if (isBlank(newPassword) || isBlank(confirmPassword)) {
             response.sendRedirect(request.getContextPath() + returnPath + "?passwordError=missing");
             return;
         }
@@ -191,9 +200,9 @@ public class ProfileServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + returnPath + "?passwordError=mismatch");
             return;
         }
-        boolean success = profileDAO.resetPassword(userId, role, currentPassword, newPassword);
+        boolean success = profileDAO.resetPassword(userId, role, newPassword);
         response.sendRedirect(request.getContextPath()
-                + returnPath + (success ? "?updateSuccess=true" : "?passwordError=current"));
+                + returnPath + (success ? "?passwordUpdated=true" : "?passwordError=failed"));
     }
 
     private boolean isBlank(String value) {

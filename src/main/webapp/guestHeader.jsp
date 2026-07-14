@@ -17,11 +17,14 @@
 <link rel="stylesheet"
       type="text/css"
       href="${pageContext.request.contextPath}/css/theme.css">
-<script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
+<script src="${pageContext.request.contextPath}/js/app-modal.js?v=20260714-5"></script>
 
 <style>
     .guest-user-nav {
-        position: relative;
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
         z-index: 1000;
         width: 100%;
         background: rgba(255, 255, 255, 0.97);

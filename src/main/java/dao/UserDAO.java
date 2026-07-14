@@ -30,8 +30,10 @@ public class UserDAO {
         String sql =
                 "INSERT INTO GUEST " +
                 "(GUESTID, GUESTNAME, GUESTEMAIL, " +
-                "GUESTPHONENUMBER, GUESTPASSWORD) " +
-                "VALUES ('G'||LPAD(GUEST_SEQ.NEXTVAL, 3,'0'), ?, ?, ?, ?)";
+                "GUESTPHONENUMBER, GUESTPASSWORD, STATUS) " +
+                "SELECT 'G'||LPAD(NVL(MAX(TO_NUMBER(SUBSTR(GUESTID, 2))), 0) + 1, 3, '0'), " +
+                "?, ?, ?, ?, 'ACTIVE' FROM GUEST " +
+                "WHERE REGEXP_LIKE(GUESTID, '^G[0-9]+$')";
 
         try (
             Connection conn = DBConnection.getConnection();

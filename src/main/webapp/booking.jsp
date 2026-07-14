@@ -20,15 +20,16 @@
 <body class="auth-body booking-page">
 <style>
 body.booking-page {
-    padding-top: 0 !important;
+    padding-top: 82px !important;
 }
 
 body.booking-page .guest-user-nav,
 body.booking-page .guest-top-nav,
 body.booking-page .guest-top-nav .navbar {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
 }
 </style>
 <jsp:include page="navbar.jsp" />

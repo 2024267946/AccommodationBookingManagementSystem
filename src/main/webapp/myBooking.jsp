@@ -1,4 +1,5 @@
 <%@ page import="java.util.List" %>
+<%@ page import="java.time.LocalDate" %>
 <%@ page import="model.Booking" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
@@ -83,10 +84,12 @@
                     <% } %>
 
                     <% if (!"CANCELLED".equalsIgnoreCase(booking.getBookingStatus()) &&
-                           !"COMPLETED".equalsIgnoreCase(booking.getBookingStatus())) { %>
+                           !"COMPLETED".equalsIgnoreCase(booking.getBookingStatus()) &&
+                           !LocalDate.parse(booking.getCheckInDate()).isBefore(LocalDate.now())) { %>
                         <form action="${pageContext.request.contextPath}/booking/cancel-booking" method="POST" style="margin:0;">
                             <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
-                            <button type="button" class="cancel-btn open-cancel-modal" data-booking-id="<%= booking.getBookingID() %>">Cancel</button>
+                            <button type="submit" class="cancel-btn"
+                                    data-confirm-message="Are you sure you want to cancel booking <%= booking.getBookingID() %>?">Cancel Booking</button>
                         </form>
                     <% } %>
                 </div>
@@ -94,18 +97,5 @@
         <% } %>
     <% } %>
 </main>
-<div id="cancelBookingModal" style="display:none;position:fixed;z-index:3000;inset:0;align-items:center;justify-content:center;padding:24px;background:rgba(8,28,22,.62);">
-    <div style="width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22);">
-        <h2 style="margin:0 0 10px;color:#123a30;">Cancel Booking?</h2><p style="color:#746f69;margin:0 0 24px;">Are you sure you want to cancel booking <strong id="cancelBookingIdText"></strong>?</p>
-        <div style="display:flex;justify-content:center;gap:12px;"><button type="button" class="receipt-btn" id="closeCancelModal">Confirm</button><button type="button" class="cancel-btn" id="confirmCancelBooking">Cancel</button></div>
-    </div>
-</div>
-<script>
-const cancelModal=document.getElementById('cancelBookingModal');let cancelForm=null;
-document.querySelectorAll('.open-cancel-modal').forEach(function(button){button.addEventListener('click',function(){cancelForm=button.closest('form');document.getElementById('cancelBookingIdText').textContent=button.dataset.bookingId;cancelModal.style.display='flex';});});
-document.getElementById('closeCancelModal').addEventListener('click',function(){cancelModal.style.display='none';cancelForm=null;});
-document.getElementById('confirmCancelBooking').addEventListener('click',function(){if(cancelForm)cancelForm.submit();});
-cancelModal.addEventListener('click',function(event){if(event.target===cancelModal){cancelModal.style.display='none';cancelForm=null;}});
-</script>
 </body>
 </html>

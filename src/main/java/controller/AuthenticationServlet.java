@@ -87,11 +87,10 @@ public class AuthenticationServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + appendReturn("/login.jsp?error=missing", returnTo));
             return;
         }
-
         Guest guest = userDAO.loginGuest(email.trim(), password);
         if (guest != null) {
             HttpSession session = request.getSession(true);
-            session.setMaxInactiveInterval(3600);
+            session.setMaxInactiveInterval(40 * 60);
             session.setAttribute("role", "GUEST");
             session.setAttribute("loggedGuest", guest);
             session.setAttribute("guestID", guest.getGuestId());
@@ -110,7 +109,7 @@ public class AuthenticationServlet extends HttpServlet {
 
         String role = staff.getStaffRoles();
         HttpSession session = request.getSession(true);
-        session.setMaxInactiveInterval(300);
+        session.setMaxInactiveInterval(40 * 60);
         session.setAttribute("role", role);
         session.setAttribute("loggedStaff", staff);
         session.setAttribute("staffID", staff.getStaffId());

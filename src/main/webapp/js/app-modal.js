@@ -1,5 +1,5 @@
 (function () {
-    if (window.__appModalLoaded) return;
+    if (window.__appModalLoaded && typeof window.showPasswordResetModal === "function") return;
     window.__appModalLoaded = true;
     function ensureStyles() {
         if (document.getElementById("app-modal-styles")) return;
@@ -10,7 +10,7 @@
     }
 
     window.showAppMessage = function (title, message) {
-        return window.showAppNotification(title, message, "error", 3500);
+        return window.showAppNotification(title, message, "error");
     };
 
     window.showAppNotification = function (title, message, type, duration) {
@@ -18,17 +18,15 @@
         const overlay = build(title, message, type === "success" ? "✓" : "!");
         if (type === "success") overlay.querySelector(".app-modal-icon").style.cssText = "background:#eaf7ef;color:#17633a";
         const actions = overlay.querySelector(".app-modal-actions");
-        const ok = button("OK", "app-modal-ok");
-        ok.addEventListener("click", function () { overlay.remove(); });
-        actions.appendChild(ok);
+        actions.remove();
         document.body.appendChild(overlay);
-        window.setTimeout(function () { if (overlay.isConnected) overlay.remove(); }, duration || 3000);
+        window.setTimeout(function () { if (overlay.isConnected) overlay.remove(); }, 1500);
         return overlay;
     };
 
     window.showPasswordResetModal = function (action) {
         ensureStyles();
-        const overlay = build("Reset Password", "Enter your current password, then choose a new password.", "•");
+        const overlay = build("Reset Password", "Choose and confirm your new password.", "•");
         const card = overlay.querySelector(".app-modal-card");
         const actions = overlay.querySelector(".app-modal-actions");
         const form = document.createElement("form");
@@ -39,10 +37,9 @@
             const wrapper = document.createElement("div"); wrapper.className = "app-password-field";
             const labelNode = document.createElement("label"); labelNode.textContent = label;
             const input = document.createElement("input"); input.type = "password"; input.name = name;
-            input.required = true; if (name !== "currentPassword") input.minLength = 6;
+            input.required = true; input.minLength = 6;
             wrapper.append(labelNode, input); form.appendChild(wrapper); return input;
         }
-        field("Current Password", "currentPassword");
         const password = field("New Password", "newPassword");
         const confirmation = field("Confirm New Password", "confirmPassword");
         const error = document.createElement("div"); error.className = "app-password-error"; error.textContent = "New passwords do not match."; form.appendChild(error);
@@ -100,6 +97,6 @@
         const text = notification.textContent.replace(/\s+/g, " ").trim();
         notification.remove();
         window.showAppNotification(success ? "Success" : "Something Went Wrong", text,
-                success ? "success" : "error", 3500);
+                success ? "success" : "error");
     });
 })();

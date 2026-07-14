@@ -591,9 +591,13 @@
 </div>
 <% if (!isAvailable) { %>
 <script>
-    document.getElementById("close-availability-modal").addEventListener("click", function () {
-        document.getElementById("availability-result-modal").remove();
-    });
+    (function () {
+        const modal = document.getElementById("availability-result-modal");
+        document.getElementById("close-availability-modal").addEventListener("click", function () {
+            modal.remove();
+        });
+        window.setTimeout(function () { if (modal.isConnected) modal.remove(); }, 1500);
+    })();
 </script>
 <% } %>
 <% } %>
@@ -610,9 +614,13 @@
     </div>
 </div>
 <script>
-    document.getElementById("close-booking-error-modal").addEventListener("click", function () {
-        document.getElementById("booking-error-modal").remove();
-    });
+    (function () {
+        const modal = document.getElementById("booking-error-modal");
+        document.getElementById("close-booking-error-modal").addEventListener("click", function () {
+            modal.remove();
+        });
+        window.setTimeout(function () { if (modal.isConnected) modal.remove(); }, 1500);
+    })();
 </script>
 <% } %>
 
