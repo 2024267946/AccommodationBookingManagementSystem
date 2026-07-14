@@ -62,8 +62,10 @@
             <section class="booking-card">
                 <div class="booking-top">
                     <div>
-                        <h2 class="booking-id">Booking <%= booking.getBookingID() %></h2>
-                        <div>Accommodation ID: <strong><%= booking.getAccommodationID() %></strong></div>
+                        <!-- Replaced Booking ID with Accommodation Name -->
+                        <h2 class="booking-id"><%= booking.getAccommodationName() %></h2>
+                        <!-- Replaced Accommodation ID with Booking ID -->
+                        <div>Booking ID: <strong><%= booking.getBookingID() %></strong></div>
                     </div>
                     <span class="status"><%= "PENDING".equalsIgnoreCase(booking.getBookingStatus())
                             ? "PENDING PAYMENT" : booking.getBookingStatus() %></span>

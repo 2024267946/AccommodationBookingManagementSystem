@@ -1,6 +1,8 @@
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="model.Accommodation" %>
 <%@ page import="util.AccommodationImageStore" %>
+<%@ page import="dao.AccommodationDAO" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
@@ -445,8 +447,17 @@
                         if (displayedAccommodationList != null
                                 && !displayedAccommodationList.isEmpty()) {
 
+                            // Initialize the DAO once for the loop
+                            AccommodationDAO dao = new AccommodationDAO();
+
                             for (Accommodation acc : displayedAccommodationList) {
                                 List<String> cardImages = AccommodationImageStore.getImages(acc.getAccommodationId());
+                                
+                                // Fetch the specific homestay/chalet details dynamically
+                                Map<String, String> subtypeDetails = dao.getAccommodationSubtype(
+                                        acc.getAccommodationId(), 
+                                        acc.getAccommodationType()
+                                );
                     %>
 
                     <div class="accommodation-card" role="button" tabindex="0" aria-expanded="false">
@@ -516,6 +527,33 @@
                                     Capacity:
                                     <strong><%= acc.getMaxCapacity() %> Pax</strong>
                                 </div>
+
+                                <!-- DYNAMIC HOMESTAY INFO -->
+                                <% if ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) && subtypeDetails != null) { %>
+                                    <div class="detail-item">
+                                        Rooms:
+                                        <strong><%= subtypeDetails.get("numberOfRooms") %></strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        Living Hall:
+                                        <strong><%= subtypeDetails.get("hasLivingHall") %></strong>
+                                    </div>
+                                
+                                <!-- DYNAMIC CHALET INFO -->
+                                <% } else if ("CHALET".equalsIgnoreCase(acc.getAccommodationType()) && subtypeDetails != null) { %>
+                                    <div class="detail-item">
+                                        Category:
+                                        <strong><%= subtypeDetails.get("chaletCategory") %></strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        Room No:
+                                        <strong><%= subtypeDetails.get("roomNumber") %></strong>
+                                    </div>
+                                    <div class="detail-item">
+                                        Floor:
+                                        <strong><%= subtypeDetails.get("floorLevel") %></strong>
+                                    </div>
+                                <% } %>
 
                                 <div class="detail-item">
                                     Price:

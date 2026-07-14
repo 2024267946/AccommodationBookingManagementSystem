@@ -189,17 +189,20 @@ public class BookingDAO {
     }
 
     // 5. /staff/view-bookings
+ // 5. /staff/view-bookings
     public List<Booking> getAllBookings() {
 
         List<Booking> list = new ArrayList<>();
 
+        // Updated SQL to include the JOIN and ACCOMMODATIONNAME
         String sql =
             "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
-            "BD.ACCOMMODATIONID, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "BD.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
             "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
             "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
             "FROM BOOKING B " +
             "JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
+            "JOIN ACCOMMODATION A ON A.ACCOMMODATIONID = BD.ACCOMMODATIONID " +
             "ORDER BY B.BOOKINGID DESC";
 
         try (
@@ -215,6 +218,7 @@ public class BookingDAO {
                 b.setGuestID(rs.getString("GUESTID"));
                 b.setStaffID(rs.getString("STAFFID"));
                 b.setAccommodationID(rs.getString("ACCOMMODATIONID"));
+                b.setAccommodationName(rs.getString("ACCOMMODATIONNAME")); // Added this line
                 b.setCheckInDate(rs.getString("CHECKINSTR"));
                 b.setCheckOutDate(rs.getString("CHECKOUTSTR"));
                 b.setNumberOfPax(rs.getInt("NUMBEROFPAX"));
