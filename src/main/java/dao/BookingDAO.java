@@ -24,23 +24,17 @@ public class BookingDAO {
 
         String bookingSql =
             "INSERT INTO BOOKING " +
-            "(BOOKINGID, GUESTID, STAFFID, " +
+            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, " +
             "CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
-            "VALUES (?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
+            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
             "TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
-
-        String detailSql =
-            "INSERT INTO BOOKINGDETAIL (BOOKINGID, ACCOMMODATIONID) " +
-            "VALUES (?, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
 
             try (
                 PreparedStatement bookingPs =
-                        conn.prepareStatement(bookingSql);
-                PreparedStatement detailPs =
-                        conn.prepareStatement(detailSql)
+                        conn.prepareStatement(bookingSql)
             ) {
                 bookingPs.setString(1, bookingID);
                 bookingPs.setString(2, booking.getGuestID());
@@ -52,19 +46,16 @@ public class BookingDAO {
                     bookingPs.setString(3, booking.getStaffID());
                 }
 
-                bookingPs.setString(4, booking.getCheckInDate());
-                bookingPs.setString(5, booking.getCheckOutDate());
-                bookingPs.setInt(6, booking.getNumberOfPax());
-                bookingPs.setDouble(7, booking.getTotalPrice());
-                bookingPs.setString(8, booking.getBookingStatus());
-
-                detailPs.setString(1, bookingID);
-                detailPs.setString(2, booking.getAccommodationID());
+                bookingPs.setString(4, booking.getAccommodationID());
+                bookingPs.setString(5, booking.getCheckInDate());
+                bookingPs.setString(6, booking.getCheckOutDate());
+                bookingPs.setInt(7, booking.getNumberOfPax());
+                bookingPs.setDouble(8, booking.getTotalPrice());
+                bookingPs.setString(9, booking.getBookingStatus());
 
                 int bookingResult = bookingPs.executeUpdate();
-                int detailResult = detailPs.executeUpdate();
 
-                if (bookingResult > 0 && detailResult > 0) {
+                if (bookingResult > 0) {
                     conn.commit();
                     return bookingID;
                 }
@@ -143,13 +134,12 @@ public class BookingDAO {
 
         String sql =
             "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
-            "BD.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "B.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
             "CASE WHEN EXISTS (SELECT 1 FROM PAYMENT P WHERE P.BOOKINGID=B.BOOKINGID AND UPPER(P.PAYMENTSTATUS)='PAID') THEN 1 ELSE 0 END ISPAID, " +
             "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
             "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
             "FROM BOOKING B " +
-            "JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
-            "JOIN ACCOMMODATION A ON A.ACCOMMODATIONID=BD.ACCOMMODATIONID " +
+            "JOIN ACCOMMODATION A ON A.ACCOMMODATIONID = B.ACCOMMODATIONID " +
             "WHERE B.GUESTID = ? " +
             "ORDER BY B.BOOKINGID DESC";
 
@@ -189,7 +179,6 @@ public class BookingDAO {
     }
 
     // 5. /staff/view-bookings
- // 5. /staff/view-bookings
     public List<Booking> getAllBookings() {
 
         List<Booking> list = new ArrayList<>();
@@ -197,12 +186,11 @@ public class BookingDAO {
         // Updated SQL to include the JOIN and ACCOMMODATIONNAME
         String sql =
             "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
-            "BD.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
+            "B.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
             "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
             "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
             "FROM BOOKING B " +
-            "JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
-            "JOIN ACCOMMODATION A ON A.ACCOMMODATIONID = BD.ACCOMMODATIONID " +
+            "JOIN ACCOMMODATION A ON A.ACCOMMODATIONID = B.ACCOMMODATIONID " +
             "ORDER BY B.BOOKINGID DESC";
 
         try (

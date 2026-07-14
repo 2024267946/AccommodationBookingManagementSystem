@@ -39,8 +39,8 @@ public class PaymentDAO {
 
         String sql =
             "INSERT INTO PAYMENT " +
-            "(PAYMENTID, BOOKINGID, PAYMENTDATE, TOTALAMOUNT, PAYMENTMETHOD, PAYMENTSTATUS) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "(PAYMENTID, BOOKINGID, PAYMENTDATE, TOTALAMOUNT, PAYMENTSTATUS) " +
+            "VALUES (?, ?, ?, ?, ?)";
 
         Connection conn = null;
         try {
@@ -53,8 +53,8 @@ public class PaymentDAO {
             ps.setString(2, payment.getBookingID());
             ps.setDate(3, java.sql.Date.valueOf(payment.getPaymentDate()));
             ps.setDouble(4, payment.getTotalAmount());
-            ps.setString(5, payment.getPaymentMethod());
-            ps.setString(6, payment.getPaymentStatus());
+           
+            ps.setString(5, payment.getPaymentStatus());
 
                 if (ps.executeUpdate() == 0) { conn.rollback(); return false; }
             }
@@ -80,7 +80,7 @@ public class PaymentDAO {
 
     public Payment getPaidPaymentByBookingId(String bookingId) {
         String sql = "SELECT PAYMENTID, BOOKINGID, TO_CHAR(PAYMENTDATE,'YYYY-MM-DD') PAYMENTDATE, "
-                + "TOTALAMOUNT, PAYMENTMETHOD, PAYMENTSTATUS FROM PAYMENT "
+                + "TOTALAMOUNT, PAYMENTSTATUS FROM PAYMENT "
                 + "WHERE BOOKINGID=? AND UPPER(PAYMENTSTATUS)='PAID' ORDER BY PAYMENTDATE DESC FETCH FIRST 1 ROWS ONLY";
         try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, bookingId);
@@ -91,7 +91,7 @@ public class PaymentDAO {
                     payment.setBookingID(rs.getString("BOOKINGID"));
                     payment.setPaymentDate(rs.getString("PAYMENTDATE"));
                     payment.setTotalAmount(rs.getDouble("TOTALAMOUNT"));
-                    payment.setPaymentMethod(rs.getString("PAYMENTMETHOD"));
+                    
                     payment.setPaymentStatus(rs.getString("PAYMENTSTATUS"));
                     return payment;
                 }

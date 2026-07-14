@@ -22,9 +22,8 @@ public class AvailabilityDAO {
             "FROM ACCOMMODATION " +
             "WHERE MAXCAPACITY >= ? " +
             "AND ACCOMMODATIONID NOT IN ( " +
-            "   SELECT BD.ACCOMMODATIONID " +
-            "   FROM BOOKINGDETAIL BD " +
-            "   JOIN BOOKING B ON BD.BOOKINGID = B.BOOKINGID " +
+            "   SELECT B.ACCOMMODATIONID " +
+            "   FROM BOOKING B " +
             "   WHERE B.BOOKINGSTATUS NOT IN ('Cancelled', 'Rejected') " +
             "   AND TO_DATE(?, 'YYYY-MM-DD') < B.CHECKOUTDATE " +
             "   AND TO_DATE(?, 'YYYY-MM-DD') > B.CHECKINDATE " +
@@ -122,13 +121,9 @@ public class AvailabilityDAO {
 
         String sqlBooking =
             "INSERT INTO BOOKING " +
-            "(BOOKINGID, GUESTID, STAFFID, CHECKINDATE, CHECKOUTDATE, " +
+            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, CHECKINDATE, CHECKOUTDATE, " +
             "NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
-            "VALUES (?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
-
-        String sqlDetail =
-            "INSERT INTO BOOKINGDETAIL (BOOKINGID, ACCOMMODATIONID) " +
-            "VALUES (?, ?)";
+            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
 
         try {
             Connection con = DBConnection.getConnection();
@@ -138,28 +133,22 @@ public class AvailabilityDAO {
             psBooking.setString(1, bookingId);
             psBooking.setString(2, "SYSTEM");
             psBooking.setString(3, staffId);
-            psBooking.setString(4, checkIn);
-            psBooking.setString(5, checkOut);
-            psBooking.setInt(6, 0);
-            psBooking.setDouble(7, 0.00);
-            psBooking.setString(8, "Unavailable");
+            psBooking.setString(4, accommodationId);
+            psBooking.setString(5, checkIn);
+            psBooking.setString(6, checkOut);
+            psBooking.setInt(7, 0);
+            psBooking.setDouble(8, 0.00);
+            psBooking.setString(9, "Unavailable");
 
             int resultBooking = psBooking.executeUpdate();
 
-            PreparedStatement psDetail = con.prepareStatement(sqlDetail);
-            psDetail.setString(1, bookingId);
-            psDetail.setString(2, accommodationId);
-
-            int resultDetail = psDetail.executeUpdate();
-
-            if (resultBooking > 0 && resultDetail > 0) {
+            if (resultBooking > 0) {
                 con.commit();
                 success = true;
             } else {
                 con.rollback();
             }
 
-            psDetail.close();
             psBooking.close();
             con.close();
 
@@ -179,11 +168,7 @@ public class AvailabilityDAO {
             "UPDATE BOOKING B " +
             "SET B.BOOKINGSTATUS = 'Cancelled' " +
             "WHERE B.BOOKINGSTATUS = 'Unavailable' " +
-            "AND B.BOOKINGID IN ( " +
-            "   SELECT BD.BOOKINGID " +
-            "   FROM BOOKINGDETAIL BD " +
-            "   WHERE BD.ACCOMMODATIONID = ? " +
-            ") " +
+            "AND B.ACCOMMODATIONID = ? " +
             "AND TO_DATE(?, 'YYYY-MM-DD') < B.CHECKOUTDATE " +
             "AND TO_DATE(?, 'YYYY-MM-DD') > B.CHECKINDATE";
 
