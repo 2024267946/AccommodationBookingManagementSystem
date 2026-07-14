@@ -189,6 +189,10 @@ public class AccommodationServlet extends HttpServlet {
                     request.getRequestDispatcher("/homestayDetails.jsp?error=-1").forward(request, response);
                 }else{
                     request.setAttribute("accomodation", accommodation);
+                    request.setAttribute("subtypeDetails",
+                            accommodationDAO.getAccommodationSubtype(
+                                    accommodation.getAccommodationId(),
+                                    accommodation.getAccommodationType()));
                     request.getRequestDispatcher("/homestayDetails.jsp").forward(request, response);
                 }
         }

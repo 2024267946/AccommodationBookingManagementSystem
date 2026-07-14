@@ -1,9 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="model.Accommodation" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="util.AccommodationImageStore" %>
 <%
 Accommodation accommodation = (Accommodation) request.getAttribute("accomodation");
+Map<String, String> subtypeDetails = (Map<String, String>) request.getAttribute("subtypeDetails");
+if (subtypeDetails == null) subtypeDetails = java.util.Collections.emptyMap();
 List<String> detailPictures = accommodation == null ? java.util.Collections.emptyList()
         : AccommodationImageStore.getImages(accommodation.getAccommodationId());
 %>
@@ -42,6 +45,14 @@ List<String> detailPictures = accommodation == null ? java.util.Collections.empt
                     <span><i class="fas fa-users"></i> Up to <%= accommodation.getMaxCapacity() %> guests</span>
                     <span><i class="fas fa-home"></i> <%= accommodation.getAccommodationType() %></span>
                     <span><i class="fas fa-map-marker-alt"></i> <%= accommodation.getLocation() %></span>
+                    <% if ("HOMESTAY".equalsIgnoreCase(accommodation.getAccommodationType())) { %>
+                    <span><i class="fas fa-door-open"></i> <%= subtypeDetails.getOrDefault("numberOfRooms", "Not specified") %> rooms</span>
+                    <span><i class="fas fa-couch"></i> Living hall: <%= "YES".equalsIgnoreCase(subtypeDetails.get("hasLivingHall")) ? "Available" : "Not available" %></span>
+                    <% } else if ("CHALET".equalsIgnoreCase(accommodation.getAccommodationType())) { %>
+                    <span><i class="fas fa-star"></i> Category: <%= subtypeDetails.getOrDefault("chaletCategory", "Not specified") %></span>
+                    <span><i class="fas fa-door-closed"></i> Room: <%= subtypeDetails.getOrDefault("roomNumber", "Not specified") %></span>
+                    <span><i class="fas fa-layer-group"></i> Floor: <%= subtypeDetails.getOrDefault("floorLevel", "Not specified") %></span>
+                    <% } %>
                 </div>
 
                 <a href="${pageContext.request.contextPath}/homestays/search?id=<%= accommodation.getAccommodationId() %>"

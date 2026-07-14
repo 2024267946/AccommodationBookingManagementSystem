@@ -66,7 +66,7 @@ public final class AccommodationImageStore {
             Files.createDirectories(directory);
 
             for (Part part : imageParts) {
-                String submitted = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+                String submitted = fileNameOnly(part.getSubmittedFileName());
                 String extension = extension(submitted);
                 String contentType = part.getContentType();
                 if (!EXTENSIONS.contains(extension)
@@ -165,14 +165,50 @@ public final class AccommodationImageStore {
         String configured = System.getProperty("cmm.project.root");
         if (configured == null || configured.isBlank()) configured = System.getenv("CMM_PROJECT_ROOT");
         if (configured != null && !configured.isBlank()) return Paths.get(configured).toAbsolutePath();
-        Path current = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
-        for (Path candidate = current; candidate != null; candidate = candidate.getParent()) {
-            if (Files.exists(candidate.resolve("pom.xml"))) return candidate;
+        Path detected = findProjectRoot(Paths.get(System.getProperty("user.dir")));
+        if (detected != null) return detected;
+        try {
+            Path codeLocation = Paths.get(AccommodationImageStore.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI());
+            detected = findProjectRoot(codeLocation);
+            if (detected != null) return detected;
+        } catch (Exception ignored) { }
+
+        Path home = Paths.get(System.getProperty("user.home"));
+        Path[] commonLocations = {
+            home.resolve(Paths.get("Desktop", "Self_Project", "alyasystem")),
+            home.resolve(Paths.get("Documents", "alyasystem")),
+            home.resolve(Paths.get("Documents", "GitHub", "alyasystem")),
+            home.resolve(Paths.get("eclipse-workspace", "alyasystem")),
+            home.resolve(Paths.get("IdeaProjects", "alyasystem"))
+        };
+        for (Path location : commonLocations) {
+            if (Files.isRegularFile(location.resolve("pom.xml"))) return location.toAbsolutePath();
         }
-        Path localProject = Paths.get(System.getProperty("user.home"),
-                "Desktop", "Self_Project", "alyasystem");
-        if (Files.exists(localProject.resolve("pom.xml"))) return localProject;
         throw new IllegalStateException("Project root not found. Set CMM_PROJECT_ROOT.");
+    }
+
+    private static Path findProjectRoot(Path startingPoint) {
+        if (startingPoint == null) return null;
+        Path current = startingPoint.toAbsolutePath().normalize();
+        if (!Files.isDirectory(current)) current = current.getParent();
+        for (Path candidate = current; candidate != null; candidate = candidate.getParent()) {
+            if (Files.isRegularFile(candidate.resolve("pom.xml"))) return candidate;
+        }
+        return null;
+    }
+
+    private static String fileNameOnly(String submittedName) throws IOException {
+        if (submittedName == null || submittedName.isBlank()) {
+            throw new IOException("Selected image has no filename");
+        }
+        String normalized = submittedName.replace('\\', '/');
+        int slash = normalized.lastIndexOf('/');
+        String filename = slash >= 0 ? normalized.substring(slash + 1) : normalized;
+        if (filename.isBlank() || ".".equals(filename) || "..".equals(filename)) {
+            throw new IOException("Selected image has an invalid filename");
+        }
+        return filename;
     }
 
     private static String extension(String filename) {
