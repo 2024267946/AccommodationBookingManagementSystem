@@ -93,6 +93,6 @@
     <footer class="site-footer">
         <p class="mb-0">&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
     </footer>
-    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js"></script>
+    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-2"></script>
 </body>
 </html>

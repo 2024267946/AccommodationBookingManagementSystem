@@ -174,7 +174,7 @@
 
         .accommodation-summary {
             display: grid;
-            grid-template-columns: 260px minmax(0, 1fr) auto;
+            grid-template-columns: 260px minmax(0, 1fr);
             gap: 26px;
             align-items: center;
         }
@@ -220,10 +220,6 @@
             color: #6d6964;
             line-height: 1.65;
         }
-
-        .expand-indicator { display:flex;align-items:center;gap:8px;color:#476058;font-weight:700;font-size:13px;white-space:nowrap; }
-        .expand-indicator::after { content:"+";display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#edf4f0;color:#0f5c49;font-size:20px; }
-        .accommodation-card.is-expanded .expand-indicator::after { content:"\2212"; }
 
         .expand-panel { display:none;margin-top:22px;padding-top:20px;border-top:1px solid #e6ded4;cursor:default; }
         .accommodation-card.is-expanded .expand-panel { display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end; }
@@ -318,7 +314,6 @@
                 padding:18px;
             }
             .accommodation-summary { grid-template-columns:180px minmax(0,1fr); }
-            .expand-indicator { grid-column:1 / -1;justify-self:end; }
         }
 
         @media (max-width: 700px) {
@@ -501,8 +496,6 @@
 
                         </div>
 
-                        <span class="expand-indicator">View details</span>
-
                         </div>
 
                         <div class="expand-panel">
@@ -593,13 +586,12 @@
     <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %><script>showAppNotification("Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully","The accommodation information has been saved.","success",3500);</script><% } %>
 
 <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
+<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-2"></script>
 <script>
 document.querySelectorAll('.accommodation-card').forEach(function(card) {
     function toggleCard() {
         const expanded = card.classList.toggle('is-expanded');
         card.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-        const label = card.querySelector('.expand-indicator');
-        if (label) label.textContent = expanded ? 'Hide details' : 'View details';
     }
     card.addEventListener('click', function(event) {
         if (event.target.closest('a, button, form')) return;
@@ -611,23 +603,6 @@ document.querySelectorAll('.accommodation-card').forEach(function(card) {
             event.preventDefault();
             toggleCard();
         }
-    });
-});
-document.querySelectorAll('[data-carousel]').forEach(function(carousel) {
-    const slides = Array.from(carousel.querySelectorAll('.accommodation-slide'));
-    if (slides.length < 2) return;
-    let current = 0;
-    const counter = carousel.querySelector('.carousel-count span');
-    function show(index) {
-        current = (index + slides.length) % slides.length;
-        slides.forEach((slide, i) => slide.classList.toggle('is-active', i === current));
-        if (counter) counter.textContent = current + 1;
-    }
-    carousel.querySelector('.previous').addEventListener('click', function(event) {
-        event.stopPropagation(); show(current - 1);
-    });
-    carousel.querySelector('.next').addEventListener('click', function(event) {
-        event.stopPropagation(); show(current + 1);
     });
 });
 </script>

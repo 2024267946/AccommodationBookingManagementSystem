@@ -284,11 +284,11 @@
                         </div>
 
                         <div class="form-group full-width">
-                            <label for="accommodationImages">Add Accommodation Pictures</label>
+                            <label for="accommodationImages">Replace Accommodation Pictures</label>
                             <input id="accommodationImages" class="form-control" type="file"
                                    name="accommodationImages" accept="image/jpeg,image/png,image/gif,image/webp"
                                    multiple>
-                            <small class="text-muted">New pictures will be added to the existing carousel.</small>
+                            <small class="text-muted">Choose multiple pictures to replace the entire current carousel. Leave empty to keep the existing pictures.</small>
                         </div>
                         
                     </div>

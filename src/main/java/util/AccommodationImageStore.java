@@ -32,6 +32,16 @@ public final class AccommodationImageStore {
 
     public static int saveUploadedImages(HttpServletRequest request, String accommodationId)
             throws Exception {
+        return saveUploadedImages(request, accommodationId, false);
+    }
+
+    public static int replaceUploadedImages(HttpServletRequest request, String accommodationId)
+            throws Exception {
+        return saveUploadedImages(request, accommodationId, true);
+    }
+
+    private static int saveUploadedImages(HttpServletRequest request, String accommodationId,
+            boolean replaceExisting) throws Exception {
         if (accommodationId == null || !accommodationId.matches("[A-Za-z0-9_-]+")) return 0;
         List<Part> imageParts = new ArrayList<>();
         for (Part part : request.getParts()) {
@@ -43,8 +53,10 @@ public final class AccommodationImageStore {
 
         synchronized (LOCK) {
             Map<String, List<String>> index = readIndex();
-            List<String> images = new ArrayList<>(
+            List<String> previousImages = new ArrayList<>(
                     index.getOrDefault(accommodationId, List.of()));
+            List<String> images = replaceExisting
+                    ? new ArrayList<>() : new ArrayList<>(previousImages);
             Path directory = root().resolve("accommodation-images").resolve(accommodationId);
             Files.createDirectories(directory);
 
@@ -69,6 +81,16 @@ public final class AccommodationImageStore {
             }
             index.put(accommodationId, images);
             writeIndex(index);
+            if (replaceExisting) {
+                Path projectRoot = root().toAbsolutePath().normalize();
+                for (String previous : previousImages) {
+                    Path oldImage = projectRoot.resolve(previous).normalize();
+                    if (oldImage.startsWith(projectRoot.resolve("accommodation-images"))
+                            && !images.contains(previous)) {
+                        Files.deleteIfExists(oldImage);
+                    }
+                }
+            }
             return imageParts.size();
         }
     }

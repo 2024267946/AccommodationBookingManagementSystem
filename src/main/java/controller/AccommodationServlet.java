@@ -775,7 +775,7 @@ public class AccommodationServlet extends HttpServlet {
                 }
 
                 try {
-                    AccommodationImageStore.saveUploadedImages(request,
+                    AccommodationImageStore.replaceUploadedImages(request,
                             accommodation.getAccommodationId());
                 } catch (Exception imageError) {
                     imageError.printStackTrace();
