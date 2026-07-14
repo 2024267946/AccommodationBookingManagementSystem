@@ -13,6 +13,7 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import dao.GuestDAO;
 import dao.DashboardDAO;
 import dao.StaffDAO;
+import dao.ProfileDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,10 +21,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Staff;
+import model.Profile;
 
 @WebServlet(urlPatterns = { "/owner/dashboard", "/owner/dashboard/report", "/owner/view-staff", "/owner/view-guest",
 		"/owner/create-staff", "/owner/archive-staff", "/owner/view-archived-staff", "/owner/restore-staff",
 		"/owner/archive-guest", "/owner/view-archived-guest", "/owner/restore-guest",
+		"/Owner/myProfile", "/owner/update-profile",
 
 		"/staff/dashboard", "/staff/dashboard/report", "/staff/my-profile", "/staff/user-management",
 		"/staff/archived-staff", "/staff/archived-guest", "/staff/update-profile" })
@@ -34,12 +37,14 @@ public class StaffServlet extends HttpServlet {
 	private StaffDAO staffDAO;
 	private GuestDAO guestDAO;
 	private DashboardDAO dashboardDAO;
+	private ProfileDAO profileDAO;
 
 	@Override
 	public void init() {
 		staffDAO = new StaffDAO();
 		guestDAO = new GuestDAO();
 		dashboardDAO = new DashboardDAO();
+		profileDAO = new ProfileDAO();
 	}
 
 	@Override
@@ -49,6 +54,13 @@ public class StaffServlet extends HttpServlet {
 		String path = request.getServletPath();
 
 		switch (path) {
+		case "/Owner/myProfile":
+			if (!isRole(request, "OWNER")) {
+				redirectUnauthorized(request, response);
+				return;
+			}
+			openManagementProfile(request, response, "OWNER");
+			break;
 
 		case "/owner/dashboard":
 			if (!isRole(request, "OWNER")) {
@@ -160,8 +172,7 @@ public class StaffServlet extends HttpServlet {
 				redirectUnauthorized(request, response);
 				return;
 			}
-			// Fixed: Added the /Staff/ folder directory prefix
-			request.getRequestDispatcher("/Staff/StaffMyProfile.jsp").forward(request, response);
+			openManagementProfile(request, response, "STAFF");
 			break;
 
 		case "/staff/user-management":
@@ -208,6 +219,13 @@ public class StaffServlet extends HttpServlet {
 		String path = request.getServletPath();
 
 		switch (path) {
+		case "/owner/update-profile":
+			if (!isRole(request, "OWNER")) {
+				redirectUnauthorized(request, response);
+				return;
+			}
+			updateManagementProfile(request, response, "OWNER");
+			break;
 
 		case "/owner/create-staff":
 			if (!isRole(request, "OWNER")) {
@@ -241,13 +259,78 @@ public class StaffServlet extends HttpServlet {
 				redirectUnauthorized(request, response);
 				return;
 			}
-			updateOwnStaffProfile(request, response);
+			updateManagementProfile(request, response, "STAFF");
 			break;
 
 		default:
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			break;
 		}
+	}
+
+	private void openManagementProfile(HttpServletRequest request, HttpServletResponse response,
+			String role) throws ServletException, IOException {
+		HttpSession session = request.getSession(false);
+		String staffId = session == null ? null : (String) session.getAttribute("staffID");
+		Profile profile = staffId == null ? null : profileDAO.getProfileById(staffId, role);
+		if (profile == null) {
+			response.sendRedirect(request.getContextPath() + "/login.jsp?error=profileNotFound");
+			return;
+		}
+		request.setAttribute("profile", profile);
+		if ("STAFF".equalsIgnoreCase(role)) {
+			Staff loggedStaff = (Staff) session.getAttribute("loggedStaff");
+			if (loggedStaff != null) {
+				loggedStaff.setStaffName(profile.getName());
+				loggedStaff.setStaffEmail(profile.getEmail());
+				loggedStaff.setStaffPhoneNumber(profile.getPhone());
+			}
+			request.getRequestDispatcher("/Staff/StaffMyProfile.jsp").forward(request, response);
+		} else {
+			request.getRequestDispatcher("/Owner/myProfile.jsp").forward(request, response);
+		}
+	}
+
+	private void updateManagementProfile(HttpServletRequest request, HttpServletResponse response,
+			String role) throws IOException {
+		HttpSession session = request.getSession(false);
+		String staffId = session == null ? null : (String) session.getAttribute("staffID");
+		String returnPath = "OWNER".equalsIgnoreCase(role) ? "/Owner/myProfile" : "/staff/my-profile";
+		String name = request.getParameter("fullName");
+		String phone = request.getParameter("phone");
+		String email = request.getParameter("email");
+		String newPassword = request.getParameter("newPassword");
+		String confirmPassword = request.getParameter("confirmPassword");
+		if (staffId == null || isBlank(name) || isBlank(phone) || isBlank(email)) {
+			response.sendRedirect(request.getContextPath() + returnPath + "?error=invalidProfile");
+			return;
+		}
+		boolean changingPassword = !isBlank(newPassword) || !isBlank(confirmPassword);
+		if (changingPassword && (isBlank(newPassword) || isBlank(confirmPassword)
+				|| newPassword.length() < 6 || !newPassword.equals(confirmPassword))) {
+			response.sendRedirect(request.getContextPath() + returnPath + "?error=passwordMismatch");
+			return;
+		}
+		Profile profile = new Profile();
+		profile.setId(staffId);
+		profile.setName(name.trim());
+		profile.setPhone(phone.trim());
+		profile.setEmail(email.trim());
+		profile.setPassword(changingPassword ? newPassword : null);
+		profile.setRole(role);
+		if (!profileDAO.updateProfile(profile)) {
+			response.sendRedirect(request.getContextPath() + returnPath + "?error=updateFailed");
+			return;
+		}
+		Object logged = session.getAttribute("loggedStaff");
+		if (logged instanceof Staff) {
+			Staff staff = (Staff) logged;
+			staff.setStaffName(profile.getName());
+			staff.setStaffEmail(profile.getEmail());
+			staff.setStaffPhoneNumber(profile.getPhone());
+		}
+		session.setAttribute("staffName", profile.getName());
+		response.sendRedirect(request.getContextPath() + returnPath + "?updateSuccess=true");
 	}
 
 	private void createStaff(HttpServletRequest request, HttpServletResponse response) throws IOException {

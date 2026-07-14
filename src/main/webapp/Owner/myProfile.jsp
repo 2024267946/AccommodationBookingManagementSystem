@@ -53,7 +53,7 @@
 
                     <!-- Profile Form Section -->
                     <div style="padding: 32px;">
-                        <form id="profileForm" action="${pageContext.request.contextPath}/profile/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+                        <form id="profileForm" action="${pageContext.request.contextPath}/owner/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
                             <input type="hidden" name="userId" value="<%= profile.getId() %>">
                             
                             <!-- 1. Full Name Field -->

@@ -28,7 +28,7 @@
                     <% if (staff == null) { %>
                         <p style="color:var(--danger); margin:0;">Staff profile not found.</p>
                     <% } else { %>
-                        <form id="legacyStaffProfileForm" action="${pageContext.request.contextPath}/profile/update-profile" method="POST">
+                        <form id="legacyStaffProfileForm" action="${pageContext.request.contextPath}/staff/update-profile" method="POST">
                             <input type="hidden" name="staffID" value="<%= staff.getStaffId() %>">
                             <input type="hidden" name="staffRoles" value="<%= staff.getStaffRoles() %>">
 

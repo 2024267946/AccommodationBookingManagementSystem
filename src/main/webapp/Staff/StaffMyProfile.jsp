@@ -55,7 +55,7 @@
                     <!-- Profile Form Section -->
                     <div style="padding: 32px;">
                         <% if (loggedStaff != null) { %>
-                        <form id="profileForm" action="${pageContext.request.contextPath}/profile/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
+                        <form id="profileForm" action="${pageContext.request.contextPath}/staff/update-profile" method="POST" style="display: flex; flex-direction: column; gap: 24px;">
                             <input type="hidden" name="staffId" value="<%= loggedStaff.getStaffId() %>">
                             
                             <!-- 1. Full Name Field -->
