@@ -54,30 +54,37 @@ public class PaymentServlet extends HttpServlet {
         }
     }
 
-    private void startPayment(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    private void startPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("bookingID") == null
                 || session.getAttribute("totalAmount") == null) {
             response.sendRedirect(request.getContextPath() + "/booking/my-booking?payment=invalid");
             return;
         }
+        
         String bookingID = session.getAttribute("bookingID").toString();
         Guest guest = (Guest) session.getAttribute("loggedGuest");
         Booking booking = findGuestBooking(guest, bookingID);
+        
         if (guest == null || booking == null) {
             response.sendRedirect(request.getContextPath() + "/booking/my-booking?payment=invalid");
             return;
         }
+
+        // 1. TRUNCATE BILL NAME TO 30 CHARACTERS
+        String billName = booking.getAccommodationName() + " Booking";
+        if (billName.length() > 30) {
+            billName = billName.substring(0, 30);
+        }
+
         double totalAmount = ((Number) session.getAttribute("totalAmount")).doubleValue();
         int amountInSen = (int) Math.round(totalAmount * 100);
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":"
                 + request.getServerPort() + request.getContextPath();
-        String params =
-                "userSecretKey=" + enc(SECRET_KEY) + "&categoryCode=" + enc(CATEGORY_CODE)
-                + "&billName=" + enc(booking.getAccommodationName() + " Booking")
-                + "&billDescription=" + enc("Payment for " + booking.getAccommodationName()
-                        + " (Booking " + bookingID + ")")
+
+        String params = "userSecretKey=" + enc(SECRET_KEY) + "&categoryCode=" + enc(CATEGORY_CODE)
+                + "&billName=" + enc(billName) // Use truncated billName
+                + "&billDescription=" + enc("Payment for " + booking.getAccommodationName() + " (Booking " + bookingID + ")")
                 + "&billPriceSetting=1&billPayorInfo=1&billAmount=" + amountInSen
                 + "&billReturnUrl=" + enc(baseUrl + "/PaymentReturnServlet")
                 + "&billCallbackUrl=" + enc(baseUrl + "/PaymentCallbackServlet")
@@ -89,27 +96,36 @@ public class PaymentServlet extends HttpServlet {
                 + "&billContentEmail=" + enc("Thank you for payment.")
                 + "&billChargeToCustomer=1";
 
-        HttpURLConnection conn = (HttpURLConnection)
-                new URL("https://dev.toyyibpay.com/index.php/api/createBill").openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URL("https://dev.toyyibpay.com/index.php/api/createBill").openConnection();
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
         try (OutputStream os = conn.getOutputStream()) {
             os.write(params.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
+
+        // 2. READ RESPONSE FULLY
         String result;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-            result = br.readLine();
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            result = sb.toString();
         }
+
+        // 3. EXTRACT BILL CODE
         if (result == null || !result.contains("BillCode")) {
-            response.sendRedirect(request.getContextPath() + "/booking/pay?bookingID="
-                    + enc(bookingID) + "&step=confirm&error=toyyibpay");
+            System.err.println("API Error Response: " + result);
+            response.sendRedirect(request.getContextPath() + "/booking/pay?bookingID=" + enc(bookingID) + "&step=confirm&error=toyyibpay");
             return;
         }
-        String billCode = result.split("\"BillCode\":\"")[1].split("\"")[0];
+
+        String billCode = result.split("BillCode\":\"")[1].split("\"")[0];
         response.sendRedirect("https://dev.toyyibpay.com/" + billCode);
     }
-
     private void openPayment(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);

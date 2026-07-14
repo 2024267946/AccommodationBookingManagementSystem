@@ -30,7 +30,11 @@
                         ? "New passwords must match and contain at least 6 characters."
                         : "Unable to update your profile. Please check the information and try again." %></div>
             <% } %>
-            
+            <% if ("emailAlreadyTaken".equals(request.getParameter("error"))) { %>
+    <div class="message message-error" style="background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        This email is already registered to another account. Please use a different email.
+    </div>
+<% } %>
             <!-- Points to your single-servlet path mapping matching Member 3 specs -->
             <form action="${pageContext.request.contextPath}/profile/update-profile" method="POST">
                 <div class="form-group">
@@ -45,7 +49,7 @@
                 
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" name="email" class="form-control" value="${profile.email != null ? profile.email : ''}" readonly>
+                    <input type="email" name="email" class="form-control" value="${profile.email != null ? profile.email : ''}" required>
                 </div>
 
                 <div class="form-group" style="margin-top:24px;">

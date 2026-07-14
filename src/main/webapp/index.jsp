@@ -19,7 +19,7 @@
             <p class="emily-hero-text">Experience Encik Ridzuan's signature collection of 100 comfort-driven units situated within historical and natural enclaves.</p>
             <div class="emily-hero-actions">
                 <a href="homestays" class="btn-emily-solid">Explore The Stays</a>
-                <a href="${pageContext.request.contextPath}/homestays/search" class="btn-emily-outline">Check Availability</a>
+                <a href="${pageContext.request.contextPath}/login.jsp" class="btn-emily-outline">Check Availability</a>
             </div>
         </div>
     </section>

@@ -305,6 +305,15 @@ public class StaffServlet extends HttpServlet {
 			response.sendRedirect(request.getContextPath() + returnPath + "?error=invalidProfile");
 			return;
 		}
+		if (staffDAO.isEmailTaken(email.trim(), staffId)) {
+	        response.sendRedirect(request.getContextPath() + returnPath + "?error=emailAlreadyTaken");
+	        return;
+	    }
+		ProfileDAO profileDAO = new ProfileDAO(); // Make sure you have this or use your existing instance
+	    if (profileDAO.isEmailTaken(email.trim(), staffId)) {
+	        response.sendRedirect(request.getContextPath() + returnPath + "?error=emailAlreadyTaken");
+	        return;
+	    }
 		boolean changingPassword = !isBlank(newPassword) || !isBlank(confirmPassword);
 		if (changingPassword && (isBlank(newPassword) || isBlank(confirmPassword)
 				|| newPassword.length() < 6 || !newPassword.equals(confirmPassword))) {
@@ -451,17 +460,34 @@ public class StaffServlet extends HttpServlet {
 
 	private void archiveStaff(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		String staffID = request.getParameter("staffID");
+	    String staffID = request.getParameter("staffID");
 
-		boolean success = staffID != null && !staffID.trim().isEmpty() && staffDAO.archiveStaff(staffID.trim());
+	    // Handle invalid ID case first
+	    if (staffID == null || staffID.trim().isEmpty()) {
+	        request.getSession().setAttribute("errorMessage", "Invalid staff ID.");
+	        response.sendRedirect(request.getContextPath() + "/owner/view-staff");
+	        return; // STOP execution here
+	    }
 
-		if (success) {
-			request.getSession().setAttribute("successMessage", "Staff archived successfully.");
-		} else {
-			request.getSession().setAttribute("errorMessage", "Unable to archive this staff.");
-		}
+	    // Fetch the staff object
+	    Staff staffToArchive = staffDAO.getStaffByID(staffID.trim());
 
-		response.sendRedirect(request.getContextPath() + "/owner/view-staff");
+	    // Check if that staff member is an OWNER
+	    if (staffToArchive != null && "OWNER".equalsIgnoreCase(staffToArchive.getStaffRoles())) {
+	        request.getSession().setAttribute("errorMessage", "Security Alert: Owners cannot be archived.");
+	        response.sendRedirect(request.getContextPath() + "/owner/view-staff");
+	        return; // STOP execution here
+	    }
+
+	    // Perform the archive action
+	    boolean success = staffDAO.archiveStaff(staffID.trim());
+	    if (success) {
+	        response.sendRedirect(request.getContextPath() + "/owner/view-staff?notification=staffArchived");
+	    } else {
+	        response.sendRedirect(request.getContextPath() + "/owner/view-staff?error=archiveFailed");
+	    }
+	    
+	    // NO final redirect here, because all paths above end with a return
 	}
 
 	private void restoreStaff(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -486,12 +512,14 @@ public class StaffServlet extends HttpServlet {
 		boolean success = guestID != null && !guestID.trim().isEmpty() && guestDAO.archiveGuest(guestID.trim());
 
 		if (success) {
-			request.getSession().setAttribute("successMessage", "Guest archived successfully.");
+			request.getSession().setAttribute("successMessage", "Account Archived.");
+	        response.sendRedirect(request.getContextPath() + "/owner/view-guest?notification=guestArchived");
+	        return;
 		} else {
 			request.getSession().setAttribute("errorMessage", "Unable to archive this guest.");
+	        response.sendRedirect(request.getContextPath() + "/owner/view-guest?error=archiveFailed");
+	        return;
 		}
-
-		response.sendRedirect(request.getContextPath() + "/owner/view-guest");
 	}
 
 	private void restoreGuest(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -70,7 +70,7 @@
                         </div>
                         <div class="chalet-footer">
                             <span class="price">RM <%= String.format("%.2f", hs.getPricePerNight()) %> <small>/ night</small></span>
-                            <a href="<%= request.getContextPath() %>/homestays/details?id=<%= hs.getAccommodationId() %>" class="btn-primary">View Details</a>
+                            <a href="${pageContext.request.contextPath}/login.jsp" class="btn-primary">View Details</a>
                         </div>
                     </div>
                 </div>

@@ -106,10 +106,12 @@
            Update
         </a>-->
 
-        <form action="${pageContext.request.contextPath}/owner/archive-staff" method="get" style="display:inline; margin:0;">
-            <input type="hidden" name="staffID" value="<%= staff.getStaffId() %>">
-            <button type="submit" class="btn-danger" data-confirm-message="Are you sure you want to archive this staff account?">Archive</button>
-        </form>
+        <% if (!"OWNER".equalsIgnoreCase(staff.getStaffRoles())) { %>
+            <form action="${pageContext.request.contextPath}/owner/archive-staff" method="get" style="display:inline; margin:0;">
+                <input type="hidden" name="staffID" value="<%= staff.getStaffId() %>">
+                <button type="submit" class="btn-danger" data-confirm-message="Are you sure you want to archive this staff account?">Archive</button>
+            </form>
+        <% } %>
     </td>
 </tr>
 
@@ -150,6 +152,8 @@ if (guestList != null) {
  <form action="${pageContext.request.contextPath}/owner/archive-guest" method="get" style="display:inline; margin:0;">
             <input type="hidden" name="guestID" value="<%= guest.getGuestId() %>">
             <button type="submit" class="btn-danger" data-confirm-message="Are you sure you want to archive this guest account?">Archive</button>
+            
+            
         </form>
     </td>
 
@@ -211,5 +215,21 @@ if (guestList != null) {
       filterUsers();
     });
     </script>
+    
+    <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        <% if ("staffArchived".equals(request.getParameter("notification"))) { %>
+            showAppNotification("Staff Archived", "The staff account has been archived.", "success", 3500);
+        <% } else if ("guestArchived".equals(request.getParameter("notification"))) { %>
+            showAppNotification("Guest Archived", "The guest account has been archived.", "success", 3500);
+        <% } else if ("staffCreated".equals(request.getParameter("notification"))) { %>
+            showAppNotification("Account Created", "The staff account is ready to use.", "success", 3500);
+        <% } else if ("archiveFailed".equals(request.getParameter("error"))) { %>
+            showAppNotification("Error", "Could not archive the account.", "error", 3500);
+        <% } %>
+    });
+</script>
 </body>
 </html>

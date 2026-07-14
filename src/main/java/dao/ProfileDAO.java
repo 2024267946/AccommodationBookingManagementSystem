@@ -75,6 +75,29 @@ public class ProfileDAO {
         }
         return success;
     }
+    
+    public boolean isEmailTaken(String email, String excludeId) {
+        // This SQL checks both tables for the email, excluding the current user's ID
+        String sql = "SELECT GUESTEMAIL FROM GUEST WHERE GUESTEMAIL = ? AND GUESTID != ? " +
+                     "UNION " +
+                     "SELECT STAFFEMAIL FROM STAFF WHERE STAFFEMAIL = ? AND STAFFID != ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, email);
+            ps.setString(2, excludeId);
+            ps.setString(3, email);
+            ps.setString(4, excludeId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Returns true if the email is found in either table
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return true; // Safety: If DB fails, assume email is taken
+        }
+    }
 
     public boolean resetPassword(String userId, String role, String newPassword) {
         boolean guest = "GUEST".equalsIgnoreCase(role);

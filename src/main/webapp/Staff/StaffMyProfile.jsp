@@ -36,6 +36,11 @@
                     <div class="message message-error">Unable to reset password. Make sure both new password fields match and try again.</div>
                 <% } %>
 
+<% if ("emailAlreadyTaken".equals(request.getParameter("error"))) { %>
+    <div class="message message-error" style="background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        This email is already registered to another account. Please use a different email.
+    </div>
+<% } %>
                 <!-- Sub-navigation tabs inside Account -->
                 <div class="sub-nav-tabs">
                     <a href="${pageContext.request.contextPath}/staff/my-profile" class="active">My Profile</a>

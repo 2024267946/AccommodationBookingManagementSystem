@@ -34,6 +34,12 @@
                 <% } else if (request.getParameter("passwordError") != null) { %>
                     <div class="message message-error">Unable to reset password. Make sure both new password fields match and try again.</div>
                 <% } %>
+                
+                <% if ("emailAlreadyTaken".equals(request.getParameter("error"))) { %>
+    <div class="message message-error" style="background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        This email is already registered to another account. Please use a different email.
+    </div>
+<% } %>
 
                 <!-- Sub-navigation tabs inside Account -->
                 <div class="sub-nav-tabs">
@@ -136,6 +142,7 @@
                 }
             }
         }
+        
         function setupOptionalPassword(passwordId, confirmationId, errorId) {
             const password = document.getElementById(passwordId), confirmation = document.getElementById(confirmationId), error = document.getElementById(errorId);
             function validate(){const entered=password.value!==''||confirmation.value!=='';const mismatch=entered&&password.value!==confirmation.value;password.required=confirmation.value!=='';confirmation.required=entered;confirmation.setCustomValidity(mismatch?'New passwords do not match.':'');error.style.display=mismatch?'block':'none';}

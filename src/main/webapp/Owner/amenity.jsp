@@ -443,7 +443,7 @@
                                            type="text"
                                            name="amenityName"
                                            class="amenity-input"
-                                           placeholder="Example: Wi-Fi"
+                                           placeholder="Example: Kettle"
                                            required>
 
                                 </div>

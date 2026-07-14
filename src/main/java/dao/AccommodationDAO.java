@@ -16,7 +16,6 @@ import model.Accommodation;
 
 public class AccommodationDAO {
   
-  // Search and return available accommodations based on check-in, check-out and number of guests.
     public List<Accommodation> searchAvailability(String checkIn, String checkOut, int pax) {
 
         List<Accommodation> accommodationList = new ArrayList<>();
@@ -156,7 +155,6 @@ public class AccommodationDAO {
         }
     }
 
- // Generate Accommodation ID (A001, A002, A003...)
     private String generateAccommodationId(Connection con) {
 
         String accommodationId = "A001";
@@ -180,7 +178,6 @@ public class AccommodationDAO {
         return accommodationId;
     }
 
- // Retrieve all accommodation records from the database.
     public List<Accommodation> getAllAccommodation() {
 
         return getAccommodationByStatus("WHERE UPPER(STATUS) = 'ACTIVE'");
@@ -202,7 +199,7 @@ public class AccommodationDAO {
 
         String sql =
             "SELECT ACCOMMODATIONID, ACCOMMODATIONNAME, LOCATION, " +
-            "PRICEPERNIGHT, MAXCAPACITY, ACCOMMODATIONTYPE, DESCRIPTION " +
+            "PRICEPERNIGHT, MAXCAPACITY, ACCOMMODATIONTYPE, DESCRIPTION, STAFFID " +
             "FROM ACCOMMODATION " +
             statusClause + " " +
             "ORDER BY ACCOMMODATIONID";
@@ -221,6 +218,7 @@ public class AccommodationDAO {
                 acc.setMaxCapacity(rs.getInt("MAXCAPACITY"));
                 acc.setAccommodationType(rs.getString("ACCOMMODATIONTYPE"));
                 acc.setDescription(rs.getString("DESCRIPTION"));
+                acc.setStaffID(rs.getString("STAFFID"));
 
                 accommodationList.add(acc);
             }
@@ -254,8 +252,6 @@ public class AccommodationDAO {
         }
     }
 
-
- // Owner: Create new accommodation
     public boolean createAccommodation(
             Accommodation acc,
             Integer numberOfRooms,
@@ -268,8 +264,8 @@ public class AccommodationDAO {
 
         String sql =
             "INSERT INTO ACCOMMODATION " +
-            "(ACCOMMODATIONID, ACCOMMODATIONNAME, LOCATION, PRICEPERNIGHT, MAXCAPACITY, ACCOMMODATIONTYPE, DESCRIPTION) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            "(ACCOMMODATIONID, ACCOMMODATIONNAME, LOCATION, PRICEPERNIGHT, MAXCAPACITY, ACCOMMODATIONTYPE, DESCRIPTION, STAFFID) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection con = null;
         try {
@@ -285,7 +281,8 @@ public class AccommodationDAO {
             ps.setInt(5, acc.getMaxCapacity());
             ps.setString(6, acc.getAccommodationType());
             ps.setString(7, acc.getDescription());
-
+            ps.setString(8, acc.getStaffID());
+            
                 if (ps.executeUpdate() == 0) {
                     con.rollback();
                     return false;
@@ -348,14 +345,13 @@ public class AccommodationDAO {
         return success;
     }
     
- // Owner/Staff: Get accommodation by ID
     public Accommodation getAccommodationById(String accommodationId) {
 
         Accommodation acc = null;
 
         String sql =
             "SELECT ACCOMMODATIONID, ACCOMMODATIONNAME, ACCOMMODATIONTYPE, " +
-            "MAXCAPACITY, PRICEPERNIGHT, LOCATION, DESCRIPTION " +
+            "MAXCAPACITY, PRICEPERNIGHT, LOCATION, DESCRIPTION, STAFFID " +
             "FROM ACCOMMODATION " +
             "WHERE ACCOMMODATIONID = ?";
 
@@ -364,12 +360,10 @@ public class AccommodationDAO {
             PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
-            // Set accommodation ID
             ps.setString(1, accommodationId);
 
             ResultSet rs = ps.executeQuery();
 
-            // If accommodation exists
             if (rs.next()) {
 
                 acc = new Accommodation();
@@ -381,6 +375,7 @@ public class AccommodationDAO {
                 acc.setPricePerNight(rs.getDouble("PRICEPERNIGHT"));
                 acc.setLocation(rs.getString("LOCATION"));
                 acc.setDescription(rs.getString("DESCRIPTION"));
+                acc.setStaffID(rs.getString("STAFFID"));
             }
 
             rs.close();
@@ -392,94 +387,89 @@ public class AccommodationDAO {
         return acc;
     }
     
-    
- // Update an existing accommodation record.
-        public boolean updateAccommodation(Accommodation acc) {
-
-            return updateAccommodation(acc, null, null, null, null, null);
-        }
-
-        public Map<String, String> getAccommodationSubtype(String accommodationId, String type) {
-            Map<String, String> details = new HashMap<>();
-            String sql = "HOMESTAY".equalsIgnoreCase(type)
-                    ? "SELECT NUMBEROFROOM, HASLIVINGHALL FROM HOMESTAY WHERE ACCOMMODATIONID=?"
-                    : "SELECT ROOMNUMBER, FLOORLEVEL, CHALETCATEGORY FROM CHALET WHERE ACCOMMODATIONID=?";
-            try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setString(1, accommodationId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        if ("HOMESTAY".equalsIgnoreCase(type)) {
-                            details.put("numberOfRooms", rs.getString("NUMBEROFROOM"));
-                            details.put("hasLivingHall", rs.getString("HASLIVINGHALL"));
-                        } else {
-                            details.put("roomNumber", rs.getString("ROOMNUMBER"));
-                            details.put("floorLevel", rs.getString("FLOORLEVEL"));
-                            details.put("chaletCategory", rs.getString("CHALETCATEGORY"));
-                        }
+    public Map<String, String> getAccommodationSubtype(String accommodationId, String type) {
+        Map<String, String> details = new HashMap<>();
+        String sql = "HOMESTAY".equalsIgnoreCase(type)
+                ? "SELECT NUMBEROFROOM, HASLIVINGHALL FROM HOMESTAY WHERE ACCOMMODATIONID=?"
+                : "SELECT ROOMNUMBER, FLOORLEVEL, CHALETCATEGORY FROM CHALET WHERE ACCOMMODATIONID=?";
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, accommodationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    if ("HOMESTAY".equalsIgnoreCase(type)) {
+                        details.put("numberOfRooms", rs.getString("NUMBEROFROOM"));
+                        details.put("hasLivingHall", rs.getString("HASLIVINGHALL"));
+                    } else {
+                        details.put("roomNumber", rs.getString("ROOMNUMBER"));
+                        details.put("floorLevel", rs.getString("FLOORLEVEL"));
+                        details.put("chaletCategory", rs.getString("CHALETCATEGORY"));
                     }
                 }
-            } catch (SQLException e) { e.printStackTrace(); }
-            return details;
-        }
-
-        public boolean updateAccommodation(Accommodation acc, Integer numberOfRooms,
-                String hasLivingHall, String roomNumber, String floorLevel, String chaletCategory) {
-
-            boolean success = false;
-
-            String sql =
-                "UPDATE ACCOMMODATION SET " +
-                "ACCOMMODATIONNAME = ?, " +
-                "LOCATION = ?, " +
-                "PRICEPERNIGHT = ?, " +
-                "MAXCAPACITY = ?, " +
-                "ACCOMMODATIONTYPE = ?, " +
-                "DESCRIPTION = ? " +
-                "WHERE ACCOMMODATIONID = ?";
-            Connection con = null;
-            try {
-                    con = DBConnection.getConnection();
-                    con.setAutoCommit(false);
-                    try (PreparedStatement ps = con.prepareStatement(sql)) {
-                    ps.setString(1, acc.getAccommodationName());
-                    ps.setString(2, acc.getLocation());
-                    ps.setDouble(3, acc.getPricePerNight());
-                    ps.setInt(4, acc.getMaxCapacity());
-                    ps.setString(5, acc.getAccommodationType());
-                    ps.setString(6, acc.getDescription());
-                    ps.setString(7, acc.getAccommodationId());
-
-                    if (ps.executeUpdate() == 0) { con.rollback(); return false; }
-                    }
-
-                    try (PreparedStatement ps = con.prepareStatement(
-                            "DELETE FROM " + ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "CHALET" : "HOMESTAY")
-                            + " WHERE ACCOMMODATIONID=?")) {
-                        ps.setString(1, acc.getAccommodationId()); ps.executeUpdate();
-                    }
-                    String subtypeSql = "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType())
-                            ? "MERGE INTO HOMESTAY H USING (SELECT ? ACCOMMODATIONID FROM DUAL) S ON (H.ACCOMMODATIONID=S.ACCOMMODATIONID) WHEN MATCHED THEN UPDATE SET H.NUMBEROFROOM=?, H.HASLIVINGHALL=? WHEN NOT MATCHED THEN INSERT (ACCOMMODATIONID,NUMBEROFROOM,HASLIVINGHALL) VALUES (?,?,?)"
-                            : "MERGE INTO CHALET C USING (SELECT ? ACCOMMODATIONID FROM DUAL) S ON (C.ACCOMMODATIONID=S.ACCOMMODATIONID) WHEN MATCHED THEN UPDATE SET C.ROOMNUMBER=?, C.FLOORLEVEL=?, C.CHALETCATEGORY=? WHEN NOT MATCHED THEN INSERT (ACCOMMODATIONID,ROOMNUMBER,FLOORLEVEL,CHALETCATEGORY) VALUES (?,?,?,?)";
-                    try (PreparedStatement ps = con.prepareStatement(subtypeSql)) {
-                        String id = acc.getAccommodationId(); ps.setString(1, id);
-                        if ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType())) {
-                            ps.setInt(2, numberOfRooms); ps.setString(3, hasLivingHall);
-                            ps.setString(4, id); ps.setInt(5, numberOfRooms); ps.setString(6, hasLivingHall);
-                        } else {
-                            ps.setString(2, roomNumber); ps.setString(3, floorLevel); ps.setString(4, chaletCategory);
-                            ps.setString(5, id); ps.setString(6, roomNumber); ps.setString(7, floorLevel); ps.setString(8, chaletCategory);
-                        }
-                        ps.executeUpdate();
-                    }
-                    con.commit(); success = true;
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    if (con != null) try { con.rollback(); } catch (SQLException ignored) { }
-                } finally {
-                    if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ignored) { }
-                }
-
-                return success;
             }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return details;
+    }
+
+    public boolean updateAccommodation(Accommodation acc, Integer numberOfRooms,
+            String hasLivingHall, String roomNumber, String floorLevel, String chaletCategory) {
+
+        boolean success = false;
+
+        String sql =
+            "UPDATE ACCOMMODATION SET " +
+            "ACCOMMODATIONNAME = ?, " +
+            "LOCATION = ?, " +
+            "PRICEPERNIGHT = ?, " +
+            "MAXCAPACITY = ?, " +
+            "ACCOMMODATIONTYPE = ?, " +
+            "DESCRIPTION = ?, " +
+            "STAFFID = ? " +
+            "WHERE ACCOMMODATIONID = ?";
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false);
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, acc.getAccommodationName());
+            ps.setString(2, acc.getLocation());
+            ps.setDouble(3, acc.getPricePerNight());
+            ps.setInt(4, acc.getMaxCapacity());
+            ps.setString(5, acc.getAccommodationType());
+            ps.setString(6, acc.getDescription());
+            ps.setString(7, acc.getStaffID());
+            ps.setString(8, acc.getAccommodationId());
+
+            if (ps.executeUpdate() == 0) { con.rollback(); return false; }
+            }
+
+            try (PreparedStatement ps = con.prepareStatement(
+                    "DELETE FROM " + ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "CHALET" : "HOMESTAY")
+                    + " WHERE ACCOMMODATIONID=?")) {
+                ps.setString(1, acc.getAccommodationId()); ps.executeUpdate();
+            }
+            String subtypeSql = "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType())
+                    ? "MERGE INTO HOMESTAY H USING (SELECT ? ACCOMMODATIONID FROM DUAL) S ON (H.ACCOMMODATIONID=S.ACCOMMODATIONID) WHEN MATCHED THEN UPDATE SET H.NUMBEROFROOM=?, H.HASLIVINGHALL=? WHEN NOT MATCHED THEN INSERT (ACCOMMODATIONID,NUMBEROFROOM,HASLIVINGHALL) VALUES (?,?,?)"
+                    : "MERGE INTO CHALET C USING (SELECT ? ACCOMMODATIONID FROM DUAL) S ON (C.ACCOMMODATIONID=S.ACCOMMODATIONID) WHEN MATCHED THEN UPDATE SET C.ROOMNUMBER=?, C.FLOORLEVEL=?, C.CHALETCATEGORY=? WHEN NOT MATCHED THEN INSERT (ACCOMMODATIONID,ROOMNUMBER,FLOORLEVEL,CHALETCATEGORY) VALUES (?,?,?,?)";
+            try (PreparedStatement ps = con.prepareStatement(subtypeSql)) {
+                String id = acc.getAccommodationId(); ps.setString(1, id);
+                if ("HOMESTAY".equalsIgnoreCase(acc.getAccommodationType())) {
+                    ps.setInt(2, numberOfRooms); ps.setString(3, hasLivingHall);
+                    ps.setString(4, id); ps.setInt(5, numberOfRooms); ps.setString(6, hasLivingHall);
+                } else {
+                    ps.setString(2, roomNumber); ps.setString(3, floorLevel); ps.setString(4, chaletCategory);
+                    ps.setString(5, id); ps.setString(6, roomNumber); ps.setString(7, floorLevel); ps.setString(8, chaletCategory);
+                }
+                ps.executeUpdate();
+            }
+            con.commit(); success = true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (con != null) try { con.rollback(); } catch (SQLException ignored) { }
+        } finally {
+            if (con != null) try { con.setAutoCommit(true); con.close(); } catch (SQLException ignored) { }
         }
+
+        return success;
+    }
+}

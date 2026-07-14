@@ -18,15 +18,11 @@
         <main class="main-content">
             <div class="container" style="max-width: 650px; margin: 0 auto;">
                 
-                <div style="margin-bottom: 20px;">
-                    <a href="${pageContext.request.contextPath}/staff/view-staff" style="text-decoration: none; color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
-                        Back to User Management
-                    </a>
-                </div>
+               
 
                 <div class="page-header" style="text-align: left; margin-bottom: 25px;">
                     <h1>Add New Staff Account</h1>
-                    <p class="text-muted">Register a new administrative staff member to help manage bookings and homestay units.</p>
+                    <p class="text-muted">Register a new administrative staff member to help manage accommodation units.</p>
                 </div>
 
                 <div class="auth-card" style="padding: 40px !important; border-radius: 16px !important; margin: 0 auto !important;">
@@ -55,17 +51,17 @@
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
                             <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Email Address</label>
-                            <input type="email" name="staffEmail" class="form-control" placeholder="e.g. staffname@cutimurah.com" required>
+                            <input type="email" name="staffEmail" class="form-control" placeholder="e.g. staffname@gmail.com" required>
                         </div>
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 20px; text-align: left;">
                             <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Phone Number</label>
-                            <input type="tel" name="staffPhoneNumber" class="form-control" placeholder="e.g. 012-3456789" required>
+                            <input type="tel" name="staffPhoneNumber" class="form-control" placeholder="e.g. 0123456789" required>
                         </div>
 
                         <div class="form-group" style="display: flex; flex-direction: column; margin-bottom: 30px; text-align: left;">
                             <label style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Temporary Password</label>
-                            <input type="password" name="staffPassword" class="form-control" minlength="6" placeholder="Assign a default login password" required>
+                            <input type="password" name="staffPassword" class="form-control" minlength="6" placeholder="Assign a temporary login password" required>
                             <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">Staff members can update their password later via profile configurations.</small>
                         </div>
 

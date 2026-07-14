@@ -91,7 +91,7 @@
                         <form action="${pageContext.request.contextPath}/booking/cancel-booking" method="POST" style="margin:0;">
                             <input type="hidden" name="bookingID" value="<%= booking.getBookingID() %>">
                             <button type="submit" class="cancel-btn"
-                                    data-confirm-message="Are you sure you want to cancel booking <%= booking.getBookingID() %>?">Cancel Booking</button>
+                                    data-confirm-message="Are you sure you want to cancel booking <%= booking.getBookingID() %>? Please note that this action cannot be undone and no refund will be provided.">Cancel Booking</button>
                         </form>
                     <% } %>
                 </div>

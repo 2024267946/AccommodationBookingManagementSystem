@@ -286,9 +286,11 @@ session.removeAttribute("errorMessage");
                     <td><%= staff.getStaffId() %></td>
                     <td class="action">
                         <a class="update" href="<%=request.getContextPath()%>/staff/update?staffID=<%=staff.getStaffId()%>">Update</a>
-                        <a class="delete" href="<%=request.getContextPath()%>/staff/archive-staff?staffID=<%=staff.getStaffId()%>"
-                           data-confirm-message="Are you sure you want to archive this staff?">Delete</a>
-                    </td>
+                        
+<% if (!"OWNER".equalsIgnoreCase(staff.getStaffRoles())) { %>
+    <a class="delete" href="<%=request.getContextPath()%>/staff/archive-staff?staffID=<%=staff.getStaffId()%>"
+       data-confirm-message="Are you sure you want to archive this staff?">Delete</a>
+<% } %>                        </td>
                 </tr>
             <%
                     }
@@ -304,6 +306,8 @@ session.removeAttribute("errorMessage");
         </table>
     </div>
 </div>
+
+
 
 <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
 </body>

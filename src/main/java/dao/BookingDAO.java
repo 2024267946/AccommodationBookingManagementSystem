@@ -12,8 +12,6 @@ public class BookingDAO {
 
     private static final Logger logger = Logger.getLogger(BookingDAO.class.getName());
 
-    // 1. /booking/create-booking
-    // Creates a booking and returns its generated ID, for example B005.
     public static String createBooking(Booking booking) {
 
         String bookingID = generateNewBookingId();
@@ -24,9 +22,9 @@ public class BookingDAO {
 
         String bookingSql =
             "INSERT INTO BOOKING " +
-            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, " +
+            "(BOOKINGID, GUESTID, ACCOMMODATIONID, " +
             "CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
-            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
+            "VALUES (?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), " +
             "TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
@@ -38,20 +36,12 @@ public class BookingDAO {
             ) {
                 bookingPs.setString(1, bookingID);
                 bookingPs.setString(2, booking.getGuestID());
-
-                if (booking.getStaffID() == null
-                        || booking.getStaffID().trim().isEmpty()) {
-                    bookingPs.setNull(3, Types.VARCHAR);
-                } else {
-                    bookingPs.setString(3, booking.getStaffID());
-                }
-
-                bookingPs.setString(4, booking.getAccommodationID());
-                bookingPs.setString(5, booking.getCheckInDate());
-                bookingPs.setString(6, booking.getCheckOutDate());
-                bookingPs.setInt(7, booking.getNumberOfPax());
-                bookingPs.setDouble(8, booking.getTotalPrice());
-                bookingPs.setString(9, booking.getBookingStatus());
+                bookingPs.setString(3, booking.getAccommodationID());
+                bookingPs.setString(4, booking.getCheckInDate());
+                bookingPs.setString(5, booking.getCheckOutDate());
+                bookingPs.setInt(6, booking.getNumberOfPax());
+                bookingPs.setDouble(7, booking.getTotalPrice());
+                bookingPs.setString(8, booking.getBookingStatus());
 
                 int bookingResult = bookingPs.executeUpdate();
 
@@ -73,7 +63,6 @@ public class BookingDAO {
         return null;
     }
 
-    // Generates IDs in the format B001, B002, B003 and so on.
     private static String generateNewBookingId() {
 
         String sql =
@@ -101,7 +90,6 @@ public class BookingDAO {
         return null;
     }
 
-    // 2. /booking/cancel-booking
     public boolean cancelBooking(String bookingId, String guestId) {
 
         String sql =
@@ -127,13 +115,12 @@ public class BookingDAO {
         }
     }
 
-    // 4. /booking/my-bookings
     public List<Booking> getBookingsByGuest(String guestId) {
 
         List<Booking> list = new ArrayList<>();
 
         String sql =
-            "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
+            "SELECT B.BOOKINGID, B.GUESTID, " +
             "B.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
             "CASE WHEN EXISTS (SELECT 1 FROM PAYMENT P WHERE P.BOOKINGID=B.BOOKINGID AND UPPER(P.PAYMENTSTATUS)='PAID') THEN 1 ELSE 0 END ISPAID, " +
             "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
@@ -157,7 +144,6 @@ public class BookingDAO {
 
                 b.setBookingID(rs.getString("BOOKINGID"));
                 b.setGuestID(rs.getString("GUESTID"));
-                b.setStaffID(rs.getString("STAFFID"));
                 b.setAccommodationID(rs.getString("ACCOMMODATIONID"));
                 b.setAccommodationName(rs.getString("ACCOMMODATIONNAME"));
                 b.setCheckInDate(rs.getString("CHECKINSTR"));
@@ -178,14 +164,12 @@ public class BookingDAO {
         return list;
     }
 
-    // 5. /staff/view-bookings
     public List<Booking> getAllBookings() {
 
         List<Booking> list = new ArrayList<>();
 
-        // Updated SQL to include the JOIN and ACCOMMODATIONNAME
         String sql =
-            "SELECT B.BOOKINGID, B.GUESTID, B.STAFFID, " +
+            "SELECT B.BOOKINGID, B.GUESTID, " +
             "B.ACCOMMODATIONID, A.ACCOMMODATIONNAME, B.NUMBEROFPAX, B.TOTALPRICE, B.BOOKINGSTATUS, " +
             "TO_CHAR(B.CHECKINDATE, 'YYYY-MM-DD') AS CHECKINSTR, " +
             "TO_CHAR(B.CHECKOUTDATE, 'YYYY-MM-DD') AS CHECKOUTSTR " +
@@ -204,9 +188,8 @@ public class BookingDAO {
 
                 b.setBookingID(rs.getString("BOOKINGID"));
                 b.setGuestID(rs.getString("GUESTID"));
-                b.setStaffID(rs.getString("STAFFID"));
                 b.setAccommodationID(rs.getString("ACCOMMODATIONID"));
-                b.setAccommodationName(rs.getString("ACCOMMODATIONNAME")); // Added this line
+                b.setAccommodationName(rs.getString("ACCOMMODATIONNAME"));
                 b.setCheckInDate(rs.getString("CHECKINSTR"));
                 b.setCheckOutDate(rs.getString("CHECKOUTSTR"));
                 b.setNumberOfPax(rs.getInt("NUMBEROFPAX"));
@@ -224,12 +207,11 @@ public class BookingDAO {
         return list;
     }
 
-    // 6. Staff update accommodation availability
-    public boolean updateAvailability(String accommodationID, String staffID,
+    public boolean updateAvailability(String accommodationID,
                                       String checkIn, String checkOut, String status) {
 
         if ("Unavailable".equalsIgnoreCase(status)) {
-            return blockAvailability(accommodationID, staffID, checkIn, checkOut);
+            return blockAvailability(accommodationID, checkIn, checkOut);
         } else if ("Available".equalsIgnoreCase(status)) {
             return reopenAvailability(accommodationID, checkIn, checkOut);
         }
@@ -237,16 +219,15 @@ public class BookingDAO {
         return false;
     }
 
-    // Staff blocks accommodation date
-    private boolean blockAvailability(String accommodationID, String staffID,
+    private boolean blockAvailability(String accommodationID,
                                       String checkIn, String checkOut) {
 
         String bookingId = generateBookingId();
 
         String sql =
             "INSERT INTO BOOKING " +
-            "(BOOKINGID, GUESTID, STAFFID, ACCOMMODATIONID, CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
-            "VALUES (?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
+            "(BOOKINGID, GUESTID, ACCOMMODATIONID, CHECKINDATE, CHECKOUTDATE, NUMBEROFPAX, TOTALPRICE, BOOKINGSTATUS) " +
+            "VALUES (?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?, ?)";
 
         try (
             Connection conn = DBConnection.getConnection();
@@ -255,13 +236,12 @@ public class BookingDAO {
 
             ps.setString(1, bookingId);
             ps.setString(2, null);
-            ps.setString(3, staffID);
-            ps.setString(4, accommodationID);
-            ps.setString(5, checkIn);
-            ps.setString(6, checkOut);
-            ps.setInt(7, 0);
-            ps.setDouble(8, 0.00);
-            ps.setString(9, "Unavailable");
+            ps.setString(3, accommodationID);
+            ps.setString(4, checkIn);
+            ps.setString(5, checkOut);
+            ps.setInt(6, 0);
+            ps.setDouble(7, 0.00);
+            ps.setString(8, "Unavailable");
 
             return ps.executeUpdate() > 0;
 
@@ -272,7 +252,6 @@ public class BookingDAO {
         }
     }
 
-    // Staff reopens blocked accommodation date
     private boolean reopenAvailability(String accommodationID, String checkIn, String checkOut) {
 
         String sql =
@@ -300,7 +279,6 @@ public class BookingDAO {
         }
     }
 
-    // Generate Booking ID like B001, B002, B003
     private String generateBookingId() {
 
         String bookingId = "B001";

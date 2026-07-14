@@ -177,6 +177,28 @@ public class StaffDAO {
         }
 		return false;
     }
+    
+    public boolean isEmailTaken(String email, String excludeId) {
+        String sql = "SELECT STAFFEMAIL FROM STAFF WHERE STAFFEMAIL = ? AND STAFFID != ? " +
+                     "UNION " +
+                     "SELECT GUESTEMAIL FROM GUEST WHERE GUESTEMAIL = ? AND GUESTID != ?";
+        
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, email);
+            ps.setString(2, excludeId); // Use current user ID to exclude themselves
+            ps.setString(3, email);
+            ps.setString(4, "NONE");    // We don't have a Guest ID here, so use a dummy string
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Returns true if it finds a match in either table
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true; // If something goes wrong, assume it's taken to be safe
+        }
+    }
 
     public boolean archiveStaff(String staffID) {
 

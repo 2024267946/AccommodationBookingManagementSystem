@@ -8,6 +8,7 @@ public class Accommodation {
     private double pricePerNight;
     private String location;
     private String description;
+    private String staffID;
 
     public String getAccommodationId() {
         return accommodationId;
@@ -63,5 +64,13 @@ public class Accommodation {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getStaffID() {
+        return staffID;
+    }
+
+    public void setStaffID(String staffID) {
+        this.staffID = staffID;
     }
 }

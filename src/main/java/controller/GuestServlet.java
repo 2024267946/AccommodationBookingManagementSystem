@@ -72,6 +72,15 @@ public class GuestServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/profile/edit?error=invalidProfile");
             return;
         }
+        
+        ProfileDAO profileDAO = new ProfileDAO();
+
+     // Perform the global uniqueness check
+     if (profileDAO.isEmailTaken(email.trim(), guestId)) {
+         response.sendRedirect(request.getContextPath() + "/profile/edit?error=emailAlreadyTaken");
+         return;
+     }
+     
         boolean changingPassword = !isBlank(newPassword) || !isBlank(confirmPassword);
         if (changingPassword && (isBlank(newPassword) || isBlank(confirmPassword)
                 || newPassword.length() < 6 || !newPassword.equals(confirmPassword))) {
