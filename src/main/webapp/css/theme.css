@@ -1089,3 +1089,4 @@ footer, .site-footer, .footer-section, .footer {
     margin-top: 60px !important;
     text-align: center !important;
 }
+.accom-photo-carousel{position:relative;width:100%;height:100%;overflow:hidden;background:#eee9e1}.accom-photo-carousel img{display:none;width:100%;height:100%;object-fit:cover}.accom-photo-carousel img.is-active{display:block}.accom-photo-carousel .photo-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:36px;height:36px;border:0;border-radius:50%;background:rgba(9,55,43,.78);color:#fff;font-size:24px;line-height:1;cursor:pointer}.accom-photo-carousel .photo-prev{left:10px}.accom-photo-carousel .photo-next{right:10px}.accom-photo-carousel .photo-count{position:absolute;right:10px;bottom:9px;z-index:3;padding:4px 9px;border-radius:14px;background:rgba(0,0,0,.62);color:#fff;font-size:12px}

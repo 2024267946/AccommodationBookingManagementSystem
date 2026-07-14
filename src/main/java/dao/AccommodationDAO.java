@@ -322,6 +322,7 @@ public class AccommodationDAO {
             }
 
             con.commit();
+            acc.setAccommodationId(accommodationId);
             success = true;
 
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Accommodation" %>
+<%@ page import="util.AccommodationImageStore" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
@@ -192,6 +193,15 @@
             object-fit: cover;
             display: block;
         }
+
+        .accommodation-carousel { position:relative;width:100%;height:100%; }
+        .accommodation-slide { display:none;width:100%;height:100%; }
+        .accommodation-slide.is-active { display:block; }
+        .carousel-control { position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:rgba(16,55,45,.78);color:#fff;font-size:20px;line-height:1;cursor:pointer;z-index:2; }
+        .carousel-control:hover { background:#0f5c49; }
+        .carousel-control.previous { left:8px; }
+        .carousel-control.next { right:8px; }
+        .carousel-count { position:absolute;right:9px;bottom:8px;padding:3px 8px;border-radius:12px;background:rgba(0,0,0,.62);color:#fff;font-size:11px;z-index:2; }
 
         .accommodation-info h3 {
             margin: 0 0 6px;
@@ -441,6 +451,7 @@
                                 && !displayedAccommodationList.isEmpty()) {
 
                             for (Accommodation acc : displayedAccommodationList) {
+                                List<String> cardImages = AccommodationImageStore.getImages(acc.getAccommodationId());
                     %>
 
                     <div class="accommodation-card" role="button" tabindex="0" aria-expanded="false">
@@ -448,8 +459,23 @@
                         <div class="accommodation-summary">
 
                         <div class="image-box">
-                            <img src="${pageContext.request.contextPath}/images/<%= "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "cmm1.jpg" : "chalet1.png" %>"
-                                 alt="Accommodation image">
+                            <div class="accommodation-carousel" data-carousel>
+                            <% if (cardImages.isEmpty()) { %>
+                                <img src="${pageContext.request.contextPath}/images/<%= "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "cmm1.jpg" : "chalet1.png" %>"
+                                     alt="<%= acc.getAccommodationName() %>">
+                            <% } else {
+                                for (int imageIndex = 0; imageIndex < cardImages.size(); imageIndex++) { %>
+                                <img class="accommodation-slide <%= imageIndex == 0 ? "is-active" : "" %>"
+                                     src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(acc.getAccommodationId(), "UTF-8") %>&index=<%= imageIndex %>"
+                                     alt="<%= acc.getAccommodationName() %> picture <%= imageIndex + 1 %>">
+                            <%  }
+                                if (cardImages.size() > 1) { %>
+                                <button type="button" class="carousel-control previous" aria-label="Previous picture">&#8249;</button>
+                                <button type="button" class="carousel-control next" aria-label="Next picture">&#8250;</button>
+                                <span class="carousel-count"><span>1</span>/<%= cardImages.size() %></span>
+                            <%  }
+                               } %>
+                            </div>
                         </div>
 
                         <div class="accommodation-info">
@@ -585,6 +611,23 @@ document.querySelectorAll('.accommodation-card').forEach(function(card) {
             event.preventDefault();
             toggleCard();
         }
+    });
+});
+document.querySelectorAll('[data-carousel]').forEach(function(carousel) {
+    const slides = Array.from(carousel.querySelectorAll('.accommodation-slide'));
+    if (slides.length < 2) return;
+    let current = 0;
+    const counter = carousel.querySelector('.carousel-count span');
+    function show(index) {
+        current = (index + slides.length) % slides.length;
+        slides.forEach((slide, i) => slide.classList.toggle('is-active', i === current));
+        if (counter) counter.textContent = current + 1;
+    }
+    carousel.querySelector('.previous').addEventListener('click', function(event) {
+        event.stopPropagation(); show(current - 1);
+    });
+    carousel.querySelector('.next').addEventListener('click', function(event) {
+        event.stopPropagation(); show(current + 1);
     });
 });
 </script>

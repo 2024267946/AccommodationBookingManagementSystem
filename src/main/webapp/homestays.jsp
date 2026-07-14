@@ -3,6 +3,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="model.Accommodation" %>
 <%@ page import="model.Amenity" %>
+<%@ page import="util.AccommodationImageStore" %>
 
 <!DOCTYPE html>
 <html>
@@ -35,13 +36,20 @@
             if (homestays != null && !homestays.isEmpty()) {
 
                 for (Accommodation hs : homestays) {
+                    List<String> pictures = AccommodationImageStore.getImages(hs.getAccommodationId());
                     List<Amenity> amenities = amenitiesMap == null
                         ? null
                         : amenitiesMap.get(hs.getAccommodationId());
             %>
                 <div class="chalet-card">
-                    <div class="chalet-img-placeholder">
-                        <i class="fas fa-image fa-3x text-muted"></i>
+                    <div class="chalet-img-placeholder accom-photo-carousel" data-accommodation-carousel>
+                        <% if (pictures.isEmpty()) { %>
+                        <img src="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(hs.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>" alt="<%= hs.getAccommodationName() %>">
+                        <% } else { for (int pictureIndex = 0; pictureIndex < pictures.size(); pictureIndex++) { %>
+                        <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(hs.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="<%= hs.getAccommodationName() %> picture <%= pictureIndex + 1 %>">
+                        <% } if (pictures.size() > 1) { %>
+                        <button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= pictures.size() %></span>
+                        <% } } %>
                     </div>
                     <div class="chalet-details">
                         <h3><%= hs.getAccommodationName() %></h3>
@@ -85,5 +93,6 @@
     <footer class="site-footer">
         <p class="mb-0">&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
     </footer>
+    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js"></script>
 </body>
 </html>

@@ -9,10 +9,13 @@ import java.util.*;
 
 import dao.*;
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.*;
+import util.AccommodationImageStore;
 
+@MultipartConfig(maxFileSize = 10L * 1024 * 1024, maxRequestSize = 50L * 1024 * 1024)
 @WebServlet(urlPatterns = {
     "/homestays",
     "/homestays/details",
@@ -23,7 +26,8 @@ import model.*;
     "/staff/accommodation",
     "/CreateAccommodationServlet",
     "/UpdateAccommodationServlet",
-    "/UpdateAvailabilityServlet"
+    "/UpdateAvailabilityServlet",
+    "/accommodation-image"
 })
 public class AccommodationServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -69,9 +73,34 @@ public class AccommodationServlet extends HttpServlet {
             case "/UpdateAvailabilityServlet":
                 availabilityHandler.doGet(request, response);
                 break;
+            case "/accommodation-image":
+                serveAccommodationImage(request, response);
+                break;
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    private void serveAccommodationImage(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String id = request.getParameter("id");
+        int index;
+        try {
+            index = Integer.parseInt(request.getParameter("index"));
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        java.nio.file.Path image = AccommodationImageStore.resolveStoredImage(id, index);
+        if (image == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        String contentType = java.nio.file.Files.probeContentType(image);
+        response.setContentType(contentType == null ? "application/octet-stream" : contentType);
+        response.setContentLengthLong(java.nio.file.Files.size(image));
+        response.setHeader("Cache-Control", "public, max-age=3600");
+        java.nio.file.Files.copy(image, response.getOutputStream());
     }
 
     @Override
@@ -476,7 +505,12 @@ public class AccommodationServlet extends HttpServlet {
                         isChalet ? chaletCategory.toUpperCase(Locale.ROOT) : null);
     
                 if (success) {
-    
+                    try {
+                        AccommodationImageStore.saveUploadedImages(request,
+                                acc.getAccommodationId());
+                    } catch (Exception imageError) {
+                        imageError.printStackTrace();
+                    }
                     System.out.println("Accommodation created successfully.");
     
                     response.sendRedirect(
@@ -737,6 +771,15 @@ public class AccommodationServlet extends HttpServlet {
                             response,
                             accommodationId,
                             "updateFailed");
+                    return;
+                }
+
+                try {
+                    AccommodationImageStore.saveUploadedImages(request,
+                            accommodation.getAccommodationId());
+                } catch (Exception imageError) {
+                    imageError.printStackTrace();
+                    redirectBackToEdit(request, response, accommodationId, "imageFailed");
                     return;
                 }
                 

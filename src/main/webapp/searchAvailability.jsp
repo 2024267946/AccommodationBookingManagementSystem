@@ -1,5 +1,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Accommodation" %>
+<%@ page import="util.AccommodationImageStore" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
@@ -471,6 +472,7 @@
 
     <!-- SELECTED ACCOMMODATION ANCHOR (RESTORED) -->
     <% if (selectedAccommodationId != null && accommodationChosen != null) { %>
+        <% List<String> chosenPictures = AccommodationImageStore.getImages(accommodationChosen.getAccommodationId()); %>
         <div class="results-heading-meta">
             <h2>Selected Accommodation</h2>
             <span>Verifying designated option details</span>
@@ -479,7 +481,13 @@
         <div style="max-width: 450px; margin: 0 auto 40px;">
             <article class="accommodation-card">
                 <div class="card-visual-header">
-                    <img src="${pageContext.request.contextPath}/images/cmm3.jpg" alt="Selected Stay" class="card-visual-img">
+                    <div class="accom-photo-carousel" data-accommodation-carousel>
+                    <% if (chosenPictures.isEmpty()) { %>
+                        <img src="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(accommodationChosen.getAccommodationType()) ? "chalet1.png" : "cmm3.jpg" %>" alt="Selected Stay" class="card-visual-img">
+                    <% } else { for (int pictureIndex = 0; pictureIndex < chosenPictures.size(); pictureIndex++) { %>
+                        <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(accommodationChosen.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="Selected Stay picture <%= pictureIndex + 1 %>" class="card-visual-img">
+                    <% } if (chosenPictures.size() > 1) { %><button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= chosenPictures.size() %></span><% } } %>
+                    </div>
                     <span class="badge-geo"><i class="bi bi-geo-alt-fill"></i> <%= accommodationChosen.getLocation() %></span>
                     <span class="badge-score">★ Selected</span>
                 </div>
@@ -521,9 +529,16 @@
 
         <div class="accommodation-display-grid">
             <% for (Accommodation acc : accommodationList) { %>
+                <% List<String> resultPictures = AccommodationImageStore.getImages(acc.getAccommodationId()); %>
                 <article class="accommodation-card">
                     <div class="card-visual-header">
-                        <img src="${pageContext.request.contextPath}/<%= "CHALET".equalsIgnoreCase(acc.getAccommodationType()) ? "images/chalet1.png" : "images/cmm3.jpg" %>" alt="Stay Thumbnail" class="card-visual-img">
+                        <div class="accom-photo-carousel" data-accommodation-carousel>
+                        <% if (resultPictures.isEmpty()) { %>
+                            <img src="${pageContext.request.contextPath}/<%= "CHALET".equalsIgnoreCase(acc.getAccommodationType()) ? "images/chalet1.png" : "images/cmm3.jpg" %>" alt="Stay Thumbnail" class="card-visual-img">
+                        <% } else { for (int pictureIndex = 0; pictureIndex < resultPictures.size(); pictureIndex++) { %>
+                            <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(acc.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="<%= acc.getAccommodationName() %> picture <%= pictureIndex + 1 %>" class="card-visual-img">
+                        <% } if (resultPictures.size() > 1) { %><button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= resultPictures.size() %></span><% } } %>
+                        </div>
                         <span class="badge-geo"><i class="bi bi-geo-alt-fill"></i> <%= acc.getLocation() %></span>
                         <span class="badge-score">★ 4.9</span>
                     </div>
@@ -627,6 +642,8 @@
 <footer style="text-align: center; padding: 30px 20px; color: #78827e; font-size: 13px;">
     <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
 </footer>
+
+<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js"></script>
 
 </body>
 </html>

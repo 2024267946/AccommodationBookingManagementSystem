@@ -135,7 +135,7 @@
                 <div class="table-card form-card">
 
                     <form action="${pageContext.request.contextPath}/UpdateAccommodationServlet"
-                          method="post">
+                          method="post" enctype="multipart/form-data">
 
                         <input type="hidden"
                                name="accommodationId"
@@ -228,6 +228,13 @@
                                           required><%= accommodation.getDescription() == null
                                                   ? ""
                                                   : accommodation.getDescription() %></textarea>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Add Accommodation Pictures</label>
+                                <input type="file" class="form-control" name="accommodationImages"
+                                       accept="image/jpeg,image/png,image/gif,image/webp" multiple>
+                                <small class="text-muted">New pictures will be added to the existing carousel.</small>
                             </div>
                         </div>
 

@@ -225,7 +225,7 @@
             <div class="form-card">
 
                 <form action="${pageContext.request.contextPath}/CreateAccommodationServlet"
-                      method="post">
+                      method="post" enctype="multipart/form-data">
 
                     <div class="form-grid">
 
@@ -336,6 +336,14 @@
                                       name="description"
                                       placeholder="Enter accommodation description"
                                       required></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="accommodationImages">Accommodation Pictures</label>
+                            <input id="accommodationImages" class="form-control" type="file"
+                                   name="accommodationImages" accept="image/jpeg,image/png,image/gif,image/webp"
+                                   multiple>
+                            <small class="text-muted">Choose one or more JPG, PNG, GIF or WEBP pictures (maximum 10 MB each).</small>
                         </div>
 
                     </div>

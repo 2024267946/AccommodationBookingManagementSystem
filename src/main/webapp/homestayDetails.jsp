@@ -1,7 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="model.Accommodation" %>
+<%@ page import="java.util.List" %>
+<%@ page import="util.AccommodationImageStore" %>
 <%
 Accommodation accommodation = (Accommodation) request.getAttribute("accomodation");
+List<String> detailPictures = accommodation == null ? java.util.Collections.emptyList()
+        : AccommodationImageStore.getImages(accommodation.getAccommodationId());
 %>
 <!DOCTYPE html>
 <html>
@@ -16,8 +20,14 @@ Accommodation accommodation = (Accommodation) request.getAttribute("accomodation
     <main class="container details-section">
         <div class="details-grid">
             <div class="details-image-box" style="overflow: hidden;">
-                <div class="chalet-img-placeholder" style="width: 100%; height: 100%; min-height: 450px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-image fa-3x text-muted"></i>
+                <div class="chalet-img-placeholder accom-photo-carousel" data-accommodation-carousel style="width:100%;height:100%;min-height:450px;">
+                    <% if (detailPictures.isEmpty()) { %>
+                    <img src="${pageContext.request.contextPath}/images/<%= accommodation != null && "CHALET".equalsIgnoreCase(accommodation.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>" alt="Accommodation picture">
+                    <% } else { for (int pictureIndex = 0; pictureIndex < detailPictures.size(); pictureIndex++) { %>
+                    <img src="${pageContext.request.contextPath}/accommodation-image?id=<%= java.net.URLEncoder.encode(accommodation.getAccommodationId(), "UTF-8") %>&index=<%= pictureIndex %>" alt="<%= accommodation.getAccommodationName() %> picture <%= pictureIndex + 1 %>">
+                    <% } if (detailPictures.size() > 1) { %>
+                    <button type="button" class="photo-nav photo-prev" aria-label="Previous picture">&#8249;</button><button type="button" class="photo-nav photo-next" aria-label="Next picture">&#8250;</button><span class="photo-count"><span>1</span>/<%= detailPictures.size() %></span>
+                    <% } } %>
                 </div>
             </div>
             
@@ -49,6 +59,7 @@ Accommodation accommodation = (Accommodation) request.getAttribute("accomodation
     </footer>
     
     <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
+    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         if (params.get("error") === "-1") {
