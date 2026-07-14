@@ -644,7 +644,7 @@
     <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
 </footer>
 
-<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
+<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-4"></script>
 <script>
 (function () {
     const checkInInput = document.getElementById('checkIn');

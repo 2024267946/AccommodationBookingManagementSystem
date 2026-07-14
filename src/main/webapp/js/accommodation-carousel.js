@@ -1,32 +1,48 @@
-document.querySelectorAll('[data-accommodation-carousel], [data-carousel]').forEach(function (carousel) {
-    const slides = Array.from(carousel.querySelectorAll('img'));
-    if (!slides.length) return;
-    slides.forEach(function (slide) {
-        slide.addEventListener('error', function () {
-            const fallback = carousel.dataset.fallback;
-            if (fallback && slide.src !== new URL(fallback, window.location.href).href) {
-                slide.src = fallback;
-            }
-        });
-    });
-    slides.forEach((slide, index) => slide.classList.toggle('is-active', index === 0));
-    if (slides.length < 2) return;
-    let current = 0;
-    const count = carousel.querySelector('.photo-count span, .carousel-count span');
-    function show(index) {
-        current = (index + slides.length) % slides.length;
-        slides.forEach((slide, position) => slide.classList.toggle('is-active', position === current));
-        if (count) count.textContent = current + 1;
+(function () {
+    const carouselSelector = '[data-accommodation-carousel], [data-carousel]';
+
+    function slidesFor(carousel) {
+        return Array.prototype.slice.call(carousel.querySelectorAll('img'));
     }
-    const previous = carousel.querySelector('.photo-prev, .carousel-control.previous');
-    const next = carousel.querySelector('.photo-next, .carousel-control.next');
-    if (previous) previous.addEventListener('click', function (event) {
-        event.preventDefault(); event.stopPropagation(); show(current - 1);
+
+    function show(carousel, requestedIndex) {
+        const slides = slidesFor(carousel);
+        if (!slides.length) return;
+        const index = (requestedIndex + slides.length) % slides.length;
+        carousel.setAttribute('data-current-slide', String(index));
+        slides.forEach(function (slide, position) {
+            slide.classList.toggle('is-active', position === index);
+        });
+        const count = carousel.querySelector('.photo-count span, .carousel-count span');
+        if (count) count.textContent = String(index + 1);
+    }
+
+    document.querySelectorAll(carouselSelector).forEach(function (carousel) {
+        carousel.setAttribute('data-current-slide', '0');
+        const slides = slidesFor(carousel);
+        slides.forEach(function (slide) {
+            slide.addEventListener('error', function () {
+                const fallback = carousel.getAttribute('data-fallback');
+                if (fallback && slide.getAttribute('src') !== fallback) slide.setAttribute('src', fallback);
+            });
+        });
+        show(carousel, 0);
     });
-    if (next) next.addEventListener('click', function (event) {
-        event.preventDefault(); event.stopPropagation(); show(current + 1);
+
+    document.addEventListener('click', function (event) {
+        const control = event.target.closest(
+                '.photo-prev, .photo-next, .carousel-control.previous, .carousel-control.next');
+        if (!control) return;
+        const carousel = control.closest(carouselSelector);
+        if (!carousel) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const current = parseInt(carousel.getAttribute('data-current-slide') || '0', 10);
+        const backwards = control.classList.contains('photo-prev')
+                || control.classList.contains('previous');
+        show(carousel, current + (backwards ? -1 : 1));
     });
-});
+})();
 
 (function () {
     const pictures = document.querySelectorAll('.accom-photo-carousel img, .accommodation-carousel img');

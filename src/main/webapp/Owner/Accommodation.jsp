@@ -624,7 +624,7 @@
     <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %><script>showAppNotification("Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully","The accommodation information has been saved.","success",3500);</script><% } %>
 
 <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
-<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
+<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-4"></script>
 <script>
 document.querySelectorAll('.accommodation-card').forEach(function(card) {
     function toggleCard() {

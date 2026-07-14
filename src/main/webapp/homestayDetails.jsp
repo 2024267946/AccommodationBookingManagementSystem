@@ -70,7 +70,7 @@ List<String> detailPictures = accommodation == null ? java.util.Collections.empt
     </footer>
     
     <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
-    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
+    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-4"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         if (params.get("error") === "-1") {
