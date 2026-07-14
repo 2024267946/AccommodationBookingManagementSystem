@@ -7,7 +7,7 @@
     
     <!-- Left Section: Logo Image and Elegant Cursive Title -->
     <div style="display: flex; align-items: center; gap: 16px;">
-        <img src="${pageContext.request.contextPath}/images/logo1.png" alt="Logo" style="height: 45px; width: auto; object-fit: contain;">
+        <img src="${pageContext.request.contextPath}/images/logo2.png" alt="Logo" style="height: 45px; width: auto; object-fit: contain;">
         
     </div>
 

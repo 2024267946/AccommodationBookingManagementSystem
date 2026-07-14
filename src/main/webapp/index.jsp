@@ -49,59 +49,7 @@
         </div>
     </section>
 
-    <!-- 3. Curated Showcase Highlights Section (Horizontal Slider Layout matching image_bba6a9.png) -->
-    <section class="emily-slider-section">
-        <div class="container-fluid px-5">
-            <div class="d-flex justify-content-between align-items-end mb-4 pb-3" style="border-bottom: 1px solid rgba(14, 30, 25, 0.15);">
-                <div>
-                    <span class="emily-meta-tag">CURATED ACCOMMODATION</span>
-                    <h2 class="emily-section-title mt-2">Handpicked Spaces</h2>
-                </div>
-                
-            </div>
-
-            <!-- The Side-by-Side Horizontal Scroll Track Window -->
-            <div class="emily-horizontal-scroll-track">
-                
-                <!-- Slide Item 1 -->
-                <div class="emily-slide-item">
-                    <div class="emily-slide-img-box" style="background-image: url('images/cmm3.jpg');">
-                        <div class="emily-slide-overlay">
-                            <span class="slide-number">01</span>
-                            <h3>Standard Chalet A1</h3>
-                            <p>RM 150 <small>/ night</small></p>
-                            <a href="homestayDetails.jsp?id=1" class="slide-action-btn">View Space &rarr;</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide Item 2 -->
-                <div class="emily-slide-item">
-                    <div class="emily-slide-img-box" style="background-image: url('images/cmm4.jpg');">
-                        <div class="emily-slide-overlay">
-                            <span class="slide-number">02</span>
-                            <h3>Family Suite B1</h3>
-                            <p>RM 280 <small>/ night</small></p>
-                            <a href="homestayDetails.jsp?id=2" class="slide-action-btn">View Space &rarr;</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide Item 3 -->
-                <div class="emily-slide-item">
-                    <div class="emily-slide-img-box" style="background-image: url('images/cmm5.jpg');">
-                        <div class="emily-slide-overlay">
-                            <span class="slide-number">03</span>
-                            <h3>Luxury Nature Villa C1</h3>
-                            <p>RM 350 <small>/ night</small></p>
-                            <a href="homestayDetails.jsp?id=3" class="slide-action-btn">View Space &rarr;</a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
+   
 
     <!-- Shared Minimalist Footer Block Alignment -->
     <footer class="site-footer">

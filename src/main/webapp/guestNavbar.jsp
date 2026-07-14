@@ -21,7 +21,7 @@
         <a class="guest-logo"
            href="${pageContext.request.contextPath}/homepage.jsp">
 
-            <img src="${pageContext.request.contextPath}/images/logo1.png"
+            <img src="${pageContext.request.contextPath}/images/logo2.png"
                  alt="Cuti Murah Melaka">
 
         </a>

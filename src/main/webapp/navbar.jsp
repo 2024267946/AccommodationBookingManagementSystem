@@ -25,7 +25,7 @@ if ("OWNER".equalsIgnoreCase(navbarRole)) {
                 <a class="navbar-brand d-flex align-items-center"
                    href="${pageContext.request.contextPath}/index.jsp"
                    style="gap: 12px; text-decoration: none;">
-                    <img src="${pageContext.request.contextPath}/images/logo1.png"
+                    <img src="${pageContext.request.contextPath}/images/logo2.png"
                          alt="Cuti Murah Melaka"
                          class="logo-img">
                 </a>

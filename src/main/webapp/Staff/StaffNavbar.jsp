@@ -5,7 +5,7 @@
 %>
 <header class="navbar" style="box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; height:80px;">
     <div style="display:flex; align-items:center; gap:16px;">
-        <img src="${pageContext.request.contextPath}/images/logo1.png" alt="Logo" style="height:45px; width:auto; object-fit:contain;">
+        <img src="${pageContext.request.contextPath}/images/logo2.png" alt="Logo" style="height:45px; width:auto; object-fit:contain;">
     </div>
 
     <ul class="navbar-nav">
