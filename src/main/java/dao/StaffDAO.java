@@ -61,8 +61,7 @@ public class StaffDAO {
             ps.setString(5, staff.getStaffPhoneNumber());
             ps.setString(6, staff.getStaffRoles());
 
-            ps.executeUpdate();
-            return true;
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -155,7 +154,6 @@ public class StaffDAO {
         String sql =
                 "UPDATE STAFF SET " +
                 "STAFFNAME = ?, " +
-                "STAFFPASSWORD = ?, " +
                 "STAFFEMAIL = ?, " +
                 "STAFFPHONENUMBER = ?, " +
                 "STAFFROLES = ? " +
@@ -167,13 +165,12 @@ public class StaffDAO {
         ) {
 
             ps.setString(1, staff.getStaffName());
-            ps.setString(2, PasswordUtil.hashIfNeeded(staff.getStaffPassword()));
-            ps.setString(3, staff.getStaffEmail());
-            ps.setString(4, staff.getStaffPhoneNumber());
-            ps.setString(5, staff.getStaffRoles());
-            ps.setString(6, staff.getStaffId());
+            ps.setString(2, staff.getStaffEmail());
+            ps.setString(3, staff.getStaffPhoneNumber());
+            ps.setString(4, staff.getStaffRoles());
+            ps.setString(5, staff.getStaffId());
 
-            ps.executeUpdate();
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();

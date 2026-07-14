@@ -17,6 +17,7 @@
 <link rel="stylesheet"
       type="text/css"
       href="${pageContext.request.contextPath}/css/theme.css">
+<script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
 
 <style>
     .guest-user-nav {

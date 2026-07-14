@@ -45,7 +45,7 @@ public class ProfileServlet extends HttpServlet {
         if (path.equals("/profile/update-profile")) {
             executeProfileUpdate(request, response);
         } else if (path.equals("/profile/reset-password")) {
-            resetGuestPassword(request, response);
+            resetPassword(request, response);
         }
     }
 
@@ -160,33 +160,40 @@ public class ProfileServlet extends HttpServlet {
         }
     }
 
-    private void resetGuestPassword(HttpServletRequest request, HttpServletResponse response)
+    private void resetPassword(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         HttpSession session = request.getSession(false);
-        if (session == null || !"GUEST".equalsIgnoreCase(String.valueOf(session.getAttribute("role")))
-                || session.getAttribute("guestID") == null) {
+        if (session == null || session.getAttribute("role") == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
             return;
         }
+        String role = String.valueOf(session.getAttribute("role"));
+        String userId = "GUEST".equalsIgnoreCase(role)
+                ? (String) session.getAttribute("guestID") : (String) session.getAttribute("staffID");
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=unauthorized");
+            return;
+        }
+        String returnPath = "GUEST".equalsIgnoreCase(role) ? "/profile"
+                : ("OWNER".equalsIgnoreCase(role) ? "/Owner/myProfile" : "/staff/my-profile");
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
         if (isBlank(currentPassword) || isBlank(newPassword) || isBlank(confirmPassword)) {
-            response.sendRedirect(request.getContextPath() + "/profile?passwordError=missing");
+            response.sendRedirect(request.getContextPath() + returnPath + "?passwordError=missing");
             return;
         }
         if (newPassword.length() < 6) {
-            response.sendRedirect(request.getContextPath() + "/profile?passwordError=short");
+            response.sendRedirect(request.getContextPath() + returnPath + "?passwordError=short");
             return;
         }
         if (!newPassword.equals(confirmPassword)) {
-            response.sendRedirect(request.getContextPath() + "/profile?passwordError=mismatch");
+            response.sendRedirect(request.getContextPath() + returnPath + "?passwordError=mismatch");
             return;
         }
-        boolean success = profileDAO.resetGuestPassword(
-                session.getAttribute("guestID").toString(), currentPassword, newPassword);
+        boolean success = profileDAO.resetPassword(userId, role, currentPassword, newPassword);
         response.sendRedirect(request.getContextPath()
-                + (success ? "/profile?passwordReset=success" : "/profile?passwordError=current"));
+                + returnPath + (success ? "?updateSuccess=true" : "?passwordError=current"));
     }
 
     private boolean isBlank(String value) {

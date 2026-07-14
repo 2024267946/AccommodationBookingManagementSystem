@@ -290,12 +290,10 @@ public class StaffServlet extends HttpServlet {
 		boolean success = staffDAO.addStaff(staff);
 
 		if (success) {
-			request.getSession().setAttribute("successMessage", "Staff created successfully.");
+			response.sendRedirect(request.getContextPath() + "/owner/view-staff?notification=staffCreated");
 		} else {
-			request.getSession().setAttribute("errorMessage", "Unable to create staff.");
+			response.sendRedirect(request.getContextPath() + "/owner/create-staff?error=createFailed");
 		}
-
-		response.sendRedirect(request.getContextPath() + "/owner/view-staff");
 	}
 
 	private void viewArchivedStaff(HttpServletRequest request, HttpServletResponse response)
@@ -350,7 +348,6 @@ public class StaffServlet extends HttpServlet {
 
 		staff.setStaffId(loggedStaff.getStaffId());
 		staff.setStaffName(request.getParameter("staffName"));
-		staff.setStaffPassword(request.getParameter("staffPassword"));
 		staff.setStaffEmail(request.getParameter("staffEmail"));
 		staff.setStaffPhoneNumber(request.getParameter("staffPhoneNumber"));
 		staff.setStaffRoles(loggedStaff.getStaffRoles());
@@ -362,12 +359,8 @@ public class StaffServlet extends HttpServlet {
 			session.setAttribute("loggedStaff", staff);
 			session.setAttribute("staffID", staff.getStaffId());
 			session.setAttribute("staffName", staff.getStaffName());
-			session.setAttribute("successMessage", "Profile updated successfully.");
-
 			response.sendRedirect(request.getContextPath() + "/staff/my-profile?updateSuccess=true");
 		} else {
-			session.setAttribute("errorMessage", "Unable to update profile.");
-
 			response.sendRedirect(request.getContextPath() + "/staff/my-profile?error=true");
 		}
 

@@ -14,9 +14,6 @@ String registerSuffix=encodedRegisterReturn==null?"":"?returnTo="+encodedRegiste
     
 </head>
 <body class="auth-body">
-<style>
-.result-modal{position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(8,28,22,.62)}.result-modal-card{width:min(430px,100%);padding:34px;background:#fff;border-radius:18px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22)}.result-modal-icon{width:62px;height:62px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold}.result-modal.error .result-modal-icon{background:#fff0f0;color:#a61b1b}.result-modal h2{margin:0 0 10px;color:#123a30}.result-modal p{margin:0 0 24px;color:#746f69}.result-modal .btn-primary{display:inline-flex;text-decoration:none;padding:12px 28px}
-</style>
 <jsp:include page="navbar.jsp" />
     <div class="auth-container">
         <div class="auth-card">
@@ -68,16 +65,13 @@ String registerSuffix=encodedRegisterReturn==null?"":"?returnTo="+encodedRegiste
             </div>
         </div>
     </div>
-    <% if ("emailExists".equals(request.getParameter("error"))) { %>
-    <div class="result-modal error"><div class="result-modal-card"><div class="result-modal-icon">!</div><h2>Email Already Exists</h2><p>An account is already registered with this email address.</p><a class="btn-primary" href="${pageContext.request.contextPath}/register.jsp<%= registerSuffix %>">Try Another Email</a></div></div>
-    <% } else if ("success".equals(request.getParameter("register"))) { %>
-    <div class="result-modal"><div class="result-modal-card"><div class="result-modal-icon">✓</div><h2>Account Created Successfully</h2><p>Your guest account is ready. Log in to continue.</p><a class="btn-primary" href="${pageContext.request.contextPath}/login.jsp<%= registerSuffix %>">Continue to Login</a></div></div>
-    <% } %>
     <script>
     const registerPassword=document.getElementById('registerPassword'),registerConfirmation=document.getElementById('registerConfirmPassword');
     function validateRegistrationPassword(){const mismatch=registerConfirmation.value!==''&&registerPassword.value!==registerConfirmation.value;registerConfirmation.setCustomValidity(mismatch?'Passwords do not match.':'');document.getElementById('registerPasswordMismatch').style.display=mismatch?'block':'none';}
     registerPassword.addEventListener('input',validateRegistrationPassword);registerConfirmation.addEventListener('input',validateRegistrationPassword);
+    <% if ("emailExists".equals(request.getParameter("error"))) { %>showAppNotification("Email Already Exists","An account is already registered with this email address.","error",3500);<% } %>
     <% if ("success".equals(request.getParameter("register"))) { %>
+    showAppNotification("Account Created Successfully","Your guest account is ready. Redirecting you to login.","success",3000);
     window.setTimeout(function(){window.location.href='${pageContext.request.contextPath}/login.jsp<%= registerSuffix %>';},3000);
     <% } %>
     </script>

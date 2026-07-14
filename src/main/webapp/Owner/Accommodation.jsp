@@ -332,7 +332,6 @@
 </head>
 
 <body class="admin-body">
-    <style>.accom-success-modal{position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(8,28,22,.62)}.accom-success-card{width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22)}.accom-success-icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold}.accom-success-card h2{margin:0 0 9px;color:#123a30}.accom-success-card p{margin:0 0 22px;color:#746f69}</style>
 
     <% if (staffView) { %><jsp:include page="../Staff/StaffNavbar.jsp" /><% } else { %><jsp:include page="ownerNavbar.jsp" /><% } %>
 
@@ -539,9 +538,7 @@
 
     </div>
 
-    <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %>
-    <div class="accom-success-modal"><div class="accom-success-card"><div class="accom-success-icon">✓</div><h2>Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully</h2><p>The accommodation information has been saved.</p><a class="btn-edit" href="${pageContext.request.contextPath}/<%= staffView ? "staff/accommodation" : "OwnerAccommodationListServlet" %>">Done</a></div></div>
-    <% } %>
+    <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %><script>showAppNotification("Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully","The accommodation information has been saved.","success",3500);</script><% } %>
 
 <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
 </body>

@@ -76,18 +76,22 @@ public class ProfileDAO {
         return success;
     }
 
-    public boolean resetGuestPassword(String guestId, String currentPassword, String newPassword) {
-        String selectSql = "SELECT GUESTPASSWORD FROM GUEST WHERE GUESTID=?";
+    public boolean resetPassword(String userId, String role, String currentPassword, String newPassword) {
+        boolean guest = "GUEST".equalsIgnoreCase(role);
+        String table = guest ? "GUEST" : "STAFF";
+        String idColumn = guest ? "GUESTID" : "STAFFID";
+        String passwordColumn = guest ? "GUESTPASSWORD" : "STAFFPASSWORD";
+        String selectSql = "SELECT " + passwordColumn + " FROM " + table + " WHERE " + idColumn + "=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement select = conn.prepareStatement(selectSql)) {
-            select.setString(1, guestId);
+            select.setString(1, userId);
             try (ResultSet rs = select.executeQuery()) {
                 if (!rs.next() || !PasswordUtil.matches(currentPassword, rs.getString(1))) return false;
             }
             try (PreparedStatement update = conn.prepareStatement(
-                    "UPDATE GUEST SET GUESTPASSWORD=? WHERE GUESTID=?")) {
+                    "UPDATE " + table + " SET " + passwordColumn + "=? WHERE " + idColumn + "=?")) {
                 update.setString(1, PasswordUtil.hash(newPassword));
-                update.setString(2, guestId);
+                update.setString(2, userId);
                 return update.executeUpdate() > 0;
             }
         } catch (SQLException e) {

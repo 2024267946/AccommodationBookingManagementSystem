@@ -10,7 +10,6 @@
     <jsp:include page="header.jsp" />
 </head>
 <body>
-    <style>.account-modal{position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,28,22,.62);padding:24px}.account-modal-card{width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22)}.account-modal-icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold}.account-modal h2{margin:0 0 9px;color:#123a30}.account-modal p{margin:0 0 22px;color:#746f69}</style>
     <jsp:include page="navbar.jsp" />
 
     <main class="container" style="padding: 3rem 5%; min-height: 75vh;">
@@ -36,21 +35,9 @@
                 </div>
             </div>
 
-            <div id="passwordResetCard" class="profile-card" style="display:none;text-align:left;">
-                <h2 style="margin-top:0;">Reset Password</h2>
-                <% if (request.getParameter("passwordError") != null) { %>
-                    <div class="message message-error">Unable to reset password. Verify your current password and ensure the new passwords match.</div>
-                <% } else if ("success".equals(request.getParameter("passwordReset"))) { %>
-                    <div class="message message-success">Password updated successfully.</div>
-                <% } %>
-                <form action="${pageContext.request.contextPath}/profile/reset-password" method="post">
-                    <div class="form-group"><label>Current Password</label><input class="form-control" type="password" name="currentPassword" required></div>
-                    <div class="form-group"><label>New Password</label><input id="newPassword" class="form-control" type="password" name="newPassword" minlength="6" required></div>
-                    <div class="form-group"><label>Confirm New Password</label><input id="confirmPassword" class="form-control" type="password" name="confirmPassword" minlength="6" required></div>
-                    <div id="passwordMismatch" style="display:none;color:#a61b1b;margin-bottom:12px;">New passwords do not match.</div>
-                    <button type="submit" class="btn-primary">Save New Password</button>
-                </form>
-            </div>
+            <% if (request.getParameter("passwordError") != null) { %>
+                <div class="message message-error">Unable to reset password. Check your current password and make sure the new passwords match.</div>
+            <% } %>
 
             <div class="booking-history">
                 <h2>My Reservation History</h2>
@@ -86,15 +73,9 @@
     <footer class="site-footer">
         <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
     </footer>
-    <% if ("true".equals(request.getParameter("updateSuccess"))) { %>
-    <div class="account-modal"><div class="account-modal-card"><div class="account-modal-icon">✓</div><h2>Account Updated Successfully</h2><p>Your latest profile information has been saved.</p><a class="btn-primary" href="${pageContext.request.contextPath}/profile" style="text-decoration:none;display:inline-flex;">Done</a></div></div>
-    <% } %>
+    <% if ("true".equals(request.getParameter("updateSuccess"))) { %><script>showAppNotification("Account Updated Successfully","Your latest profile information has been saved.","success",3500);</script><% } %>
 <script>
-function togglePasswordReset(){const card=document.getElementById('passwordResetCard');card.style.display=card.style.display==='none'?'block':'none';}
-const newPassword=document.getElementById('newPassword'),confirmPassword=document.getElementById('confirmPassword');
-function validateResetPassword(){const mismatch=confirmPassword.value!==''&&newPassword.value!==confirmPassword.value;confirmPassword.setCustomValidity(mismatch?'Passwords do not match.':'');document.getElementById('passwordMismatch').style.display=mismatch?'block':'none';}
-newPassword.addEventListener('input',validateResetPassword);confirmPassword.addEventListener('input',validateResetPassword);
-<% if (request.getParameter("passwordError") != null || request.getParameter("passwordReset") != null) { %>document.getElementById('passwordResetCard').style.display='block';<% } %>
+function togglePasswordReset(){showPasswordResetModal('${pageContext.request.contextPath}/profile/reset-password');}
 </script>
 </body>
 </html>

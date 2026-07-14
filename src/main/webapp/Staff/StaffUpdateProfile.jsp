@@ -48,12 +48,9 @@
                             <input type="text" name="staffPhoneNumber" value="<%= staff.getStaffPhoneNumber() %>" required
                                    style="width:100%; padding:14px; margin-bottom:20px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
 
-                            <label style="font-weight:600; display:block; margin-bottom:8px;">Password</label>
-                            <input type="password" name="staffPassword" value="<%= staff.getStaffPassword() %>" required
-                                   style="width:100%; padding:14px; margin-bottom:25px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-
                             <div style="display:flex; gap:12px;">
                                 <button type="submit" class="btn-primary" style="padding:12px 24px; border-radius:8px;">Save Changes</button>
+                                <button type="button" class="btn-clear" onclick="showPasswordResetModal('${pageContext.request.contextPath}/profile/reset-password')" style="padding:12px 24px;border-radius:8px;">Reset Password</button>
                                 <a href="${pageContext.request.contextPath}/staff/view-staff" style="padding:12px 24px; border-radius:8px; text-decoration:none; background:#f3f0e8; color:#555; font-weight:600;">Cancel</a>
                             </div>
                         </form>
@@ -62,5 +59,8 @@
             </div>
         </main>
     </div>
+    <% if ("true".equals(request.getParameter("updateSuccess"))) { %><script>showAppNotification("Account Updated Successfully","Your account information has been saved.","success",3500);</script><% } %>
+    <% if (request.getParameter("passwordError") != null) { %><script>showAppNotification("Unable to Reset Password","Check your current password and make sure the new passwords match.","error",3500);</script><% } %>
+    <% if (request.getParameter("error") != null) { %><script>showAppNotification("Unable to Update Account","Your account information could not be saved. Please try again.","error",3500);</script><% } %>
 </body>
 </html>

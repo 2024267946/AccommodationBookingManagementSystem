@@ -171,6 +171,9 @@ if (guestList != null) {
       </main>
     </div>
     <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
+    <% if ("staffCreated".equals(request.getParameter("notification"))) { %>
+    <script>window.addEventListener("DOMContentLoaded",function(){showAppNotification("Account Created Successfully","The staff account has been created and is ready to use.","success",3500);});</script>
+    <% } %>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
       const form = document.getElementById("user-search-form");

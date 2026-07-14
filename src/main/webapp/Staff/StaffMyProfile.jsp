@@ -32,6 +32,8 @@
 
                 <% if (request.getParameter("error") != null) { %>
                     <div class="message message-error">Unable to update your profile. Please check the information and try again.</div>
+                <% } else if (request.getParameter("passwordError") != null) { %>
+                    <div class="message message-error">Unable to reset password. Check your current password and make sure the new passwords match.</div>
                 <% } %>
 
                 <!-- Sub-navigation tabs inside Account -->
@@ -85,6 +87,7 @@
                                 <button type="button" id="actionBtn" onclick="toggleEditMode()" class="btn-primary" style="border-radius: 12px !important; padding: 12px 28px !important; font-size: 0.9rem !important; display: inline-flex; align-items: center; gap: 8px;">
                                     <span id="btnText">Edit Account</span>
                                 </button>
+                                <button type="button" onclick="showPasswordResetModal('${pageContext.request.contextPath}/profile/reset-password')" class="btn-clear" style="margin-left:10px;padding:12px 28px;border-radius:12px;">Reset Password</button>
                             </div>
                         </form>
                         <% } else { %>
@@ -97,16 +100,7 @@
         </main>
     </div>
 
-    <% if ("true".equals(request.getParameter("updateSuccess"))) { %>
-    <div style="position:fixed;z-index:3000;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,28,22,.62);padding:24px;">
-        <div style="width:min(420px,100%);padding:34px;border-radius:18px;background:#fff;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.22);">
-            <div style="display:flex;align-items:center;justify-content:center;width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:#eaf7ef;color:#17633a;font-size:28px;font-weight:bold;">✓</div>
-            <h2 style="margin:0 0 9px;color:#123a30;">Account Updated Successfully</h2>
-            <p style="margin:0 0 22px;color:#746f69;">Your latest profile information has been saved.</p>
-            <a class="btn-primary" href="${pageContext.request.contextPath}/staff/my-profile" style="display:inline-flex;text-decoration:none;">Done</a>
-        </div>
-    </div>
-    <% } %>
+    <% if ("true".equals(request.getParameter("updateSuccess"))) { %><script>showAppNotification("Account Updated Successfully","Your latest account information has been saved.","success",3500);</script><% } %>
 
     <script>
         let isEditMode = false;

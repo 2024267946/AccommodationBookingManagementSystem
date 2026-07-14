@@ -37,6 +37,8 @@
                         <div class="message message-error" style="margin-bottom:20px;">Please complete every required field.</div>
                     <% } else if ("invalidPassword".equals(request.getParameter("error"))) { %>
                         <div class="message message-error" style="margin-bottom:20px;">Temporary password must contain at least 6 characters.</div>
+                    <% } else if ("createFailed".equals(request.getParameter("error"))) { %>
+                        <div class="message message-error" style="margin-bottom:20px;">The staff account could not be created. Please try again.</div>
                     <% } %>
                     
                     <form id="createStaffForm" action="${pageContext.request.contextPath}/owner/create-staff" method="POST">

@@ -99,9 +99,6 @@ input[readonly] {
             <label>Email</label>
             <input type="email" name="staffEmail" value="<%=staff.getStaffEmail()%>" required>
 
-            <label>Password</label>
-            <input type="text" name="staffPassword" value="<%=staff.getStaffPassword()%>" required>
-
             <label>Phone Number</label>
             <input type="text" name="staffPhoneNumber" value="<%=staff.getStaffPhoneNumber()%>" required>
 
