@@ -29,7 +29,7 @@ public class AccommodationDAO {
             "WHERE A.MAXCAPACITY >= ? " +
             "AND NOT EXISTS ( " +
             "   SELECT 1 FROM BOOKING B " +
-            "   JOIN BOOKINGDETAIL BD ON BD.BOOKINGID = B.BOOKINGID " +
+            
             "   WHERE BD.ACCOMMODATIONID = A.ACCOMMODATIONID " +
             "   AND UPPER(B.BOOKINGSTATUS) NOT IN ('CANCELLED', 'COMPLETED') " +
             "   AND TO_DATE(?, 'YYYY-MM-DD') < B.CHECKOUTDATE " +
