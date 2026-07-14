@@ -14,7 +14,7 @@
         </a>
         
         <!-- 2. Account (Stays active on any of the 4 profile/user settings tabs) -->
-        <a href="${pageContext.request.contextPath}/staff/user-management"
+        <a href="${pageContext.request.contextPath}/staff/my-profile"
            class="nav-link <%= (currentPage.contains("StaffMyProfile.jsp") || currentPage.contains("/staff/my-profile") || currentPage.contains("StaffUserManagement.jsp") || currentPage.contains("/staff/user-management") || currentPage.contains("StaffArchivedStaff.jsp") || currentPage.contains("/staff/archived-staff") || currentPage.contains("StaffArchivedGuest.jsp") || currentPage.contains("/staff/archived-guest")) ? "active-admin-link" : "" %>"
            style="display: block; width: 100%; padding: 14px 20px; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; box-sizing: border-box;">
             Account

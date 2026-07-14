@@ -14,7 +14,7 @@
         </a>
         
         <!-- 2. Account (Triggers on either profile or user management pages) -->
-        <a href="${pageContext.request.contextPath}/owner/view-staff"
+        <a href="${pageContext.request.contextPath}/Owner/myProfile"
            class="nav-link <%= (currentPage.contains("userManagement.jsp") || currentPage.contains("myProfile.jsp") || currentPage.contains("ArchivedStaff.jsp") || currentPage.contains("ArchivedGuest.jsp")) ? "active-admin-link" : "" %>"
            style="display: block; width: 100%; padding: 14px 20px; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; box-sizing: border-box;">
             Account
