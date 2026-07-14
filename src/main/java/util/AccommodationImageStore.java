@@ -21,7 +21,12 @@ public final class AccommodationImageStore {
 
     public static Map<String, List<String>> loadAll() {
         synchronized (LOCK) {
-            return readIndex();
+            try {
+                return readIndex();
+            } catch (RuntimeException e) {
+                System.err.println("Accommodation image index unavailable: " + e.getMessage());
+                return new LinkedHashMap<>();
+            }
         }
     }
 
@@ -96,12 +101,17 @@ public final class AccommodationImageStore {
     }
 
     public static Path resolveStoredImage(String accommodationId, int index) {
-        List<String> images = getImages(accommodationId);
-        if (index < 0 || index >= images.size()) return null;
-        Path projectRoot = root().toAbsolutePath().normalize();
-        Path image = projectRoot.resolve(images.get(index)).normalize();
-        return image.startsWith(projectRoot.resolve("accommodation-images")) && Files.isRegularFile(image)
-                ? image : null;
+        try {
+            List<String> images = getImages(accommodationId);
+            if (index < 0 || index >= images.size()) return null;
+            Path projectRoot = root().toAbsolutePath().normalize();
+            Path image = projectRoot.resolve(images.get(index)).normalize();
+            return image.startsWith(projectRoot.resolve("accommodation-images"))
+                    && Files.isRegularFile(image) ? image : null;
+        } catch (RuntimeException e) {
+            System.err.println("Accommodation image unavailable: " + e.getMessage());
+            return null;
+        }
     }
 
     private static Map<String, List<String>> readIndex() {

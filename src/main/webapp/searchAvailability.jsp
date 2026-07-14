@@ -481,7 +481,7 @@
         <div style="max-width: 450px; margin: 0 auto 40px;">
             <article class="accommodation-card">
                 <div class="card-visual-header">
-                    <div class="accom-photo-carousel" data-accommodation-carousel>
+                    <div class="accom-photo-carousel" data-accommodation-carousel data-fallback="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(accommodationChosen.getAccommodationType()) ? "chalet1.png" : "cmm3.jpg" %>">
                     <% if (chosenPictures.isEmpty()) { %>
                         <img src="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(accommodationChosen.getAccommodationType()) ? "chalet1.png" : "cmm3.jpg" %>" alt="Selected Stay" class="card-visual-img">
                     <% } else { for (int pictureIndex = 0; pictureIndex < chosenPictures.size(); pictureIndex++) { %>
@@ -532,7 +532,7 @@
                 <% List<String> resultPictures = AccommodationImageStore.getImages(acc.getAccommodationId()); %>
                 <article class="accommodation-card">
                     <div class="card-visual-header">
-                        <div class="accom-photo-carousel" data-accommodation-carousel>
+                        <div class="accom-photo-carousel" data-accommodation-carousel data-fallback="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(acc.getAccommodationType()) ? "chalet1.png" : "cmm3.jpg" %>">
                         <% if (resultPictures.isEmpty()) { %>
                             <img src="${pageContext.request.contextPath}/<%= "CHALET".equalsIgnoreCase(acc.getAccommodationType()) ? "images/chalet1.png" : "images/cmm3.jpg" %>" alt="Stay Thumbnail" class="card-visual-img">
                         <% } else { for (int pictureIndex = 0; pictureIndex < resultPictures.size(); pictureIndex++) { %>
@@ -643,7 +643,7 @@
     <p>&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
 </footer>
 
-<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-2"></script>
+<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
 
 </body>
 </html>

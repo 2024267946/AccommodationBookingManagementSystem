@@ -1,6 +1,14 @@
 document.querySelectorAll('[data-accommodation-carousel], [data-carousel]').forEach(function (carousel) {
     const slides = Array.from(carousel.querySelectorAll('img'));
     if (!slides.length) return;
+    slides.forEach(function (slide) {
+        slide.addEventListener('error', function () {
+            const fallback = carousel.dataset.fallback;
+            if (fallback && slide.src !== new URL(fallback, window.location.href).href) {
+                slide.src = fallback;
+            }
+        });
+    });
     slides.forEach((slide, index) => slide.classList.toggle('is-active', index === 0));
     if (slides.length < 2) return;
     let current = 0;

@@ -20,7 +20,7 @@ List<String> detailPictures = accommodation == null ? java.util.Collections.empt
     <main class="container details-section">
         <div class="details-grid">
             <div class="details-image-box" style="overflow: hidden;">
-                <div class="chalet-img-placeholder accom-photo-carousel" data-accommodation-carousel style="width:100%;height:100%;min-height:450px;">
+                <div class="chalet-img-placeholder accom-photo-carousel" data-accommodation-carousel data-fallback="${pageContext.request.contextPath}/images/<%= accommodation != null && "CHALET".equalsIgnoreCase(accommodation.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>" style="width:100%;height:100%;min-height:450px;">
                     <% if (detailPictures.isEmpty()) { %>
                     <img src="${pageContext.request.contextPath}/images/<%= accommodation != null && "CHALET".equalsIgnoreCase(accommodation.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>" alt="Accommodation picture">
                     <% } else { for (int pictureIndex = 0; pictureIndex < detailPictures.size(); pictureIndex++) { %>
@@ -59,7 +59,7 @@ List<String> detailPictures = accommodation == null ? java.util.Collections.empt
     </footer>
     
     <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
-    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-2"></script>
+    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
     <script>
         const params = new URLSearchParams(window.location.search);
         if (params.get("error") === "-1") {

@@ -42,7 +42,7 @@
                         : amenitiesMap.get(hs.getAccommodationId());
             %>
                 <div class="chalet-card">
-                    <div class="chalet-img-placeholder accom-photo-carousel" data-accommodation-carousel>
+                    <div class="chalet-img-placeholder accom-photo-carousel" data-accommodation-carousel data-fallback="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(hs.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>">
                         <% if (pictures.isEmpty()) { %>
                         <img src="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(hs.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>" alt="<%= hs.getAccommodationName() %>">
                         <% } else { for (int pictureIndex = 0; pictureIndex < pictures.size(); pictureIndex++) { %>
@@ -93,6 +93,6 @@
     <footer class="site-footer">
         <p class="mb-0">&copy; 2026 Cuti Murah Melaka Management. All rights reserved.</p>
     </footer>
-    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-2"></script>
+    <script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
 </body>
 </html>

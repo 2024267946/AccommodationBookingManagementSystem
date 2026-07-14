@@ -454,7 +454,7 @@
                         <div class="accommodation-summary">
 
                         <div class="image-box">
-                            <div class="accommodation-carousel" data-carousel>
+                            <div class="accommodation-carousel" data-carousel data-fallback="${pageContext.request.contextPath}/images/<%= "CHALET".equalsIgnoreCase(acc.getAccommodationType()) ? "chalet1.png" : "cmm1.jpg" %>">
                             <% if (cardImages.isEmpty()) { %>
                                 <img src="${pageContext.request.contextPath}/images/<%= "HOMESTAY".equalsIgnoreCase(acc.getAccommodationType()) ? "cmm1.jpg" : "chalet1.png" %>"
                                      alt="<%= acc.getAccommodationName() %>">
@@ -586,7 +586,7 @@
     <% if ("createSuccess".equals(message) || "updated".equals(request.getParameter("success"))) { %><script>showAppNotification("Accommodation <%= "createSuccess".equals(message) ? "Created" : "Updated" %> Successfully","The accommodation information has been saved.","success",3500);</script><% } %>
 
 <script src="${pageContext.request.contextPath}/js/app-modal.js"></script>
-<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-2"></script>
+<script src="${pageContext.request.contextPath}/js/accommodation-carousel.js?v=20260714-3"></script>
 <script>
 document.querySelectorAll('.accommodation-card').forEach(function(card) {
     function toggleCard() {

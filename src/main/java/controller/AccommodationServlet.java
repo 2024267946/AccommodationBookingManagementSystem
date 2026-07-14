@@ -93,7 +93,7 @@ public class AccommodationServlet extends HttpServlet {
         }
         java.nio.file.Path image = AccommodationImageStore.resolveStoredImage(id, index);
         if (image == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            response.sendRedirect(request.getContextPath() + "/images/cmm1.jpg");
             return;
         }
         String contentType = java.nio.file.Files.probeContentType(image);
